@@ -8,7 +8,7 @@
 <title>AI Visual Cue Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Urbanist:wght@400;500;700&display=swap">
 <style>
 /* Layout: top bar, then a split workspace — controls (1/3) | stage (2/3). The stage is a quiet neutral room so the cue carries all the color. */
 :root{
@@ -199,6 +199,19 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
 .cap b{color:var(--ink);font-weight:500}
 .gl-error{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:#fff;font-size:13px;background:#222}
 
+/* Adaptive Screen (section 5b): a 1080 × 2340 stage scaled down to the device. Samsung Sharp Sans is used only if installed; otherwise Urbanist. */
+@font-face{font-family:'Samsung Sharp Sans';font-weight:400;src:local('Samsung Sharp Sans Regular'),local('SamsungSharpSans-Regular')}
+@font-face{font-family:'Samsung Sharp Sans';font-weight:500;src:local('Samsung Sharp Sans Medium'),local('SamsungSharpSans-Medium')}
+@font-face{font-family:'Samsung Sharp Sans';font-weight:700;src:local('Samsung Sharp Sans Bold'),local('SamsungSharpSans-Bold')}
+#devC{background:#f5d6d6}
+.asl-stage{position:absolute;left:0;top:0;width:1080px;height:2340px;overflow:hidden;transform-origin:0 0}
+.asl-bg,.asl-glow,.asl-texts{position:absolute;inset:0}
+.asl-glow{pointer-events:none}
+.asl-text{position:absolute;left:0;right:0;top:0}
+.asl-w{display:inline-block;white-space:pre}
+.asl-c{display:inline-block;will-change:filter,opacity,transform}
+.asl-bar{position:absolute;left:0;top:0;overflow:visible}
+
 .transport{flex:none;display:flex;align-items:center;gap:14px;padding:10px max(16px,env(safe-area-inset-right,0px)) 14px 20px;flex-wrap:wrap}
 .play{width:36px;height:36px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);cursor:pointer;display:grid;place-items:center;flex:none}
 .scrub{flex:1;min-width:160px;display:flex;flex-direction:column;gap:4px}
@@ -358,6 +371,17 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
     </div>
     <div class="stage-body" id="stageBody">
       <div class="frames" id="frames">
+        <div class="frame-col" id="colC">
+          <div class="device" id="devC" role="img" aria-label="Adaptive Screen 시안">
+            <div class="asl-stage" id="aslStage">
+              <div class="asl-bg"></div>
+              <div class="asl-glow"></div>
+              <div class="asl-texts"></div>
+              <svg class="asl-bar" width="1080" height="2340" viewBox="0 0 1080 2340" aria-hidden="true"></svg>
+            </div>
+          </div>
+          <div class="cap"><b>Adaptive Screen</b><span>맥락에 따라 재구성되는 화면</span></div>
+        </div>
         <div class="frame-col" id="colA">
           <div class="device" id="devA">
             <canvas id="bgA" aria-hidden="true"></canvas>
@@ -401,10 +425,10 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
       <h2>사용 방법</h2>
       <ol>
         <li>Design 탭에서 컬러(그라데이션 스톱 최대 3개), 물성, 크기, 모션을 조절합니다. 프리뷰는 바로 바뀝니다.</li>
-        <li>프리뷰는 3개 뷰로 볼 수 있습니다. 좌우 화살표, 키보드 ←/→, 드래그로 넘깁니다. 스페이스바로 재생을 멈춥니다.</li>
+        <li>프리뷰는 2개 뷰입니다. 첫 번째는 맥락에 따라 화면이 스스로 재구성되는 <b>Adaptive Screen</b> 시안(전체 화면), 두 번째는 ① 비주얼 큐와 ② 앱 적용을 같은 시계로 나란히 보는 <b>전체 비교</b>입니다. 좌우 화살표, 키보드 ←/→, 드래그로 넘기고 스페이스바로 재생을 멈춥니다. Design 탭의 설정은 전체 비교에 반영됩니다.</li>
         <li>상단 "Set as default"를 누르면 지금 설정과 보고 있는 뷰가 이 브라우저에 기본값으로 저장됩니다. 다음에 열면 그 화면에서 시작하고, 모든 초기화 버튼도 그 값으로 돌아갑니다. 패널 맨 아래 "처음 기본값으로"를 누르면 저장한 기본값이 지워집니다.</li>
         <li>각 슬라이더 옆 ↺ 버튼으로 그 값만, 섹션 제목 옆 "초기화"로 섹션 전체를, 맨 아래 "전체 초기화"로 모든 설정을 기본값으로 되돌립니다.</li>
-        <li>프리뷰 위 "내보내기"에서 루프 한 번을 MP4(720 × 1560, 30fps) 또는 GIF(360 × 780, 15fps, 무한 반복)로 저장합니다.</li>
+        <li>전체 비교 화면의 "내보내기"에서 ① 비주얼 큐 / ② 앱 적용 / 전체 비교 중 하나를 골라 루프 한 번을 MP4(720 × 1560, 30fps) 또는 GIF(360 × 780, 15fps, 무한 반복)로 저장합니다. Adaptive Screen 시안은 내보내기 대상이 아닙니다.</li>
         <li>Code 탭에서 Kotlin 파일 전체를 복사해 Android 프로젝트에 붙여넣고 <span class="mono">AiVisualCueDemoLoop()</span> 또는 <span class="mono">AiVisualCue(level)</span>을 호출합니다.</li>
       </ol>
     </div>
@@ -1126,12 +1150,295 @@ function drawAppBg(ctx, W, H, s, dark, push=0, full=0){
 }
 
 /* ======================================================================
+   5b. Adaptive Screen — ported from adaptive_screen_loop_code/screen_loop.html (see its CLAUDE_GUIDE.md)
+       Same deterministic renderAt(t): sentences are written in letter by letter out of a blur, and the
+       bottom control bar splits and merges like droplets (SVG goo). It runs on the tool's clock, so
+       play / pause / scrub work. Edit CFG to make a variant.
+   ====================================================================== */
+const ASL = (()=>{
+  const W = 1080, H = 2340;   // the 360 × 780 dp screen at 3×; the stage is scaled to the device with a CSS transform
+  const CFG = {
+    stateDuration: 3.4,       // seconds per state, transition included
+    startOffset: 3.0,         // the clock starts on a settled frame
+    sequence: [0, 1, 2, 1],   // 1 → 2 → 3 → 2 → back to 1
+    font: { family:"'Samsung Sharp Sans','Urbanist','IBM Plex Sans KR','Pretendard','Noto Sans KR',sans-serif", size:85, lineHeight:1.34,
+            color:'#5f5e5a', weight:400, strongColor:'#232321', strongWeight:700 },
+    layout: { padX:92, textTop:150, barY:H-160 },
+    bar: { rowMarginL:112, rowMarginR:96, gap:24, button:142, inputH:134, tabButton:128, tabGap:20, tabPad:16,
+           fill:'#fffbef', fillOpacity:0.55, stroke:'#7d7563', strokeOpacity:0.20, iconColor:'#2c2c2a',
+           placeholderColor:'#9a968c', placeholderSize:44, containerFill:'#fffdf6', containerFillOpacity:0.35,
+           shadowColor:'#c9858f', shadowOpacity:0.42, shadowBlur:20 },
+    timing: { textOut:[0, 0.5], textIn:0.42, charStagger:0.011, charDur:1.15, charInk:0.30, charBlur:18, charRise:10,
+              barMorph:[0.20, 1.25], tabMorph:[0.15, 1.54] },
+    placeholder: { en:'Ask anything...', ko:'무엇이든 물어보세요' },
+    icons: {   // SVG path data in a 24 × 24 box: a string = filled, { d, stroke } = outlined, "dots:3x4" = dot grid
+      phone: 'M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z',
+      dialpad: 'dots:3x4',
+      chat: { stroke:2.1, d:'M6.6 3.6h10.8a4 4 0 0 1 4 4v6.1a4 4 0 0 1-4 4h-5.6l-4.3 3.3c-.45.35-1.05.03-1.05-.5v-2.9a4 4 0 0 1-3.85-3.9V7.6a4 4 0 0 1 4-4z M8.3 9.3h7.4 M8.3 12.9h4.6' },
+    },
+    // text: wrap words in *...* to emphasise (in Korean wrap whole words, so a line never breaks between a stem and its particle)
+    // bar items keep their identity across states by id: same id = it moves, new id = it buds out of its neighbour
+    states: [
+      { text:{ en:'This is a vision of a future app screen that *reorganizes* itself into *groups of experiences* based on the context.',
+               ko:'맥락에 따라 *스스로 재구성되고* *경험 단위로 묶이는* 미래 앱 화면의 비전입니다.' },
+        bg:{ top:'#a3e6c6', mid:'#f0f3c2', bottom:'#f5d3d8', split:0.30 },
+        bar:{ layout:'row', items:[ { id:'call', kind:'button', icon:'phone' }, { id:'ask', kind:'input' } ] } },
+      { text:{ en:"Depending on the app's context, the *bottom control area* can *dynamically reconfigure* itself.",
+               ko:'앱의 맥락에 따라 *하단 컨트롤 영역이* *동적으로 재구성될* 수 있습니다.' },
+        bg:{ top:'#a0e4c8', mid:'#eff4c6', bottom:'#f6d6d4', split:0.26 },
+        bar:{ layout:'row', items:[ { id:'call', kind:'button', icon:'phone' }, { id:'pad', kind:'button', icon:'dialpad' }, { id:'ask', kind:'input' } ] } },
+      { text:{ en:'When more controls are needed, the *dynamic control area* can be *organized into tabs.*',
+               ko:'컨트롤이 더 필요할 때는 *동적 컨트롤 영역을* *탭으로 정리할* 수 있습니다.' },
+        bg:{ top:'#b4e9d0', mid:'#f3f2d2', bottom:'#f4dad8', split:0.18 },
+        bar:{ layout:'tabs', items:[ { id:'call', kind:'button', icon:'phone' }, { id:'pad', kind:'button', icon:'dialpad' }, { id:'chat', kind:'button', icon:'chat' } ] } },
+    ],
+  };
+  const F = CFG.font, LY = CFG.layout, B = CFG.bar, TM = CFG.timing, SEQ = CFG.sequence, N = SEQ.length, LOOP = N*CFG.stateDuration;
+  const stage = $('#aslStage'), bgEl = stage.querySelector('.asl-bg'), glowEl = stage.querySelector('.asl-glow');
+  const textsEl = stage.querySelector('.asl-texts'), barEl = stage.querySelector('.asl-bar');
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const prog = (u, [a, b]) => clamp((u - a) / (b - a));
+  const easeInOut = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const easeIn = t => t*t*t;
+  const easeInOutQuart = t => t < .5 ? 8*t*t*t*t : 1 - Math.pow(-2*t + 2, 4) / 2;   // strong ease-in-out: slow, fast, slow
+  const easeSine = t => -(Math.cos(Math.PI*t) - 1) / 2;
+  const rgb255 = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const mixHex = (a, b, t) => { const x = rgb255(a), y = rgb255(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], t))).join(',')})`; };
+  const lerpRect = (a, b, t) => ({ x:lerp(a.x, b.x, t), y:lerp(a.y, b.y, t), w:lerp(a.w, b.w, t), h:lerp(a.h, b.h, t) });
+
+  /* ---------- text: one layer per state, rebuilt when the language changes ---------- */
+  let lang = 'en', textLayers = [], buildId = 0;
+  function buildText(){
+    textsEl.textContent = ''; buildId++;
+    textLayers = CFG.states.map(s => {
+      const div = document.createElement('div');
+      div.className = 'asl-text';
+      Object.assign(div.style, { top:LY.textTop + 'px', paddingLeft:LY.padX + 'px', paddingRight:LY.padX + 'px',
+        fontFamily:F.family, fontSize:F.size + 'px', lineHeight:F.lineHeight, color:F.color, fontWeight:F.weight, letterSpacing:'-0.005em' });
+      const words = [], re = /\*([^*]+)\*|([^*]+)/g; let m;
+      while ((m = re.exec(s.text[lang] || s.text.en))) {
+        const strong = !!m[1];
+        (m[1] || m[2]).split(/(\s+)/).forEach(tok => { if (tok) words.push({ tok, strong }); });
+      }
+      const spans = []; let k = 0;   // k = writing order (a space counts as one step)
+      words.forEach(({ tok, strong }) => {
+        if (/^\s+$/.test(tok)) { div.appendChild(document.createTextNode(' ')); k++; return; }
+        const wd = document.createElement('span');   // each word is a no-wrap box, so lines break only between words
+        wd.className = 'asl-w';
+        if (strong) { wd.style.color = F.strongColor; wd.style.fontWeight = F.strongWeight; }
+        for (const ch of tok) {
+          const c = document.createElement('span');
+          c.className = 'asl-c'; c.textContent = ch;
+          wd.appendChild(c); spans.push({ el:c, k:k++ });
+        }
+        div.appendChild(wd);
+      });
+      textsEl.appendChild(div);
+      return { div, spans, doneU:TM.textIn + k*TM.charStagger + TM.charDur };
+    });
+  }
+
+  /* ---------- background ---------- */
+  function renderBg(a, b, t){
+    const A = a.bg, Z = b.bg;
+    const top = mixHex(A.top, Z.top, t), mid = mixHex(A.mid, Z.mid, t), bot = mixHex(A.bottom, Z.bottom, t), sp = lerp(A.split, Z.split, t);
+    bgEl.style.background = `linear-gradient(180deg, ${top} 0%, ${top} ${(sp*35).toFixed(1)}%, ${mid} ${(sp*100 + 25).toFixed(1)}%, ${mid} 62%, ${bot} 100%)`;
+    glowEl.style.background = `radial-gradient(120% 55% at 30% ${(sp*100 + 18).toFixed(1)}%, rgba(255,255,240,0.45), rgba(255,255,240,0) 70%)`;
+  }
+
+  /* ---------- bottom bar ---------- */
+  function layoutBar(state){
+    const items = state.bar.items, cy = LY.barY, rects = {};
+    let container = null;
+    if (state.bar.layout === 'row') {
+      const btnW = items.filter(i => i.kind !== 'input').length*B.button, nInput = items.filter(i => i.kind === 'input').length;
+      const inW = nInput ? (W - B.rowMarginL - B.rowMarginR - btnW - B.gap*(items.length - 1)) / nInput : 0;
+      let x = nInput ? B.rowMarginL : (W - (btnW + B.gap*(items.length - 1))) / 2;
+      items.forEach(it => {
+        const w = it.kind === 'input' ? inW : B.button, h = it.kind === 'input' ? B.inputH : B.button;
+        rects[it.id] = { x, y:cy - h/2, w, h }; x += w + B.gap;
+      });
+    } else {   // tabs: buttons sit inside one centred pill
+      const total = items.length*B.tabButton + (items.length - 1)*B.tabGap;
+      let x = (W - total) / 2;
+      items.forEach(it => { rects[it.id] = { x, y:cy - B.tabButton/2, w:B.tabButton, h:B.tabButton }; x += B.tabButton + B.tabGap; });
+      container = { x:(W - total)/2 - B.tabPad, y:cy - B.tabButton/2 - B.tabPad, w:total + 2*B.tabPad, h:B.tabButton + 2*B.tabPad };
+    }
+    return { rects, container };
+  }
+  function iconSVG(key, cx, cy, size, opacity){
+    const d = CFG.icons[key]; if (!d || opacity <= 0.001) return '';
+    const s = size/24, tr = `translate(${(cx - 12*s).toFixed(2)} ${(cy - 12*s).toFixed(2)}) scale(${s.toFixed(4)})`;
+    if (typeof d === 'object') return `<g opacity="${opacity.toFixed(3)}" fill="none" stroke="${B.iconColor}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round" transform="${tr}"><path d="${d.d}"/></g>`;
+    let body = '';
+    if (d.startsWith('dots:')) {
+      const [cols, rows] = d.slice(5).split('x').map(Number);
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
+        body += `<circle cx="${12 + (c - (cols - 1)/2)*5.4}" cy="${12 + (r - (rows - 1)/2)*5.4}" r="1.55"/>`;
+    } else body = `<path d="${d}"/>`;
+    return `<g opacity="${opacity.toFixed(3)}" fill="${B.iconColor}" transform="${tr}">${body}</g>`;
+  }
+  let clipSeq = 0;
+  // one layer: every shape goes through the goo filter (so neighbours fuse and tear off like droplets); icons and hints sit on top
+  function layerSVG(entries, alpha){
+    if (alpha <= 0.001) return '';
+    let shapes = '', fg = '';
+    entries.forEach(({ item, r, iconA }) => {
+      if (r.w < 1) return;
+      shapes += `<rect x="${r.x.toFixed(2)}" y="${r.y.toFixed(2)}" width="${r.w.toFixed(2)}" height="${r.h.toFixed(2)}" rx="${(Math.min(r.w, r.h)/2).toFixed(2)}" fill="#000"/>`;
+      const cx = r.x + r.w/2, cy = r.y + r.h/2;
+      if (item.kind === 'button') fg += iconSVG(item.icon, cx, cy, r.h*0.34, iconA);
+      else if (iconA > 0.001) {
+        const id = 'asl-c' + (clipSeq++);
+        fg += `<clipPath id="${id}"><rect x="${r.x + 8}" y="${r.y}" width="${Math.max(0, r.w - 16)}" height="${r.h}" rx="${r.h/2}"/></clipPath>
+          <text clip-path="url(#${id})" x="${(r.x + r.h*0.42).toFixed(2)}" y="${(cy + B.placeholderSize*0.35).toFixed(2)}" font-family="${F.family.replace(/"/g, "'")}" font-size="${B.placeholderSize}" font-weight="400" fill="${B.placeholderColor}" opacity="${iconA.toFixed(3)}">${escapeHtml(CFG.placeholder[lang] || CFG.placeholder.en)}</text>`;
+      }
+    });
+    return `<g opacity="${alpha.toFixed(3)}"><g filter="url(#asl-goo)">${shapes}</g>${fg}</g>`;
+  }
+  const GOO = `<defs>
+    <filter id="asl-goo" x="-10%" y="-60%" width="120%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/>
+      <feColorMatrix in="b" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 26 -12" result="g"/>
+      <feMorphology in="g" operator="erode" radius="2" result="e"/>
+      <feComposite in="g" in2="e" operator="out" result="ring"/>
+      <feFlood flood-color="${B.fill}" flood-opacity="${B.fillOpacity}"/>
+      <feComposite in2="e" operator="in" result="fill"/>
+      <feFlood flood-color="${B.stroke}" flood-opacity="${B.strokeOpacity}"/>
+      <feComposite in2="ring" operator="in" result="stroke"/>
+      <feGaussianBlur in="g" stdDeviation="${B.shadowBlur/2}" result="sb"/>
+      <feFlood flood-color="${B.shadowColor}" flood-opacity="${B.shadowOpacity}"/>
+      <feComposite in2="sb" operator="in" result="sc"/>
+      <feComposite in="sc" in2="g" operator="out" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="fill"/><feMergeNode in="stroke"/></feMerge>
+    </filter>
+    <filter id="asl-sh" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB">
+      <feComponentTransfer in="SourceAlpha" result="m"><feFuncA type="linear" slope="60"/></feComponentTransfer>
+      <feGaussianBlur in="m" stdDeviation="${B.shadowBlur/2}" result="sb"/>
+      <feFlood flood-color="${B.shadowColor}" flood-opacity="${B.shadowOpacity}"/>
+      <feComposite in2="sb" operator="in" result="sc"/>
+      <feComposite in="sc" in2="m" operator="out" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter></defs>`;
+  const pill = (c, a) => `<g opacity="${a.toFixed(3)}"><rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="${c.h/2}" filter="url(#asl-sh)" fill="${B.containerFill}" fill-opacity="${B.containerFillOpacity}" stroke="${B.stroke}" stroke-opacity="${B.strokeOpacity}" stroke-width="2"/></g>`;
+  // a tiny droplet hidden inside the left / right cap of `host`
+  const capDot = (host, side, h) => {
+    const sz = Math.min(host.h, h)*0.4, cx = side < 0 ? host.x + host.h*0.5 : host.x + host.w - host.h*0.5;
+    return { x:cx - sz/2, y:host.y + host.h/2 - sz/2, w:sz, h:sz };
+  };
+  // row ↔ tabs: everything flows into one droplet the shape of the tabs pill, then the buttons pop out inside it (reversed for tabs → row)
+  function renderBarLayoutChange(prev, cur, u, P, Q){
+    const toTabs = cur.bar.layout === 'tabs';
+    const rowSt = toTabs ? prev : cur, tabSt = toTabs ? cur : prev, RL = toTabs ? P : Q, TL2 = toTabs ? Q : P;
+    const q = prog(u, TM.tabMorph), s = toTabs ? q : 1 - q;
+    const s1 = easeInOutQuart(clamp(s/0.66)), s2 = easeInOutQuart(clamp((s - 0.53)/0.47));   // the two beats overlap a little
+    const c = TL2.container;
+    let out = GOO;
+    out += layerSVG(rowSt.bar.items.map(it => ({ item:it, r:lerpRect(RL.rects[it.id], c, s1), iconA:1 - clamp(s1/0.45) })), 1 - s2);   // 1) row items melt into the pill-shaped droplet
+    if (s2 > 0.001) out += pill(c, s2);                                                                                               // 2) the droplet settles into the tabs container
+    if (s2 > 0.001) out += layerSVG(tabSt.bar.items.map(it => {                                                                        // 3) the buttons pop out inside it, icons last
+      const r = TL2.rects[it.id], cx = r.x + r.w/2, cy = r.y + r.h/2, k = lerp(0.25, 1, s2);
+      return { item:it, r:{ x:cx - r.w*k/2, y:cy - r.h*k/2, w:r.w*k, h:r.h*k }, iconA:clamp((s2 - 0.35)/0.5) };
+    }), clamp(s2*3));
+    barEl.innerHTML = out;
+  }
+  // every other change is a droplet split: shared ids slide to their new place, new ids bud out of the nearest shared neighbour
+  // (the goo makes them tear off), removed ids are absorbed back into one. Nothing moves while a state is holding.
+  function renderBar(prev, cur, u){
+    clipSeq = 0;
+    const p = prog(u, TM.barMorph), t = easeInOutQuart(p);
+    const P = layoutBar(prev), Q = layoutBar(cur);
+    if (prev.bar.layout !== cur.bar.layout) return renderBarLayoutChange(prev, cur, u, P, Q);
+    const pIds = prev.bar.items.map(i => i.id), shared = new Set(cur.bar.items.map(i => i.id).filter(id => pIds.includes(id)));
+    const curRect = {};
+    shared.forEach(id => { curRect[id] = lerpRect(P.rects[id], Q.rects[id], t); });
+    const anchor = (list, idx) => {   // nearest neighbour present in both states: to the right first, else to the left
+      for (let j = idx + 1; j < list.length; j++) if (shared.has(list[j].id)) return { id:list[j].id, side:-1 };
+      for (let j = idx - 1; j >= 0; j--) if (shared.has(list[j].id)) return { id:list[j].id, side:1 };
+      return null;
+    };
+    const fallback = h => { const sz = h*0.4; return { x:W/2 - sz/2, y:LY.barY - sz/2, w:sz, h:sz }; };
+    const entries = [];
+    prev.bar.items.forEach((it, idx) => {   // removed: absorbed into a neighbour
+      if (shared.has(it.id)) return;
+      const an = anchor(prev.bar.items, idx), from = P.rects[it.id], to = an ? capDot(curRect[an.id], an.side, from.h) : fallback(from.h);
+      entries.push({ item:it, r:lerpRect(from, to, t), iconA:1 - easeOut(clamp(p/0.4)) });
+    });
+    cur.bar.items.forEach((it, idx) => {
+      if (shared.has(it.id)) { entries.push({ item:it, r:curRect[it.id], iconA:1 }); return; }
+      const an = anchor(cur.bar.items, idx), to = Q.rects[it.id], from = an ? capDot(curRect[an.id], an.side, to.h) : fallback(to.h);   // new: buds out and splits off
+      entries.push({ item:it, r:lerpRect(from, to, t), iconA:it.kind === 'input' ? easeOut(clamp((p - 0.7)/0.3)) : easeOut(clamp((p - 0.45)/0.5)) });
+    });
+    let cont = null, contA = 1;   // the tabs pill
+    if (P.container && Q.container) cont = lerpRect(P.container, Q.container, t);
+    else if (Q.container) {
+      const c = Q.container, k = easeOut(clamp((p - 0.35)/0.65)), w = lerp(c.w*0.6, c.w, k), h = lerp(c.h*0.8, c.h, k);
+      cont = { x:W/2 - w/2, y:LY.barY - h/2, w, h }; contA = k;
+    } else if (P.container) {
+      const c = P.container, k = easeIn(clamp(p/0.55)), w = lerp(c.w, c.w*0.6, k), h = lerp(c.h, c.h*0.8, k);
+      cont = { x:W/2 - w/2, y:LY.barY - h/2, w, h }; contA = 1 - k;
+    }
+    let out = GOO;
+    if (cont && contA > 0.001) out += pill(cont, contA);
+    barEl.innerHTML = out + layerSVG(entries, 1);
+  }
+
+  /* ---------- text reveal ---------- */
+  function renderText(prevIdx, curIdx, u){
+    textLayers.forEach((l, i) => { l.div.style.visibility = (i === prevIdx || i === curIdx) ? 'visible' : 'hidden'; });
+    if (prevIdx !== curIdx) {   // outgoing: fades, blurs and drifts up
+      const po = prog(u, TM.textOut), a = 1 - easeSine(po), out = textLayers[prevIdx];
+      out.div.style.opacity = a.toFixed(3);
+      out.div.style.filter = po > 0 ? `blur(${(po*12).toFixed(2)}px)` : 'none';
+      out.div.style.transform = `translateY(${(-po*18).toFixed(2)}px)`;
+      if (a <= 0.001) out.div.style.visibility = 'hidden';
+      out.spans.forEach(({ el }) => { el.style.opacity = 1; el.style.filter = 'none'; el.style.transform = 'none'; });
+    }
+    // incoming: written letter by letter. Each letter appears fast, then its blur clears slowly, so a soft blurred tail trails the writing point.
+    const inc = textLayers[curIdx];
+    inc.div.style.opacity = 1; inc.div.style.filter = 'none'; inc.div.style.transform = 'none';
+    inc.spans.forEach(({ el, k }) => {
+      const wp = clamp((u - TM.textIn - k*TM.charStagger) / TM.charDur), a = easeSine(clamp(wp/TM.charInk)), b = easeOut(wp);
+      el.style.opacity = a.toFixed(3);
+      el.style.filter = wp < 1 ? `blur(${((1 - b)*TM.charBlur).toFixed(2)}px)` : 'none';
+      el.style.transform = wp < 1 ? `translateY(${((1 - b)*TM.charRise).toFixed(2)}px)` : 'none';
+    });
+  }
+
+  /* ---------- master: tt = seconds into the loop ---------- */
+  let settledKey = '';
+  function renderAt(tt){
+    if (!textLayers.length) buildText();
+    tt = ((tt % LOOP) + LOOP) % LOOP;
+    const step = Math.floor(tt/CFG.stateDuration) % N, u = tt - step*CFG.stateDuration;
+    const idx = SEQ[step], prevIdx = SEQ[(step - 1 + N) % N], prev = CFG.states[prevIdx], cur = CFG.states[idx];
+    // once every animation of a state has finished, nothing changes until the next one: draw that picture once
+    if (u >= Math.max(1.6, textLayers[idx].doneU) + 0.05) { const key = step + '|' + buildId; if (key === settledKey) return; settledKey = key; } else settledKey = '';
+    renderBg(prev, cur, easeInOut(clamp(u/1.4)));
+    renderText(prevIdx, idx, u);
+    renderBar(prev, cur, u);
+  }
+
+  return {
+    sequence: SEQ, stepMs: CFG.stateDuration*1000, loopMs: LOOP*1000, startMs: CFG.startOffset*1000,
+    renderAt: ms => renderAt(ms/1000),
+    stepAt: ms => Math.floor(ms/1000/CFG.stateDuration) % N,
+    stateAt: ms => SEQ[Math.floor(ms/1000/CFG.stateDuration) % N],
+    setLang(l){ if (l !== lang || !textLayers.length) { lang = l; buildText(); settledKey = ''; } },
+    fit(cssW){ stage.style.transform = `scale(${cssW/W})`; },
+  };
+})();
+
+/* ======================================================================
    6. Preview frames + layout + carousel
    ====================================================================== */
 const DPR = Math.min(2, window.devicePixelRatio || 1);
 const frames = {
   A:{ dev:$('#devA'), col:$('#colA'), bg:$('#bgA'), gl:$('#glA'), comp:$('#compA'), app:false },
   B:{ dev:$('#devB'), col:$('#colB'), bg:$('#bgB'), gl:$('#glB'), comp:$('#compB'), app:true },
+  C:{ dev:$('#devC'), col:$('#colC') },   // Adaptive Screen: plain DOM, no GL
 };
 function $(s){ return document.querySelector(s); }
 let glError = null;
@@ -1145,25 +1452,30 @@ for(const k of ['A','B']){
 const hudA = { tl:$('#hudA [data-k=tl]'), tr:$('#hudA [data-k=tr]'), bl:$('#hudA [data-k=bl]'), br:$('#hudA [data-k=br]') };
 
 const VIEWS = [
-  { name:'전체 비교', desc:'① 비주얼 큐와 ② 앱 적용을 같은 시계로 나란히', show:['A','B'] },
-  { name:'① 비주얼 큐', desc:'큐 자체의 물성과 모션', show:['A'] },
-  { name:'② 앱 적용', desc:'실제 앱 화면에 녹아든 모습', show:['B'] },
+  { id:'adaptive', name:'Adaptive Screen', desc:'맥락에 따라 화면이 스스로 재구성되는 시안 · 큐 설정은 전체 비교에 반영', show:['C'] },
+  { id:'compare', name:'전체 비교', desc:'① 비주얼 큐와 ② 앱 적용을 같은 시계로 나란히', show:['A','B'] },
 ];
+const viewIndex = id => VIEWS.findIndex(v=>v.id===id);
 let view = 0;
-try{ const v = +localStorage.getItem('avc-view'); if(v>=0 && v<3) view = v; }catch(e){}
-if(USER_DEFAULT && USER_DEFAULT.view>=0 && USER_DEFAULT.view<3) view = USER_DEFAULT.view;
+try{ const i = viewIndex(localStorage.getItem('avc-view')); if(i>=0) view = i; }catch(e){}
+if(USER_DEFAULT && USER_DEFAULT.view!==undefined){
+  // saves from the old 3-view layout stored a number (0–2): all of those screens now live in 전체 비교
+  const i = typeof USER_DEFAULT.view==='string' ? viewIndex(USER_DEFAULT.view) : viewIndex('compare');
+  if(i>=0) view = i;
+}
 const dotsEl = $('#dots');
 VIEWS.forEach((v,i)=>{ const b=document.createElement('button'); b.type='button'; b.setAttribute('aria-label', v.name); b.onclick=()=>setView(i); dotsEl.appendChild(b); });
 function setView(i, dir){
-  view = (i+3)%3;
-  try{ localStorage.setItem('avc-view', view); }catch(e){}
+  view = (i+VIEWS.length)%VIEWS.length;
+  try{ localStorage.setItem('avc-view', VIEWS[view].id); }catch(e){}
   const fr = $('#frames');
   fr.style.transition='none'; fr.style.opacity='0'; fr.style.transform=`translateX(${(dir||0)*40}px)`;
-  frames.A.col.hidden = !VIEWS[view].show.includes('A');
-  frames.B.col.hidden = !VIEWS[view].show.includes('B');
-  $('#viewName').textContent = `${view+1} / 3 · ${VIEWS[view].name}`;
+  for(const k of ['A','B','C']) frames[k].col.hidden = !VIEWS[view].show.includes(k);
+  $('#viewName').textContent = `${view+1} / ${VIEWS.length} · ${VIEWS[view].name}`;
+  exportBtn.hidden = VIEWS[view].id==='adaptive'; if(exportBtn.hidden) closeExport();   // video export covers the cue views only
   $('#viewDesc').textContent = VIEWS[view].desc;
   [...dotsEl.children].forEach((b,j)=>b.setAttribute('aria-current', j===view));
+  paintTransport();
   layout();
   requestAnimationFrame(()=>{ fr.style.transition=''; fr.style.opacity='1'; fr.style.transform='translateX(0)'; });
 }
@@ -1191,6 +1503,11 @@ function layout(){
     if(f.r) f.r.setBg(f.bg);
     f.dev.style.setProperty('--hud', luminance(bgHex()) < 0.4 ? '#8A8FA0' : '#6E7381');
   }
+  { // Adaptive Screen: the same 360 × 780 device, with its own DOM stage scaled to fit
+    const f = frames.C, cw = Math.round(SCREEN.w*s), ch = Math.round(SCREEN.h*s);
+    f.dev.style.width = cw+'px'; f.dev.style.height = ch+'px'; f.dev.style.borderRadius = Math.round(30*s)+'px';
+    ASL.fit(cw);
+  }
   const fs = Math.max(9, 11*f_css());
   for(const [k,el] of Object.entries(hudA)){
     el.style.fontSize = fs+'px';
@@ -1216,20 +1533,33 @@ new ResizeObserver(()=>layout()).observe($('#stageBody'));
    7. Clock, transport, render loop
    ====================================================================== */
 const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-let playing = !reduceMotion, T = reduceMotion ? 1300 : 0, clockS = 0, last = performance.now();
+// T = cue clock, TA = Adaptive Screen clock (both in ms, both advance together; the transport shows the one for the current view)
+let playing = !reduceMotion, T = reduceMotion ? 1300 : 0, TA = ASL.startMs, aslLast = -1, aslDirty = true, clockS = 0, last = performance.now();
 const playBtn = $('#playBtn'), scrub = $('#scrub'), tclock = $('#tclock'), lanesEl = $('#lanes');
 function setPlaying(p){ playing=p; playBtn.textContent = p ? '❚❚' : '▶'; playBtn.setAttribute('aria-label', p?'일시정지':'재생'); }
 setPlaying(playing);
 playBtn.onclick = ()=>setPlaying(!playing);
-scrub.addEventListener('input', ()=>{ T = (+scrub.value/1000)*TL.len; });
-function buildLanes(){
+const aslView = ()=>VIEWS[view].id==='adaptive';
+scrub.addEventListener('input', ()=>{ const f = +scrub.value/1000; if(aslView()){ TA = f*ASL.loopMs; aslDirty = true; } else T = f*TL.len; });
+function buildLanes(){   // the strip under the scrubber follows the view: cue segments, or the states of the Adaptive Screen loop
   lanesEl.innerHTML='';
-  TL.segs.forEach((g,i)=>{ const d=document.createElement('div'); d.className='lane'; d.style.left=(g.t0/TL.len*100)+'%'; d.style.width=(g.dur/TL.len*100)+'%';
+  const asl = aslView(), len = asl ? ASL.loopMs : TL.len;
+  const segs = asl ? ASL.sequence.map((st,i)=>({ name:`상태 ${st+1}`, t0:i*ASL.stepMs, dur:ASL.stepMs })) : TL.segs;
+  segs.forEach((g,i)=>{ const d=document.createElement('div'); d.className='lane'; d.style.left=(g.t0/len*100)+'%'; d.style.width=(g.dur/len*100)+'%';
     d.textContent = g.name; d.title = `${g.name} · ${Math.round(g.dur)}ms`; d.dataset.i=i; lanesEl.appendChild(d); });
   $('#loopHint').textContent = `루프 ${(TL.len/1000/S.speed).toFixed(2)}s`;
 }
 buildLanes();
-document.querySelectorAll('#levels button').forEach(b=>b.onclick=()=>{ const l=+b.dataset.l; const idx = l===1?0:l===2?2:4; T = TL.segs[idx].t0; });
+const levelsEl = $('#levels');
+function paintTransport(){   // L1 / L2 / L3 become S1 / S2 / S3 on the Adaptive Screen
+  const asl = aslView();
+  levelsEl.setAttribute('aria-label', asl ? '상태로 이동' : '레벨로 이동');
+  levelsEl.querySelectorAll('button').forEach(b=>{ b.textContent = (asl ? 'S' : 'L') + b.dataset.l; });
+  buildLanes(); lastSeg = -1; lastLevel = -1;
+}
+levelsEl.querySelectorAll('button').forEach(b=>b.onclick=()=>{ const l=+b.dataset.l;
+  if(aslView()){ TA = ASL.sequence.indexOf(l-1)*ASL.stepMs; aslDirty = true; }
+  else { const idx = l===1?0:l===2?2:4; T = TL.segs[idx].t0; } });
 document.addEventListener('keydown', e=>{
   if(e.target.closest('input,textarea,select,[contenteditable]')) return;
   if($('#view-cue').hidden) return;
@@ -1296,14 +1626,20 @@ function renderFrame(k, fr){
 }
 function tick(now){
   const dt = Math.min(64, now-last); last = now;
-  if(playing){ T = (T + dt*S.speed) % TL.len; clockS += dt*S.speed/1000; }
-  const fr = sampleFrame(T, POSES_A);
-  if(!glError) for(const k of VIEWS[view].show) renderFrame(k, k==='A' ? fr : sampleFrame(T, POSES_B));
-  if(document.activeElement !== scrub) scrub.value = Math.round(T/TL.len*1000);
-  tclock.textContent = `${(T/1000/S.speed).toFixed(2)} / ${(TL.len/1000/S.speed).toFixed(2)}s`;
-  const si = TL.segs.indexOf(fr.seg);
+  if(playing){ T = (T + dt*S.speed) % TL.len; TA = (TA + dt*S.speed) % ASL.loopMs; clockS += dt*S.speed/1000; }
+  let len, t, si, lv;   // the transport's clock, lane and level follow the current view
+  if(aslView()){
+    if(TA !== aslLast || aslDirty){ ASL.renderAt(TA); aslLast = TA; aslDirty = false; }
+    len = ASL.loopMs; t = TA; si = ASL.stepAt(TA); lv = ASL.stateAt(TA) + 1;
+  } else {
+    const fr = sampleFrame(T, POSES_A);
+    if(!glError) for(const k of VIEWS[view].show) renderFrame(k, k==='A' ? fr : sampleFrame(T, POSES_B));
+    len = TL.len; t = T; si = TL.segs.indexOf(fr.seg); lv = fr.level;
+  }
+  if(document.activeElement !== scrub) scrub.value = Math.round(t/len*1000);
+  tclock.textContent = `${(t/1000/S.speed).toFixed(2)} / ${(len/1000/S.speed).toFixed(2)}s`;
   if(si!==lastSeg){ [...lanesEl.children].forEach((d,i)=>d.classList.toggle('on', i===si)); lastSeg=si; }
-  if(fr.level!==lastLevel){ document.querySelectorAll('#levels button').forEach(b=>b.setAttribute('aria-current', +b.dataset.l===fr.level)); lastLevel=fr.level; }
+  if(lv!==lastLevel){ document.querySelectorAll('#levels button').forEach(b=>b.setAttribute('aria-current', +b.dataset.l===lv)); lastLevel=lv; }
   requestAnimationFrame(tick);
 }
 
@@ -1428,7 +1764,7 @@ const SECTION_KEYS = {
   shadow:['shadow','shadowBlur','shadowOff'],
 };
 const SECTION_NAMES = { color:'컬러', mat:'물성', size:'크기', motion:'모션', shadow:'그림자' };
-function afterReset(msg){ closePicker(); repaintAll(); changed({motion:true, thumbs:true}); layout(); toast(msg); }
+function afterReset(msg){ closePicker(); ASL.setLang(S.lang); aslDirty = true; paintLang(); repaintAll(); changed({motion:true, thumbs:true}); layout(); toast(msg); }
 document.querySelectorAll('[data-reset]').forEach(b=>b.addEventListener('click', ()=>{
   const sec = b.dataset.reset, d = defaultSpec();
   for(const k of SECTION_KEYS[sec]) S[k] = JSON.parse(JSON.stringify(d[k]));
@@ -1446,7 +1782,7 @@ function paintDefaultUI(){
   const c = $('#clearDefault'); if(c) c.onclick = clearUserDefault;
 }
 function setUserDefault(){
-  USER_DEFAULT = { spec: JSON.parse(JSON.stringify(S)), view, savedAt: Date.now() };
+  USER_DEFAULT = { spec: JSON.parse(JSON.stringify(S)), view: VIEWS[view].id, savedAt: Date.now() };
   DEFAULT_CACHE = null;
   try{ localStorage.setItem(USER_DEFAULT_KEY, JSON.stringify(USER_DEFAULT)); toast('지금 화면을 기본값으로 저장했습니다. 다음에 열면 여기서 시작합니다'); }
   catch(e){ toast('이 브라우저에서는 저장할 수 없습니다'); }
@@ -1526,11 +1862,11 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closePicker(); c
 
 /* ---------- export one loop as MP4 / GIF ---------- */
 const exportBtn = $('#exportBtn'), exportPop = $('#exportPop');
-let exTarget = ['both','A','B'][view] || 'both', exporting = false;
-segCtrl($('#langSeg'), ()=>S.lang, v=>{ S.lang = v; frames.B.push = -1; saveSpec(); scheduleCode(); layout(); });
+let exTarget = 'both', exporting = false;
+const paintLang = segCtrl($('#langSeg'), ()=>S.lang, v=>{ S.lang = v; frames.B.push = -1; ASL.setLang(v); aslDirty = true; saveSpec(); scheduleCode(); layout(); });
 const paintExTarget = segCtrl($('#exTarget'), ()=>exTarget, v=>{ exTarget = v; });
 function closeExport(){ if(exporting) return; exportPop.hidden = true; exportBtn.setAttribute('aria-expanded','false'); }
-exportBtn.onclick = ()=>{ if(!exportPop.hidden){ closeExport(); return; } exTarget = ['both','A','B'][view]; paintExTarget(); exportPop.hidden = false; exportBtn.setAttribute('aria-expanded','true'); };
+exportBtn.onclick = ()=>{ if(!exportPop.hidden){ closeExport(); return; } paintExTarget(); exportPop.hidden = false; exportBtn.setAttribute('aria-expanded','true'); };
 document.addEventListener('pointerdown', e=>{ if(!exportPop.hidden && !exportPop.contains(e.target) && e.target !== exportBtn) closeExport(); });
 function exProgress(f, msg){ $('#exProg').hidden = false; $('#exBar').style.width = (f*100).toFixed(1)+'%'; $('#exMsg').textContent = msg; }
 const nextTick = ()=>new Promise(r=>setTimeout(r,0));
@@ -2321,6 +2657,7 @@ try{ const t = localStorage.getItem('avc-theme'); if(t==='dark'||t==='light') do
 if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>{ paintThemeBtn(); layout(); scheduleThumbs(); });
 new MutationObserver(()=>{ paintThemeBtn(); layout(); scheduleThumbs(); }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
 
+ASL.setLang(S.lang);
 repaintAll();
 paintDefaultUI();
 paintThemeBtn();

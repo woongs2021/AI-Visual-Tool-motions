@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adaptive Screen Loop</title>
+<!--
+  Adaptive Screen Loop engine
+  - Top: head icon "thinking" + word-by-word blur reveal of text
+  - Bottom: gooey morphing control bar (row <-> tabs)
+  Everything is driven by CONFIG below and a deterministic renderAt(t) function,
+  so the same file works as a live preview and as a frame-accurate video source.
+  See CLAUDE_GUIDE.md for how to make variants.
+-->
+<style>
+  /* Samsung Sharp Sans: put the font files in ./fonts with these names (or have it installed) and it is used automatically.
+     Otherwise Urbanist (a free geometric look-alike, OFL) is used. */
+  @font-face { font-family: 'Samsung Sharp Sans'; font-weight: 400;
+    src: local('Samsung Sharp Sans Regular'), local('SamsungSharpSans-Regular'),
+         url('fonts/SamsungSharpSans-Regular.otf'), url('fonts/SamsungSharpSans-Regular.ttf'); }
+  @font-face { font-family: 'Samsung Sharp Sans'; font-weight: 500;
+    src: local('Samsung Sharp Sans Medium'), local('SamsungSharpSans-Medium'),
+         url('fonts/SamsungSharpSans-Medium.otf'), url('fonts/SamsungSharpSans-Medium.ttf'); }
+  @font-face { font-family: 'Samsung Sharp Sans'; font-weight: 700;
+    src: local('Samsung Sharp Sans Bold'), local('SamsungSharpSans-Bold'),
+         url('fonts/SamsungSharpSans-Bold.otf'), url('fonts/SamsungSharpSans-Bold.ttf'); }
+  @font-face { font-family: 'Urbanist'; font-weight: 400; src: url('fonts/urbanist-latin-400-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Urbanist'; font-weight: 500; src: url('fonts/urbanist-latin-500-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Urbanist'; font-weight: 700; src: url('fonts/urbanist-latin-700-normal.woff2') format('woff2'); }
+  html, body { margin: 0; padding: 0; background: #111; }
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  body.capture { display: block; min-height: 0; }
+  #stage { position: relative; overflow: hidden; transform-origin: top left; }
+  #bg { position: absolute; inset: 0; }
+  #glow { position: absolute; inset: 0; pointer-events: none; }
+  #head { position: absolute; }
+  .text { position: absolute; left: 0; right: 0; top: 0; }
+  .w { display: inline-block; white-space: pre; }
+  .c { display: inline-block; will-change: filter, opacity, transform; }
+  #bar { position: absolute; left: 0; top: 0; overflow: visible; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+  <div id="glow"></div>
+  <svg id="head" viewBox="-1.25 -1.25 2.5 2.5"></svg>
+  <div id="texts"></div>
+  <svg id="bar"></svg>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — edit this block to make a new variant
+   ============================================================ */
+const CONFIG = {
+  width: 1080,
+  height: 2280,
+  fps: 30,
+  stateDuration: 3.4,        // seconds each state is on screen (incl. transition)
+  startOffset: 3.0,          // video starts this far into the loop (on a settled frame)
+
+  font: {
+    family: "'Samsung Sharp Sans','Urbanist','Pretendard','Noto Sans KR',sans-serif",
+    size: 85, lineHeight: 1.34,
+    color: "#5f5e5a", weight: 400,          // normal words
+    strongColor: "#232321", strongWeight: 700 // *emphasised* words
+  },
+  layout: {
+    padX: 92,                 // left/right padding of text
+    iconTop: 140, iconSize: 96,
+    textTop: 150,
+    barY: 2120,               // vertical center of the bottom bar
+  },
+  bar: {
+    rowMarginL: 112, rowMarginR: 96, gap: 24,
+    button: 142, inputH: 134,
+    tabButton: 128, tabGap: 20, tabPad: 16,
+    fill: "#fffbef", fillOpacity: 0.55,
+    stroke: "#7d7563", strokeOpacity: 0.20,
+    iconColor: "#2c2c2a", placeholderColor: "#9a968c", placeholderSize: 44,
+    containerFill: "#fffdf6", containerFillOpacity: 0.35,
+    // soft coloured glow-shadow under every floating shape (x 0, y 0)
+    shadowColor: "#c9858f", shadowOpacity: 0.42, shadowBlur: 20,
+  },
+  timing: {
+    textOut: [0.00, 0.50],    // old text fade-out window
+    textIn: 0.42,             // first word starts
+    charStagger: 0.011,       // writing speed: seconds per letter (spaces count as one)
+    charDur: 1.15,            // each letter's blur → sharp time (length of the blurred tail)
+    charInk: 0.30,            // part of charDur in which the letter becomes visible
+    charBlur: 18,             // px blur right at the writing point
+    charRise: 10,             // px each letter rises while it sharpens
+    think: [0.05, 1.55],      // head icon "thinking" window
+    barMorph: [0.20, 1.25],   // bottom bar droplet split window (same layout)
+    tabMorph: [0.15, 1.54],   // row ↔ tabs: merge into one droplet, then buttons pop out
+  },
+
+  // Head icon = list of 4-point stars {x,y,s} in icon units, plus how they spread while thinking
+  headIcon: {
+    enabled: false,           // true = show the animated sparkle above the text (then set layout.textTop ≈ 300)
+    color: "#1f1f1e",
+    // x,y,s = position/size in icon units
+    // twinkle = how much the star pulses (0..1), phase = offset in the twinkle cycle (radians)
+    // drift = radius of a slow circular float, spin = quarter-turns per loop (integer keeps the loop seamless)
+    stars: [
+      { x: -0.18, y: 0.18, s: 1.00, twinkle: 0.10, phase: 0.0, drift: 0.00, spin: 0 },
+      { x:  0.72, y: -0.66, s: 0.40, twinkle: 0.55, phase: 2.2, drift: 0.05, spin: 2 },
+      { x:  0.78, y: 0.74, s: 0.30, twinkle: 0.60, phase: 4.3, drift: 0.05, spin: -2 },
+    ],
+    twinklePeriod: 1.8,       // seconds per twinkle (rounded so it divides the loop exactly)
+    thinkSpin: 90,            // big star turns this much during each transition (multiple of 90)
+    thinkSpread: 0.16,        // small stars float outward during a transition
+    thinkBoost: 0.8,          // extra twinkle strength during a transition
+  },
+
+  // Icons: SVG path data in a 24x24 box. Add your own here and reference by key.
+  // "path" = filled icon, { d: "path", stroke: 1.9 } = outlined icon (round caps/joins), "dots:3x4" = dot grid.
+  icons: {
+    phone: "M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z",
+    dialpad: "dots:3x4",      // special: generated dot grid
+    chat: { stroke: 2.1, d: "M6.6 3.6h10.8a4 4 0 0 1 4 4v6.1a4 4 0 0 1-4 4h-5.6l-4.3 3.3c-.45.35-1.05.03-1.05-.5v-2.9a4 4 0 0 1-3.85-3.9V7.6a4 4 0 0 1 4-4z M8.3 9.3h7.4 M8.3 12.9h4.6" },
+    mic: "M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z",
+    camera: "M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z",
+    plus: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+    search: "M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  },
+
+  // Play order (indices into states). [0,1,2,1] = 1→2→3→2→(back to 1) and loop.
+  // Leave empty to play states in order and jump from the last back to the first.
+  sequence: [0, 1, 2, 1],
+
+  // States, played in order and looped. Text: wrap words in *...* to emphasise.
+  // bar.layout: "row" (buttons + optional input that fills the rest) | "tabs" (centered pill of buttons)
+  // Items keep identity across states by `id`: same id = it moves/morphs, new id = it buds out of its neighbour.
+  states: [
+    {
+      text: "This is a vision of a future app screen that *reorganizes* itself into *groups of experiences* based on the context.",
+      bg: { top: "#a3e6c6", mid: "#f0f3c2", bottom: "#f5d3d8", split: 0.30 },
+      bar: { layout: "row", items: [
+        { id: "call", kind: "button", icon: "phone" },
+        { id: "ask",  kind: "input", placeholder: "Ask anything..." },
+      ]},
+    },
+    {
+      text: "Depending on the app's context, the *bottom control area* can *dynamically reconfigure* itself.",
+      bg: { top: "#a0e4c8", mid: "#eff4c6", bottom: "#f6d6d4", split: 0.26 },
+      bar: { layout: "row", items: [
+        { id: "call", kind: "button", icon: "phone" },
+        { id: "pad",  kind: "button", icon: "dialpad" },
+        { id: "ask",  kind: "input", placeholder: "Ask anything..." },
+      ]},
+    },
+    {
+      text: "When more controls are needed, the *dynamic control area* can be *organized into tabs.*",
+      bg: { top: "#b4e9d0", mid: "#f3f2d2", bottom: "#f4dad8", split: 0.18 },
+      bar: { layout: "tabs", items: [
+        { id: "call", kind: "button", icon: "phone" },
+        { id: "pad",  kind: "button", icon: "dialpad" },
+        { id: "chat", kind: "button", icon: "chat" },
+      ]},
+    },
+  ],
+};
+/* ============================================================ */
+
+const C = CONFIG, W = C.width, H = C.height;
+const stage = document.getElementById('stage');
+const bgEl = document.getElementById('bg'), glowEl = document.getElementById('glow');
+const headEl = document.getElementById('head'), textsEl = document.getElementById('texts');
+const barEl = document.getElementById('bar');
+const SEQ = (C.sequence && C.sequence.length) ? C.sequence : C.states.map((_, i) => i);
+const N = SEQ.length, LOOP = N * C.stateDuration;
+
+stage.style.width = W + 'px'; stage.style.height = H + 'px';
+barEl.setAttribute('width', W); barEl.setAttribute('height', H);
+barEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+/* ---------- math ---------- */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (u, [a, b]) => clamp((u - a) / (b - a));
+const easeInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const easeIn = t => t * t * t;
+const easeInOutQuart = t => t < .5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;   // stronger ease-in-out
+const easeSine = t => -(Math.cos(Math.PI * t) - 1) / 2;   // gentle in-out for shape morphs
+const hex = h => { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+const mixHex = (a, b, t) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], t))).join(',')})`; };
+const lerpRect = (a, b, t) => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t) });
+
+/* ---------- text layers (built once) ---------- */
+const F = C.font, L = C.layout;
+const textLayers = C.states.map(s => {
+  const div = document.createElement('div');
+  div.className = 'text';
+  Object.assign(div.style, {
+    top: L.textTop + 'px', paddingLeft: L.padX + 'px', paddingRight: L.padX + 'px',
+    fontFamily: F.family, fontSize: F.size + 'px', lineHeight: F.lineHeight,
+    color: F.color, fontWeight: F.weight, letterSpacing: '-0.005em',
+  });
+  // tokenize: *strong phrase* → strong words
+  const words = [];
+  const re = /\*([^*]+)\*|([^*]+)/g; let m;
+  while ((m = re.exec(s.text))) {
+    const strong = !!m[1];
+    (m[1] || m[2]).split(/(\s+)/).forEach(tok => { if (tok) words.push({ tok, strong }); });
+  }
+  // each word is a no-wrap box (so lines break between words); each letter is its own span
+  const spans = [];   // {el, k}: k = writing order (spaces count as one step)
+  let k = 0;
+  words.forEach(({ tok, strong }) => {
+    if (/^\s+$/.test(tok)) { div.appendChild(document.createTextNode(' ')); k++; return; }
+    const wd = document.createElement('span');
+    wd.className = 'w';
+    if (strong) { wd.style.color = F.strongColor; wd.style.fontWeight = F.strongWeight; }
+    for (const ch of tok) {
+      const c = document.createElement('span');
+      c.className = 'c'; c.textContent = ch;
+      wd.appendChild(c); spans.push({ el: c, k: k++ });
+    }
+    div.appendChild(wd);
+  });
+  textsEl.appendChild(div);
+  return { div, spans };
+});
+
+/* ---------- head icon ---------- */
+const STAR = "M0,-1 C0.07,-0.36 0.36,-0.07 1,0 C0.36,0.07 0.07,0.36 0,1 C-0.07,0.36 -0.36,0.07 -1,0 C-0.36,-0.07 -0.07,-0.36 0,-1Z";
+Object.assign(headEl.style, { left: (L.padX - 4) + 'px', top: L.iconTop + 'px', width: L.iconSize + 'px', height: L.iconSize + 'px' });
+
+// continuous, loop-periodic sparkle: gentle idle twinkle + a smooth "thinking" swell on each transition
+function renderHead(tt, u) {
+  const hi = C.headIcon;
+  if (!hi || !hi.enabled) { headEl.style.display = 'none'; return; }
+  headEl.style.display = '';
+  const cyc = Math.max(1, Math.round(LOOP / hi.twinklePeriod));   // whole cycles per loop → seamless
+  const ph = 2 * Math.PI * tt / LOOP;                              // 0..2π over one loop
+  const p = prog(u, C.timing.think);
+  const ep = easeInOut(p);
+  const env = Math.sin(Math.PI * ep);                              // 0 → 1 → 0, smooth at both ends
+  let g = '';
+  hi.stars.forEach((st, i) => {
+    const big = i === 0;
+    const w = ph * cyc + st.phase;
+    const pulse = 0.5 - 0.5 * Math.cos(w);                         // 0..1, soft
+    const amp = st.twinkle * (1 + hi.thinkBoost * env);
+    let s = st.s * (1 - amp * pulse);
+    if (big) s *= 1 - 0.14 * env;                                 // big star breathes in while thinking
+    // slow float + outward drift while thinking
+    const fx = Math.cos(ph * 2 + st.phase) * st.drift, fy = Math.sin(ph * 2 + st.phase) * st.drift;
+    const len = Math.hypot(st.x, st.y) || 1;
+    const out = big ? 0 : hi.thinkSpread * env;
+    const x = st.x + fx + st.x / len * out, y = st.y + fy + st.y / len * out;
+    // rotation: idle spin (whole quarter-turns per loop) + one smooth quarter-turn per transition
+    const rot = st.spin * 90 * tt / LOOP + (big ? hi.thinkSpin * ep : -hi.thinkSpin * 0.5 * env);
+    const op = big ? 1 : 1 - 0.45 * pulse * Math.min(1, amp);
+    g += `<path d="${STAR}" opacity="${op.toFixed(3)}" transform="translate(${x.toFixed(4)} ${y.toFixed(4)}) rotate(${rot.toFixed(2)}) scale(${(s * 0.72).toFixed(4)})"/>`;
+  });
+  headEl.innerHTML = `<g fill="${hi.color}">${g}</g>`;
+}
+
+/* ---------- background ---------- */
+function renderBg(a, b, t) {
+  const A = a.bg, B = b.bg;
+  const top = mixHex(A.top, B.top, t), mid = mixHex(A.mid, B.mid, t), bot = mixHex(A.bottom, B.bottom, t);
+  const sp = lerp(A.split, B.split, t);
+  bgEl.style.background = `linear-gradient(180deg, ${top} 0%, ${top} ${(sp * 35).toFixed(1)}%, ${mid} ${(sp * 100 + 25).toFixed(1)}%, ${mid} 62%, ${bot} 100%)`;
+  glowEl.style.background = `radial-gradient(120% 55% at 30% ${(sp * 100 + 18).toFixed(1)}%, rgba(255,255,240,0.45), rgba(255,255,240,0) 70%)`;
+}
+
+/* ---------- bottom bar ---------- */
+const B = C.bar;
+function layoutBar(state) {
+  const items = state.bar.items, cy = L.barY, rects = {};
+  let container = null;
+  if (state.bar.layout === 'row') {
+    const btnW = items.filter(i => i.kind !== 'input').length * B.button;
+    const nInput = items.filter(i => i.kind === 'input').length;
+    const free = W - B.rowMarginL - B.rowMarginR - btnW - B.gap * (items.length - 1);
+    const inW = nInput ? free / nInput : 0;
+    let x = B.rowMarginL;
+    if (!nInput) x = (W - (btnW + B.gap * (items.length - 1))) / 2;
+    items.forEach(it => {
+      const w = it.kind === 'input' ? inW : B.button, h = it.kind === 'input' ? B.inputH : B.button;
+      rects[it.id] = { x, y: cy - h / 2, w, h }; x += w + B.gap;
+    });
+  } else { // tabs
+    const total = items.length * B.tabButton + (items.length - 1) * B.tabGap;
+    let x = (W - total) / 2;
+    items.forEach(it => { rects[it.id] = { x, y: cy - B.tabButton / 2, w: B.tabButton, h: B.tabButton }; x += B.tabButton + B.tabGap; });
+    container = { x: (W - total) / 2 - B.tabPad, y: cy - B.tabButton / 2 - B.tabPad, w: total + 2 * B.tabPad, h: B.tabButton + 2 * B.tabPad };
+  }
+  return { rects, container };
+}
+
+function iconSVG(key, cx, cy, size, opacity) {
+  const d = C.icons[key]; if (!d || opacity <= 0.001) return '';
+  const s = size / 24;
+  let body;
+  if (typeof d === 'object') {
+    return `<g opacity="${opacity.toFixed(3)}" fill="none" stroke="${B.iconColor}" stroke-width="${d.stroke}" stroke-linecap="round" stroke-linejoin="round" transform="translate(${(cx - 12 * s).toFixed(2)} ${(cy - 12 * s).toFixed(2)}) scale(${s.toFixed(4)})"><path d="${d.d}"/></g>`;
+  } else if (d.startsWith('dots:')) {
+    const [cols, rows] = d.slice(5).split('x').map(Number);
+    body = '';
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
+      body += `<circle cx="${12 + (c - (cols - 1) / 2) * 5.4}" cy="${12 + (r - (rows - 1) / 2) * 5.4}" r="1.55"/>`;
+  } else body = `<path d="${d}"/>`;
+  return `<g opacity="${opacity.toFixed(3)}" fill="${B.iconColor}" transform="translate(${(cx - 12 * s).toFixed(2)} ${(cy - 12 * s).toFixed(2)}) scale(${s.toFixed(4)})">${body}</g>`;
+}
+
+let clipSeq = 0;
+// draw one layer: list of {item, r, iconA}; container rect or null; layer opacity
+function layerSVG(entries, container, alpha, blur) {
+  if (alpha <= 0.001) return '';
+  let shapes = '', fg = '', cont = '';
+  if (container) {
+    cont = `<rect x="${container.x}" y="${container.y}" width="${container.w}" height="${container.h}" rx="${container.h / 2}"
+      filter="url(#sh)" fill="${B.containerFill}" fill-opacity="${B.containerFillOpacity}" stroke="${B.stroke}" stroke-opacity="${B.strokeOpacity}" stroke-width="2"/>`;
+  }
+  entries.forEach(({ item, r, iconA }) => {
+    if (r.w < 1) return;
+    shapes += `<rect x="${r.x.toFixed(2)}" y="${r.y.toFixed(2)}" width="${r.w.toFixed(2)}" height="${r.h.toFixed(2)}" rx="${(Math.min(r.w, r.h) / 2).toFixed(2)}" fill="#000"/>`;
+    const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    if (item.kind === 'button') fg += iconSVG(item.icon, cx, cy, r.h * 0.34, iconA);
+    else if (item.placeholder && iconA > 0.001) {
+      const id = 'c' + (clipSeq++);
+      fg += `<clipPath id="${id}"><rect x="${r.x + 8}" y="${r.y}" width="${Math.max(0, r.w - 16)}" height="${r.h}" rx="${r.h / 2}"/></clipPath>
+        <text clip-path="url(#${id})" x="${(r.x + r.h * 0.42).toFixed(2)}" y="${(cy + B.placeholderSize * 0.35).toFixed(2)}" font-family="${F.family.replace(/"/g, "'")}" font-size="${B.placeholderSize}" font-weight="400" fill="${B.placeholderColor}" opacity="${iconA.toFixed(3)}">${item.placeholder}</text>`;
+    }
+  });
+  const bf = blur > 0.05 ? `filter="url(#lb${Math.round(blur * 10)})"` : '';
+  const blurDef = blur > 0.05 ? `<filter id="lb${Math.round(blur * 10)}" x="-10%" y="-50%" width="120%" height="200%"><feGaussianBlur stdDeviation="${blur.toFixed(1)}"/></filter>` : '';
+  return `${blurDef}<g opacity="${alpha.toFixed(3)}" ${bf}>${cont}<g filter="url(#goo)">${shapes}</g>${fg}</g>`;
+}
+
+const GOO = `<defs>
+  <filter id="goo" x="-10%" y="-60%" width="120%" height="220%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b"/>
+    <feColorMatrix in="b" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 26 -12" result="g"/>
+    <feMorphology in="g" operator="erode" radius="2" result="e"/>
+    <feComposite in="g" in2="e" operator="out" result="ring"/>
+    <feFlood flood-color="${B.fill}" flood-opacity="${B.fillOpacity}"/>
+    <feComposite in2="e" operator="in" result="fill"/>
+    <feFlood flood-color="${B.stroke}" flood-opacity="${B.strokeOpacity}"/>
+    <feComposite in2="ring" operator="in" result="stroke"/>
+    <feGaussianBlur in="g" stdDeviation="${B.shadowBlur / 2}" result="sb"/>
+    <feFlood flood-color="${B.shadowColor}" flood-opacity="${B.shadowOpacity}"/>
+    <feComposite in2="sb" operator="in" result="sc"/>
+    <feComposite in="sc" in2="g" operator="out" result="shadow"/>   <!-- only outside the shape -->
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="fill"/><feMergeNode in="stroke"/></feMerge>
+  </filter>
+  <filter id="sh" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB">
+    <feComponentTransfer in="SourceAlpha" result="m"><feFuncA type="linear" slope="60"/></feComponentTransfer>  <!-- solid mask of the see-through shape -->
+    <feGaussianBlur in="m" stdDeviation="${B.shadowBlur / 2}" result="sb"/>
+    <feFlood flood-color="${B.shadowColor}" flood-opacity="${B.shadowOpacity}"/>
+    <feComposite in2="sb" operator="in" result="sc"/>
+    <feComposite in="sc" in2="m" operator="out" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter></defs>`;
+
+
+// tiny droplet hidden inside the left/right cap of `host`
+const capDot = (host, side, h) => {
+  const sz = Math.min(host.h, h) * 0.4;
+  const cx = side < 0 ? host.x + host.h * 0.5 : host.x + host.w - host.h * 0.5;
+  return { x: cx - sz / 2, y: host.y + host.h / 2 - sz / 2, w: sz, h: sz };
+};
+
+/* Every bar change is a droplet split: shared ids slide to their new place, new ids bud out of the
+   nearest shared neighbour and pull away (the goo makes them tear off like a droplet), removed ids are
+   absorbed back into a neighbour. Nothing moves while a state is holding.                         */
+/* row ↔ tabs: everything flows into one droplet the shape of the tabs pill, then the buttons
+   pop out inside it (reverse for tabs → row). s runs 0 (row) → 1 (tabs).                     */
+function renderBarLayoutChange(prev, cur, u, P, Q) {
+  const toTabs = cur.bar.layout === 'tabs';
+  const rowSt = toTabs ? prev : cur, tabSt = toTabs ? cur : prev;
+  const RL = toTabs ? P : Q, TL = toTabs ? Q : P;
+  const q = prog(u, C.timing.tabMorph);                       // linear here; each beat eases itself
+  const s = toTabs ? q : 1 - q;
+  const s1 = easeInOutQuart(clamp(s / 0.66)), s2 = easeInOutQuart(clamp((s - 0.53) / 0.47));   // merge ~0.92s, buttons pop ~0.65s   // beats overlap a little
+  const c = TL.container || (() => { const v = Object.values(TL.rects);
+    const x0 = Math.min(...v.map(r => r.x)), x1 = Math.max(...v.map(r => r.x + r.w));
+    return { x: x0, y: v[0].y, w: x1 - x0, h: v[0].h }; })();
+  let out = GOO;
+  // 1) row items melt together into the pill-shaped droplet
+  const blob = rowSt.bar.items.map(it => ({ item: it, r: lerpRect(RL.rects[it.id], c, s1), iconA: 1 - clamp(s1 / 0.45) }));
+  out += layerSVG(blob, null, 1 - s2, 0);
+  // 2) droplet settles into the tabs container
+  if (s2 > 0.001 && TL.container) out += `<g opacity="${s2.toFixed(3)}"><rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="${c.h / 2}"
+      filter="url(#sh)" fill="${B.containerFill}" fill-opacity="${B.containerFillOpacity}" stroke="${B.stroke}" stroke-opacity="${B.strokeOpacity}" stroke-width="2"/></g>`;
+  // 3) the buttons pop out inside it, icons last
+  if (s2 > 0.001) {
+    const btns = tabSt.bar.items.map(it => {
+      const r = TL.rects[it.id], cx = r.x + r.w / 2, cy = r.y + r.h / 2, k = lerp(0.25, 1, s2);
+      return { item: it, r: { x: cx - r.w * k / 2, y: cy - r.h * k / 2, w: r.w * k, h: r.h * k }, iconA: clamp((s2 - 0.35) / 0.5) };
+    });
+    out += layerSVG(btns, null, clamp(s2 * 3), 0);
+  }
+  barEl.innerHTML = out;
+}
+
+function renderBar(prev, cur, u) {
+  clipSeq = 0;
+  const p = prog(u, C.timing.barMorph), t = easeInOutQuart(p);   // ease-in-out: speeds up, then slows down
+  const P = layoutBar(prev), Q = layoutBar(cur);
+  if (prev.bar.layout !== cur.bar.layout) return renderBarLayoutChange(prev, cur, u, P, Q);
+  const pIds = prev.bar.items.map(i => i.id), qIds = cur.bar.items.map(i => i.id);
+  const shared = new Set(qIds.filter(id => pIds.includes(id)));
+
+  const curRect = {};
+  shared.forEach(id => { curRect[id] = lerpRect(P.rects[id], Q.rects[id], t); });
+  // neighbour that exists in both states: nearest to the right first, else to the left
+  const anchor = (list, idx) => {
+    for (let j = idx + 1; j < list.length; j++) if (shared.has(list[j].id)) return { id: list[j].id, side: -1 };
+    for (let j = idx - 1; j >= 0; j--) if (shared.has(list[j].id)) return { id: list[j].id, side: 1 };
+    return null;
+  };
+  const fallback = (h) => { const sz = h * 0.4; return { x: W / 2 - sz / 2, y: L.barY - sz / 2, w: sz, h: sz }; };
+
+  const entries = [];
+  prev.bar.items.forEach((it, idx) => {          // removed: absorbed into neighbour
+    if (shared.has(it.id)) return;
+    const an = anchor(prev.bar.items, idx), from = P.rects[it.id];
+    const to = an ? capDot(curRect[an.id], an.side, from.h) : fallback(from.h);
+    entries.push({ item: it, r: lerpRect(from, to, t), iconA: 1 - easeOut(clamp(p / 0.4)) });
+  });
+  cur.bar.items.forEach((it, idx) => {
+    if (shared.has(it.id)) { entries.push({ item: it, r: curRect[it.id], iconA: 1 }); return; }
+    const an = anchor(cur.bar.items, idx), to = Q.rects[it.id];   // new: buds out and splits off
+    const from = an ? capDot(curRect[an.id], an.side, to.h) : fallback(to.h);
+    entries.push({ item: it, r: lerpRect(from, to, t), iconA: it.kind === 'input' ? easeOut(clamp((p - 0.7) / 0.3)) : easeOut(clamp((p - 0.45) / 0.5)) });
+  });
+
+  // tabs container
+  let cont = null, contA = 1;
+  if (P.container && Q.container) cont = lerpRect(P.container, Q.container, t);
+  else if (Q.container) {
+    const c = Q.container, k = easeOut(clamp((p - 0.35) / 0.65));
+    const w = lerp(c.w * 0.6, c.w, k), h = lerp(c.h * 0.8, c.h, k);
+    cont = { x: W / 2 - w / 2, y: L.barY - h / 2, w, h }; contA = k;
+  } else if (P.container) {
+    const c = P.container, k = easeIn(clamp(p / 0.55));
+    const w = lerp(c.w, c.w * 0.6, k), h = lerp(c.h, c.h * 0.8, k);
+    cont = { x: W / 2 - w / 2, y: L.barY - h / 2, w, h }; contA = 1 - k;
+  }
+  let out = GOO;
+  if (cont && contA > 0.001) out += `<g opacity="${contA.toFixed(3)}"><rect x="${cont.x}" y="${cont.y}" width="${cont.w}" height="${cont.h}" rx="${cont.h / 2}"
+      filter="url(#sh)" fill="${B.containerFill}" fill-opacity="${B.containerFillOpacity}" stroke="${B.stroke}" stroke-opacity="${B.strokeOpacity}" stroke-width="2"/></g>`;
+  out += layerSVG(entries, null, 1, 0);
+  barEl.innerHTML = out;
+}
+
+/* ---------- text ---------- */
+function renderText(prevIdx, curIdx, u) {
+  const T = C.timing;
+  textLayers.forEach((L2, i) => {
+    if (i !== prevIdx && i !== curIdx) { L2.div.style.visibility = 'hidden'; return; }
+    L2.div.style.visibility = 'visible';
+  });
+  // outgoing
+  if (prevIdx !== curIdx) {
+    const po = prog(u, T.textOut), a = 1 - easeSine(po);
+    const L2 = textLayers[prevIdx];
+    L2.div.style.opacity = a.toFixed(3);
+    L2.div.style.filter = po > 0 ? `blur(${(po * 12).toFixed(2)}px)` : 'none';
+    L2.div.style.transform = `translateY(${(-po * 18).toFixed(2)}px)`;
+    if (a <= 0.001) L2.div.style.visibility = 'hidden';
+    L2.spans.forEach(({ el }) => { el.style.opacity = 1; el.style.filter = 'none'; el.style.transform = 'none'; });
+  }
+  // incoming: written letter by letter; each letter appears fast, then its blur clears slowly,
+  // so a soft blurred tail trails just behind the writing point
+  const L2 = textLayers[curIdx];
+  L2.div.style.opacity = 1; L2.div.style.filter = 'none'; L2.div.style.transform = 'none';
+  L2.spans.forEach(({ el, k }) => {
+    const wp = clamp((u - T.textIn - k * T.charStagger) / T.charDur);
+    const a = easeSine(clamp(wp / T.charInk));            // ink appears in the first part
+    const b = easeOut(wp);                                 // blur clears over the whole duration
+    el.style.opacity = a.toFixed(3);
+    el.style.filter = wp < 1 ? `blur(${((1 - b) * T.charBlur).toFixed(2)}px)` : 'none';
+    el.style.transform = wp < 1 ? `translateY(${((1 - b) * T.charRise).toFixed(2)}px)` : 'none';
+  });
+}
+
+/* ---------- master ---------- */
+function renderAt(t) {
+  let tt = ((t + C.startOffset) % LOOP + LOOP) % LOOP;
+  const step = Math.floor(tt / C.stateDuration) % N;
+  const u = tt - step * C.stateDuration;
+  const idx = SEQ[step], prevIdx = SEQ[(step - 1 + N) % N];
+  const prev = C.states[prevIdx], cur = C.states[idx];
+  renderBg(prev, cur, easeInOut(clamp(u / 1.4)));
+  renderHead(tt, u);
+  renderText(prevIdx, idx, u);
+  renderBar(prev, cur, u);
+}
+window.renderAt = renderAt;
+window.LOOP_DURATION = LOOP;
+window.CONFIG = CONFIG;
+
+/* live preview unless ?capture */
+if (location.search.includes('capture')) {
+  document.body.classList.add('capture');
+} else {
+  const fit = () => {
+    const s = Math.min(innerWidth / W, innerHeight / H) * 0.96;
+    stage.style.transform = `scale(${s})`;
+    document.body.style.width = innerWidth + 'px';
+    stage.style.marginRight = (W * s - W) + 'px'; stage.style.marginBottom = (H * s - H) + 'px';
+  };
+  addEventListener('resize', fit); fit();
+  const t0 = performance.now();
+  const loop = () => { renderAt((performance.now() - t0) / 1000); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+}
+renderAt(0);
+</script>
+</body>
+</html>
