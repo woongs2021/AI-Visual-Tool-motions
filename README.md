@@ -2,7 +2,7 @@
 
 AI 에이전트가 활성화될 때 화면에 나타나는 **비주얼 큐(AI Visual Cue)**의 컬러·물성·크기·모션을 웹에서 조절하고, 그 결과를 **Kotlin + Jetpack Compose 코드**로 내보내는 디자인 툴입니다.
 
-### ▶ 바로 열기: **https://woongs2021.github.io/AI-Visual-Tool/**
+### ▶ 바로 열기: [**woongs2021.github.io/AI-Visual-Tool-motions**](https://woongs2021.github.io/AI-Visual-Tool-motions/)
 
 설치나 빌드 없이 브라우저에서 바로 동작합니다. WebGL2를 지원하는 최신 Chrome, Edge, Safari, Firefox에서 열 수 있습니다.
 
