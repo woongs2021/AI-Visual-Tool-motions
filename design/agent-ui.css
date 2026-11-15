@@ -1,0 +1,350 @@
+/* =========================================================================================================================
+   Agent UI kit — the design of AI-Visual-Tool-motions (Adaptive Screen · 큐 적용 사례 · 전체 비교) as plain CSS, for new screens
+   that should look like the current ones. Design only: no animation values (no durations, easings or keyframes).
+
+   Values come from the tool (index.html) as it is now; mapping to its names:
+     screen backgrounds SCREEN_BGS · agent colours PRESETS · sets THEME_SETS · glass GLASS · agent rows ROW_LOOK / ROWS
+     floating bar ASL_BAR (÷ 3: the Adaptive Screen draws at 3×) · agent sentence ASL_TEXT / SAY · thinking blur CUE_FOG · app recede APP_RECEDE
+   1 dp = 1 CSS px; the phone screen is 360 × 780.
+
+   The app UI (colour roles, type scale, spacing, radius, chips, badge, buttons, list items) follows SEED Design
+   (© Danggeun Market Inc., Apache-2.0) — its values only; see licenses/seed-design. No 당근 brand resources.
+
+   Approximations: the agent ball is a shader in the tool (and AGSL in the generated Kotlin); .au-ball* here is a static CSS
+   likeness of the default material (Aura). The floating bar's droplet merging (an SVG goo filter) is motion, so it is not here:
+   its parts are drawn as separate glass pills, as they look when the bar is at rest.
+   ========================================================================================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;700&display=swap");
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   1. Tokens (defaults: set Meadow = background Meadow + agent colour Azure + material Aura)
+   --------------------------------------------------------------------------------------------------------------------------- */
+:root {
+  /* screen */
+  --au-screen-w: 360px;
+  --au-screen-h: 780px;
+  --au-screen-radius: 30px;
+
+  /* screen background: top → middle → bottom, and the floating bar's shadow that goes with it */
+  --au-bg-top:#A3E6C6; --au-bg-mid:#F0F3C2; --au-bg-bottom:#F5D3D8; --au-bar-shadow:#C9858F;
+
+  /* agent colour: 3 stops (the 2nd at its own position); the list accent is the 1st */
+  --au-agent-1:#6449F5; --au-agent-2:#3A77FF; --au-agent-2-at:40%; --au-agent-3:#C9EEFF;
+
+  /* SEED colour roles (light) */
+  --au-fg-neutral: #1A1C20;
+  --au-fg-muted: #555D6D;            /* the agent rows' detail (neutral-muted: reads on glass) */
+  --au-fg-subtle: #868B94;
+  --au-fg-placeholder: #B0B3BA;
+  --au-fg-on-solid: #FFFFFF;
+  --au-fg-info: #0B4596;
+  --au-fg-critical: #FA342C;
+  --au-bg-layer: #FFFFFF;
+  --au-bg-weak: #F3F4F5;
+  --au-bg-weak-alpha: rgba(0,0,0,0.047);
+  --au-bg-solid: #2A3038;
+  --au-bg-info-weak: #EFF6FF;
+  --au-bg-figure: #DCDEE3;
+
+  /* type: the app (SEED system stack) · the agent's voice (the Adaptive Screen's sentence) */
+  --au-font-ui: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --au-font-agent: 'Samsung Sharp Sans','Urbanist','IBM Plex Sans KR','Pretendard','Noto Sans KR',sans-serif;
+  /* SEED type scale: size / line height */
+  --au-t1: 11px; --au-t1-lh: 15px;
+  --au-t3: 13px; --au-t3-lh: 18px;
+  --au-t4: 14px; --au-t4-lh: 19px;
+  --au-t5: 16px; --au-t5-lh: 22px;
+  --au-t6: 18px; --au-t6-lh: 24px;
+  /* the agent's sentence: regular, its key words strong */
+  --au-say-size: 26px;               /* 전체 비교 (what the agent says above its list) */
+  --au-hero-size: 28.33px;           /* Adaptive Screen / 큐 적용 사례 */
+  --au-say-line: 1.34;
+  --au-say-color: #5F5E5A;
+  --au-say-strong: #232321;
+
+  /* spacing · radius */
+  --au-gutter: 16px;               /* screen edges */
+  --au-gap: 12px;                   /* between components / agent rows */
+  --au-gap-sm: 8px;                 /* rows inside the agent card */
+  --au-say-gap: 24px;              /* what the agent says → its list */
+  --au-r1: 4px;
+  --au-r2-5: 10px;
+  --au-r3: 12px;
+  --au-r4: 16px;
+  --au-r-card: 28px;              /* the agent card */
+  --au-r-full: 999px;
+
+  /* glass (cards and lists sink into the screen background) */
+  --au-glass-veil: rgba(255, 255, 255, 0.6);
+  --au-glass-blur: 16px;
+  --au-glass-edge: rgba(255, 255, 255, 0.55);
+  --au-wash-from: 0.2;               /* the agent colour's wash: alpha where it starts → ends */
+  --au-wash-to: 0.06;
+
+  /* the floating bar (the Adaptive Screen's): a warm see-through fill, a faint edge, a shadow in the screen background's colour */
+  --au-bar-fill: rgba(255, 251, 239, 0.55);
+  --au-bar-edge: rgba(125, 117, 99, 0.2);
+  --au-bar-container: rgba(255, 253, 246, 0.35);
+  --au-bar-shadow-alpha: 42%;
+  --au-bar-shadow-blur: 6.67px;
+  --au-bar-button: 47.33px;
+  --au-bar-input: 44.67px;
+  --au-bar-gap: 8px;
+  --au-bar-left: 37.33px;
+  --au-bar-right: 32px;
+  --au-bar-center: 53.33px;            /* its centre, above the screen's bottom */
+  --au-bar-tab: 42.67px;
+  --au-bar-tab-gap: 6.67px;
+  --au-bar-tab-pad: 5.33px;
+
+  /* states of the app behind the agent (static looks, no timing) */
+  --au-thinking-blur: 4.67px;      /* while the agent thinks */
+  --au-thinking-opacity: 0.72;
+  --au-recede-blur: 7px;        /* when the agent takes the full screen */
+  --au-recede-opacity: 0.1;
+
+  /* the agent ball */
+  --au-ball-d: 74px;                 /* sphere diameter = the loading capsule's height */
+  --au-ball-stretch: 2;             /* the loading capsule's width, × the sphere */
+  --au-ball-alpha: 0.5;
+  --au-card-h: 220px;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   2. Sets, backgrounds and agent colours — on any element (its children follow)
+      data-au-set="…"   background + agent colour (and, in the tool, a material — named in the comment)
+      data-au-bg="…"    the screen background alone · data-au-agent="…"  the agent colour alone
+   --------------------------------------------------------------------------------------------------------------------------- */
+[data-au-set="meadow"] { --au-bg-top:#A3E6C6; --au-bg-mid:#F0F3C2; --au-bg-bottom:#F5D3D8; --au-bar-shadow:#C9858F; --au-agent-1:#6449F5; --au-agent-2:#3A77FF; --au-agent-2-at:40%; --au-agent-3:#C9EEFF; }   /* Meadow · Azure · 오라 */
+[data-au-set="lavender"] { --au-bg-top:#D8CCF6; --au-bg-mid:#F7EEF4; --au-bg-bottom:#F9D5DC; --au-bar-shadow:#D18292; --au-agent-1:#7B72EE; --au-agent-2:#E68FF0; --au-agent-2-at:80%; --au-agent-3:#FFDCE9; }   /* Lavender · Blossom · 소프트 글로우 */
+[data-au-set="sky"] { --au-bg-top:#B9DEF8; --au-bg-mid:#EEF5FB; --au-bg-bottom:#DCD8F5; --au-bar-shadow:#938AC9; --au-agent-1:#5439D6; --au-agent-2:#3873F0; --au-agent-2-at:62%; --au-agent-3:#E8C9FF; }   /* Sky · Indigo · 프로스티드 글래스 */
+[data-au-set="sunrise"] { --au-bg-top:#FFD2B5; --au-bg-mid:#FFF2DC; --au-bg-bottom:#F8CFD4; --au-bar-shadow:#CF7D87; --au-agent-1:#E5384F; --au-agent-2:#FF8A3D; --au-agent-2-at:55%; --au-agent-3:#FFE1C7; }   /* Sunrise · Ember · 오라 */
+[data-au-set="dune"] { --au-bg-top:#EBD9BF; --au-bg-mid:#F8F1E4; --au-bg-bottom:#EDD3CB; --au-bar-shadow:#BC8F82; --au-agent-1:#D9531E; --au-agent-2:#FFB020; --au-agent-2-at:60%; --au-agent-3:#FFF1C9; }   /* Dune · Amber · 매트 클레이 */
+[data-au-set="lagoon"] { --au-bg-top:#A8E5E2; --au-bg-mid:#EAF8F1; --au-bg-bottom:#CFE2F6; --au-bar-shadow:#7FA4CB; --au-agent-1:#0FA37F; --au-agent-2:#3DDC97; --au-agent-2-at:50%; --au-agent-3:#DFFBEE; }   /* Lagoon · Mint · 워터 */
+[data-au-set="blush"] { --au-bg-top:#F6C8D5; --au-bg-mid:#FCEFEA; --au-bg-bottom:#E4D7F3; --au-bar-shadow:#A68BC5; --au-agent-1:#C2305A; --au-agent-2:#FF8FA3; --au-agent-2-at:70%; --au-agent-3:#FFE4E1; }   /* Blush · Rosé · 펄 */
+[data-au-set="cloud"] { --au-bg-top:#D9E2EC; --au-bg-mid:#F5F6F8; --au-bg-bottom:#E6E1EA; --au-bar-shadow:#A99FB2; --au-agent-1:#6449F5; --au-agent-2:#3A77FF; --au-agent-2-at:40%; --au-agent-3:#C9EEFF; }   /* Cloud · Azure · 리퀴드 메탈 */
+[data-au-set="citrus"] { --au-bg-top:#F5E9A6; --au-bg-mid:#FBF8E3; --au-bg-bottom:#D5EFD9; --au-bar-shadow:#8CBE93; --au-agent-1:#1F8A4C; --au-agent-2:#A3E635; --au-agent-2-at:65%; --au-agent-3:#F4FFD6; }   /* Citrus · Lime · 가스 */
+[data-au-set="sage"] { --au-bg-top:#C4E3C8; --au-bg-mid:#F2F6EA; --au-bg-bottom:#E3EBD6; --au-bar-shadow:#A8B790; --au-agent-1:#0B6E4F; --au-agent-2:#2FBF71; --au-agent-2-at:60%; --au-agent-3:#E3F7C8; }   /* Sage · Jade · 소프트 글로우 */
+[data-au-set="dusk"] { --au-bg-top:#CBC3F0; --au-bg-mid:#F1E7F5; --au-bg-bottom:#F7CFDF; --au-bar-shadow:#CD7E9E; --au-agent-1:#5439D6; --au-agent-2:#3873F0; --au-agent-2-at:62%; --au-agent-3:#E8C9FF; }   /* Dusk · Indigo · 네온 */
+
+[data-au-bg="meadow"] { --au-bg-top:#A3E6C6; --au-bg-mid:#F0F3C2; --au-bg-bottom:#F5D3D8; --au-bar-shadow:#C9858F; }
+[data-au-bg="lavender"] { --au-bg-top:#D8CCF6; --au-bg-mid:#F7EEF4; --au-bg-bottom:#F9D5DC; --au-bar-shadow:#D18292; }
+[data-au-bg="sky"] { --au-bg-top:#B9DEF8; --au-bg-mid:#EEF5FB; --au-bg-bottom:#DCD8F5; --au-bar-shadow:#938AC9; }
+[data-au-bg="sunrise"] { --au-bg-top:#FFD2B5; --au-bg-mid:#FFF2DC; --au-bg-bottom:#F8CFD4; --au-bar-shadow:#CF7D87; }
+[data-au-bg="dune"] { --au-bg-top:#EBD9BF; --au-bg-mid:#F8F1E4; --au-bg-bottom:#EDD3CB; --au-bar-shadow:#BC8F82; }
+[data-au-bg="lagoon"] { --au-bg-top:#A8E5E2; --au-bg-mid:#EAF8F1; --au-bg-bottom:#CFE2F6; --au-bar-shadow:#7FA4CB; }
+[data-au-bg="blush"] { --au-bg-top:#F6C8D5; --au-bg-mid:#FCEFEA; --au-bg-bottom:#E4D7F3; --au-bar-shadow:#A68BC5; }
+[data-au-bg="cloud"] { --au-bg-top:#D9E2EC; --au-bg-mid:#F5F6F8; --au-bg-bottom:#E6E1EA; --au-bar-shadow:#A99FB2; }
+[data-au-bg="citrus"] { --au-bg-top:#F5E9A6; --au-bg-mid:#FBF8E3; --au-bg-bottom:#D5EFD9; --au-bar-shadow:#8CBE93; }
+[data-au-bg="sage"] { --au-bg-top:#C4E3C8; --au-bg-mid:#F2F6EA; --au-bg-bottom:#E3EBD6; --au-bar-shadow:#A8B790; }
+[data-au-bg="dusk"] { --au-bg-top:#CBC3F0; --au-bg-mid:#F1E7F5; --au-bg-bottom:#F7CFDF; --au-bar-shadow:#CD7E9E; }
+
+[data-au-agent="azure"] { --au-agent-1:#6449F5; --au-agent-2:#3A77FF; --au-agent-2-at:40%; --au-agent-3:#C9EEFF; }   /* Azure: Iris → Azure → Mist */
+[data-au-agent="blossom"] { --au-agent-1:#7B72EE; --au-agent-2:#E68FF0; --au-agent-2-at:80%; --au-agent-3:#FFDCE9; }   /* Blossom: Lilac → Orchid → Blush */
+[data-au-agent="indigo"] { --au-agent-1:#5439D6; --au-agent-2:#3873F0; --au-agent-2-at:62%; --au-agent-3:#E8C9FF; }   /* Indigo: Indigo → Azure → Bloom */
+[data-au-agent="ember"] { --au-agent-1:#E5384F; --au-agent-2:#FF8A3D; --au-agent-2-at:55%; --au-agent-3:#FFE1C7; }   /* Ember: Crimson → Tangerine → Peach */
+[data-au-agent="amber"] { --au-agent-1:#D9531E; --au-agent-2:#FFB020; --au-agent-2-at:60%; --au-agent-3:#FFF1C9; }   /* Amber: Rust → Amber → Cream */
+[data-au-agent="rose"] { --au-agent-1:#C2305A; --au-agent-2:#FF8FA3; --au-agent-2-at:70%; --au-agent-3:#FFE4E1; }   /* Rosé: Ruby → Rose → Blush */
+[data-au-agent="mint"] { --au-agent-1:#0FA37F; --au-agent-2:#3DDC97; --au-agent-2-at:50%; --au-agent-3:#DFFBEE; }   /* Mint: Teal → Mint → Foam */
+[data-au-agent="jade"] { --au-agent-1:#0B6E4F; --au-agent-2:#2FBF71; --au-agent-2-at:60%; --au-agent-3:#E3F7C8; }   /* Jade: Jade → Emerald → Pistachio */
+[data-au-agent="lime"] { --au-agent-1:#1F8A4C; --au-agent-2:#A3E635; --au-agent-2-at:65%; --au-agent-3:#F4FFD6; }   /* Lime: Pine → Lime → Glow */
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   3. The screen
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-screen {
+  position: relative; isolation: isolate; overflow: hidden; box-sizing: border-box;
+  width: var(--au-screen-w); height: var(--au-screen-h); border-radius: var(--au-screen-radius);
+  /* the gradient (top band → middle → bottom) and the warm light over it */
+  background:
+    radial-gradient(120% 55% at 30% 48%, rgba(255, 255, 240, .45), rgba(255, 255, 240, 0) 70%),
+    linear-gradient(180deg, var(--au-bg-top) 0%, var(--au-bg-top) 10.5%, var(--au-bg-mid) 55%, var(--au-bg-mid) 62%, var(--au-bg-bottom) 100%);
+  color: var(--au-fg-neutral); font-family: var(--au-font-ui); font-size: var(--au-t4); line-height: var(--au-t4-lh);
+}
+.au-screen *, .au-screen *::before, .au-screen *::after { box-sizing: border-box; }
+
+/* the phone's status bar (time on the left, signal · wi-fi · battery on the right) */
+.au-status-bar { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 17.5px 0 26px; font: 600 14px/1 var(--au-font-ui); color: var(--au-fg-neutral); }
+.au-status-bar::after { content: ""; width: 65px; height: 15px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 9 65 15'%3E%3Crect x='0' y='17' width='3' height='5'/%3E%3Crect x='5' y='15' width='3' height='7'/%3E%3Crect x='10' y='13' width='3' height='9'/%3E%3Crect x='15' y='11' width='3' height='11'/%3E%3Cpath d='M24.1 15.6A8 8 0 0 1 35.9 15.6M27.05 18.3A4 4 0 0 1 32.96 18.3' fill='none' stroke='black' stroke-width='1.6'/%3E%3Crect x='41.5' y='11.5' width='21' height='11' fill='none' stroke='black'/%3E%3Crect x='44' y='14' width='15' height='6'/%3E%3Crect x='63' y='15' width='1.5' height='4'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 9 65 15'%3E%3Crect x='0' y='17' width='3' height='5'/%3E%3Crect x='5' y='15' width='3' height='7'/%3E%3Crect x='10' y='13' width='3' height='9'/%3E%3Crect x='15' y='11' width='3' height='11'/%3E%3Cpath d='M24.1 15.6A8 8 0 0 1 35.9 15.6M27.05 18.3A4 4 0 0 1 32.96 18.3' fill='none' stroke='black' stroke-width='1.6'/%3E%3Crect x='41.5' y='11.5' width='21' height='11' fill='none' stroke='black'/%3E%3Crect x='44' y='14' width='15' height='6'/%3E%3Crect x='63' y='15' width='1.5' height='4'/%3E%3C/svg%3E") center / contain no-repeat; }
+/* the home indicator */
+.au-home-indicator { position: absolute; left: 50%; bottom: 4px; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: var(--au-fg-neutral); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   4. Line icons — 24 × 24, stroked 1.8 with round ends, in the current colour:  <i class="au-icon au-icon--calendar"></i>
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-icon { display: inline-block; flex: none; width: 24px; height: 24px; background: currentColor; -webkit-mask: var(--au-icon) center / contain no-repeat; mask: var(--au-icon) center / contain no-repeat; }
+.au-icon--calendar { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v10.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 5 6.5zM3.5 10.5h17M8 4v4M16 4v4'/%3E%3C/svg%3E"); }
+.au-icon--doc { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3.5h7l4.5 4.5V19a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5zM14 3.5V8h4.5M8.5 12.5h7M8.5 16h5'/%3E%3C/svg%3E"); }
+.au-icon--link { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1.2 1.2M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1.2-1.2'/%3E%3C/svg%3E"); }
+.au-icon--chat { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-8l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5zM8 9.5h8M8 12.5h5'/%3E%3C/svg%3E"); }
+.au-icon--clock { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3.5a8.5 8.5 0 1 1 0 17a8.5 8.5 0 1 1 0-17zM12 7.5V12l3 2'/%3E%3C/svg%3E"); }
+.au-icon--pin { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20.5s-6-5.6-6-10.5a6 6 0 0 1 12 0c0 4.9-6 10.5-6 10.5zM12 7.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 1 1 0-5z'/%3E%3C/svg%3E"); }
+.au-icon--bag { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M4.5 7h15A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-9A1.5 1.5 0 0 1 4.5 7zM3 12h18'/%3E%3C/svg%3E"); }
+.au-icon--book { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 5.5h6A2.5 2.5 0 0 1 12 8v11a2 2 0 0 0-2-2H3.5zM20.5 5.5h-6A2.5 2.5 0 0 0 12 8v11a2 2 0 0 1 2-2h6.5z'/%3E%3C/svg%3E"); }
+.au-icon--bell { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15zM10 20.5h4'/%3E%3C/svg%3E"); }
+.au-icon--plus { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5v11M6.5 12h11'/%3E%3C/svg%3E"); }
+.au-icon--chevron { --au-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 6.5 15 12l-5.5 5.5'/%3E%3C/svg%3E"); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   5. The app (SEED): app bar, chips, badge, button, avatar, section header, list items
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-app-bar { display: flex; align-items: center; gap: 12px; height: 56px; margin-top: 4px; padding: 0 var(--au-gutter); }
+.au-app-bar__title { flex: 1; font-size: var(--au-t6); line-height: var(--au-t6-lh); font-weight: 700; }
+.au-app-bar .au-icon { position: relative; }
+/* news: a red dot on a wrapper around an icon or avatar (on the .au-icon itself, the icon's mask would clip it) */
+.au-dot { position: relative; display: inline-flex; }
+.au-dot::after { content: ""; position: absolute; top: 1px; right: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--au-fg-critical); }   /* news */
+
+.au-chips { display: flex; gap: 8px; margin-top: 4px; padding: 0 var(--au-gutter); }
+.au-chip { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 16px; background: var(--au-bg-weak-alpha);
+  color: var(--au-fg-neutral); font-size: var(--au-t4); line-height: var(--au-t4-lh); font-weight: 500; white-space: nowrap; }
+.au-chip.is-selected { background: var(--au-bg-solid); color: var(--au-fg-on-solid); }
+
+.au-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: var(--au-r1); background: var(--au-bg-info-weak);
+  color: var(--au-fg-info); font-size: var(--au-t1); line-height: var(--au-t1-lh); font-weight: 500; }
+
+.au-button { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 14px; border-radius: 16px; border: 0;
+  background: var(--au-bg-weak-alpha); color: var(--au-fg-neutral); font: 700 var(--au-t3)/var(--au-t3-lh) var(--au-font-ui); }
+.au-button--solid { background: var(--au-bg-solid); color: var(--au-fg-on-solid); }
+
+/* SEED's identity placeholder: a grey figure in a light circle (add .au-avatar--ring when stacked) */
+.au-avatar { flex: none; width: 32px; height: 32px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 41%, var(--au-bg-figure) 0 18%, transparent 18.5%),
+              radial-gradient(34% 28% at 50% 91%, var(--au-bg-figure) 0 99%, transparent 100%), var(--au-bg-weak); }
+.au-avatar--sm { width: 24px; height: 24px; }
+.au-avatar--ring { box-shadow: 0 0 0 1.5px var(--au-bg-layer); }
+.au-avatars { display: flex; }
+.au-avatars > .au-avatar + .au-avatar { margin-left: -6px; }
+
+.au-text-meta { color: var(--au-fg-subtle); font-size: var(--au-t3); line-height: var(--au-t3-lh); }
+.au-title { font-size: var(--au-t6); line-height: var(--au-t6-lh); font-weight: 700; }
+
+.au-section-head { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--au-gutter); }
+.au-section-head__title { font-size: var(--au-t6); line-height: var(--au-t6-lh); font-weight: 700; }
+.au-section-head__more { display: inline-flex; align-items: center; color: var(--au-fg-subtle); font-size: var(--au-t4); }
+.au-section-head__more .au-icon { width: 14px; height: 14px; }
+
+/* the app's list items (64 dp): a 40 dp icon box, a title (t5) and a detail (t3), the time on the right */
+.au-list-item { display: flex; align-items: center; gap: 12px; height: 64px; padding: 12px 16px; }
+.au-list-item__icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--au-r2-5); background: var(--au-bg-weak-alpha); color: var(--au-fg-neutral); }
+.au-list-item__icon .au-icon { width: 22px; height: 22px; }
+.au-list-item__text { flex: 1; min-width: 0; }
+.au-list-item__title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--au-t5); line-height: var(--au-t5-lh); }
+.au-list-item__detail { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--au-fg-subtle); font-size: var(--au-t3); line-height: var(--au-t3-lh); }
+.au-list-item__time { align-self: flex-start; margin-top: 2px; color: var(--au-fg-subtle); font-size: var(--au-t3); line-height: var(--au-t3-lh); }
+
+/* the bottom of a scrolling area fades out under a fixed bar (SEED's scroll fog, 32 dp) */
+.au-scroll-fog { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 32px), rgba(0, 0, 0, 1) calc(100% - 32px), rgba(0, 0, 0, 0.988) calc(100% - 29.44px), rgba(0, 0, 0, 0.98) calc(100% - 26.88px), rgba(0, 0, 0, 0.949) calc(100% - 24.96px), rgba(0, 0, 0, 0.922) calc(100% - 22.72px), rgba(0, 0, 0, 0.871) calc(100% - 20.8px), rgba(0, 0, 0, 0.82) calc(100% - 18.88px), rgba(0, 0, 0, 0.749) calc(100% - 16.96px), rgba(0, 0, 0, 0.678) calc(100% - 15.04px), rgba(0, 0, 0, 0.6) calc(100% - 13.12px), rgba(0, 0, 0, 0.522) calc(100% - 11.2px), rgba(0, 0, 0, 0.42) calc(100% - 9.28px), rgba(0, 0, 0, 0.329) calc(100% - 7.04px), rgba(0, 0, 0, 0.22) calc(100% - 5.12px), rgba(0, 0, 0, 0.11) calc(100% - 2.56px), rgba(0, 0, 0, 0) calc(100% - 0px));
+                         mask-image: linear-gradient(180deg, #000 calc(100% - 32px), rgba(0, 0, 0, 1) calc(100% - 32px), rgba(0, 0, 0, 0.988) calc(100% - 29.44px), rgba(0, 0, 0, 0.98) calc(100% - 26.88px), rgba(0, 0, 0, 0.949) calc(100% - 24.96px), rgba(0, 0, 0, 0.922) calc(100% - 22.72px), rgba(0, 0, 0, 0.871) calc(100% - 20.8px), rgba(0, 0, 0, 0.82) calc(100% - 18.88px), rgba(0, 0, 0, 0.749) calc(100% - 16.96px), rgba(0, 0, 0, 0.678) calc(100% - 15.04px), rgba(0, 0, 0, 0.6) calc(100% - 13.12px), rgba(0, 0, 0, 0.522) calc(100% - 11.2px), rgba(0, 0, 0, 0.42) calc(100% - 9.28px), rgba(0, 0, 0, 0.329) calc(100% - 7.04px), rgba(0, 0, 0, 0.22) calc(100% - 5.12px), rgba(0, 0, 0, 0.11) calc(100% - 2.56px), rgba(0, 0, 0, 0) calc(100% - 0px)); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   6. Glass — instead of white layers: the background behind blurred (16 dp), a 60% white veil, a light wash of the agent colour's
+      gradient (its own part of it), a thin white edge. .au-glass--wash-start / --wash-end: which part (0 → 0.35 / 0.45 → 1)
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-glass { position: relative; isolation: isolate; border-radius: var(--au-r4); background: var(--au-glass-veil);
+  -webkit-backdrop-filter: blur(var(--au-glass-blur)); backdrop-filter: blur(var(--au-glass-blur)); box-shadow: inset 0 0 0 1px var(--au-glass-edge); }
+.au-glass::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(to bottom right, var(--au-agent-1), var(--au-agent-2) var(--au-agent-2-at), var(--au-agent-3)) 0 0 / 286% 286%;
+  -webkit-mask-image: linear-gradient(to bottom right, rgba(0, 0, 0, var(--au-wash-from)), rgba(0, 0, 0, var(--au-wash-to)));
+          mask-image: linear-gradient(to bottom right, rgba(0, 0, 0, var(--au-wash-from)), rgba(0, 0, 0, var(--au-wash-to))); }
+.au-glass--wash-end::before { background-size: 182% 182%; background-position: 100% 100%; }
+.au-card { padding: 16px; }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   7. What the agent makes: its list rows (glass, each washed with its part of the agent colour), its card, what it says
+   --------------------------------------------------------------------------------------------------------------------------- */
+/* full-screen rows: 72 dp, at the gutter, 12 dp apart; a 40 dp icon box tinted with the accent (12%), its icon in the accent,
+   a regular title (16) and a muted detail (13) */
+.au-agent-list { display: flex; flex-direction: column; gap: var(--au-gap); padding: 0 var(--au-gutter); }
+.au-agent-row { position: relative; isolation: isolate; display: flex; align-items: center; gap: 12px; height: 72px; padding: 0 16px;
+  border-radius: var(--au-r3); background: var(--au-glass-veil); -webkit-backdrop-filter: blur(var(--au-glass-blur)); backdrop-filter: blur(var(--au-glass-blur));
+  box-shadow: inset 0 0 0 1px var(--au-glass-edge); }
+.au-agent-row::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(90deg, var(--au-agent-1), var(--au-agent-2) var(--au-agent-2-at), var(--au-agent-3)) 0 0 / 500% 100%;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, var(--au-wash-from)), rgba(0, 0, 0, var(--au-wash-to)));
+          mask-image: linear-gradient(90deg, rgba(0, 0, 0, var(--au-wash-from)), rgba(0, 0, 0, var(--au-wash-to))); }
+/* row by row the wash runs down the whole gradient (the 1st row its first fifth, … the 5th its last) */
+.au-agent-row:nth-child(5n + 2)::before { background-position-x: 25%; }
+.au-agent-row:nth-child(5n + 3)::before { background-position-x: 50%; }
+.au-agent-row:nth-child(5n + 4)::before { background-position-x: 75%; }
+.au-agent-row:nth-child(5n + 5)::before { background-position-x: 100%; }
+.au-agent-row__icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 10px;
+  background: color-mix(in srgb, var(--au-agent-1) 12%, transparent); color: var(--au-agent-1); }
+.au-agent-row__icon .au-icon { width: 22px; height: 22px; }
+.au-agent-row__text { flex: 1; min-width: 0; }
+.au-agent-row__title { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 16px; line-height: 1.375; color: var(--au-fg-neutral); }
+.au-agent-row__detail { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; line-height: 1.36; color: var(--au-fg-muted); }
+
+/* the agent's card, slotted in between the app's content: the agent ball as a card (220 dp, r28), its rows inside it —
+   12 dp in, 8 dp apart, smaller (32 dp icon box, 14 / 12 type) */
+.au-agent-card { position: relative; isolation: isolate; display: flex; flex-direction: column; gap: var(--au-gap-sm); height: var(--au-card-h);
+  margin: 0 var(--au-gutter); padding: 12px; }
+.au-agent-card::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: var(--au-r-card); opacity: var(--au-ball-alpha);
+  background:
+    radial-gradient(60% 55% at 50% 45%, color-mix(in srgb, var(--au-agent-1) 55%, transparent), transparent 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--au-agent-2) 70%, var(--au-agent-3)), var(--au-agent-2));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--au-agent-3) 70%, white), inset 0 0 18px 4px color-mix(in srgb, var(--au-agent-3) 60%, transparent),
+              0 0 26px 4px color-mix(in srgb, var(--au-agent-2) 55%, transparent); }
+.au-agent-card .au-agent-row { flex: 1; height: auto; padding: 0 12px; }
+.au-agent-card .au-agent-row__icon { width: 32px; height: 32px; border-radius: 8px; }
+.au-agent-card .au-agent-row__icon .au-icon { width: 17.6px; height: 17.6px; }
+.au-agent-card .au-agent-row__title { font-size: 14px; }
+.au-agent-card .au-agent-row__detail { font-size: 12px; }
+
+/* what the agent says (full screen, above its list): the Adaptive Screen's type at 26 dp, its key words in <strong>; 50 dp from the
+   top when it follows the status bar, 32 dp in from the sides; its list 24 dp below it */
+.au-say { margin: 14px 0 0; padding: 0 32px; font-family: var(--au-font-agent); font-size: var(--au-say-size); line-height: var(--au-say-line);
+  font-weight: 400; letter-spacing: -0.005em; color: var(--au-say-color); }
+.au-say strong, .au-say b, .au-hero strong, .au-hero b { color: var(--au-say-strong); font-weight: 700; }
+.au-say + .au-agent-list { margin-top: var(--au-say-gap); }
+/* the Adaptive Screen's own sentence (28 dp, 30.67px in) */
+.au-hero { margin: 14px 0 0; padding: 0 30.67px; font-family: var(--au-font-agent); font-size: var(--au-hero-size); line-height: var(--au-say-line);
+  font-weight: 400; letter-spacing: -0.005em; color: var(--au-say-color); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   8. The floating bar — the Adaptive Screen's bottom bar, at rest: buttons and an input (a row), or buttons in one pill (tabs).
+      Its parts carry their own backing in the screen background's colours, so an agent drawn under the bar never shows through.
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-floating-bar { position: absolute; left: 0; right: 0; bottom: calc(var(--au-bar-center) - var(--au-bar-button) / 2); z-index: 10;
+  display: flex; align-items: center; gap: var(--au-bar-gap); height: var(--au-bar-button); padding: 0 var(--au-bar-right) 0 var(--au-bar-left); }
+.au-floating-bar--tabs { justify-content: center; padding: 0; }
+.au-bar-button, .au-bar-input, .au-bar-tabs {
+  border: 0; color: var(--au-fg-neutral);
+  background: linear-gradient(var(--au-bar-fill), var(--au-bar-fill)), color-mix(in srgb, var(--au-bg-bottom) 82%, var(--au-bg-mid));
+  box-shadow: inset 0 0 0 0.67px var(--au-bar-edge), 0 0 var(--au-bar-shadow-blur) color-mix(in srgb, var(--au-bar-shadow) var(--au-bar-shadow-alpha), transparent); }
+.au-bar-button { display: grid; place-items: center; flex: none; width: var(--au-bar-button); height: var(--au-bar-button); border-radius: 50%; }
+.au-bar-button .au-icon { width: 42%; height: 42%; }
+.au-bar-input { display: flex; align-items: center; flex: 1; min-width: 0; height: var(--au-bar-input); padding: 0 16px 0 calc(var(--au-bar-input) * .42); border-radius: var(--au-r-full);
+  color: var(--au-fg-placeholder); font-size: var(--au-t5); line-height: var(--au-t5-lh); white-space: nowrap; overflow: hidden; }
+.au-bar-tabs { display: flex; gap: var(--au-bar-tab-gap); padding: var(--au-bar-tab-pad); border-radius: var(--au-r-full);
+  background: linear-gradient(var(--au-bar-container), var(--au-bar-container)), color-mix(in srgb, var(--au-bg-bottom) 82%, var(--au-bg-mid)); }
+.au-bar-tabs .au-bar-button { width: var(--au-bar-tab); height: var(--au-bar-tab); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   9. The agent ball (a static likeness of Aura at the cue's 50%): the loading capsule at the top, the sphere, the full-screen glow
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-ball { position: relative; flex: none; width: var(--au-ball-d); height: var(--au-ball-d); border-radius: var(--au-r-full); opacity: var(--au-ball-alpha);
+  background: radial-gradient(72% 64% at 50% 42%, var(--au-agent-1) 0%, var(--au-agent-1) 30%, color-mix(in srgb, var(--au-agent-1) 50%, var(--au-agent-2)) 68%,
+              color-mix(in srgb, var(--au-agent-2) 65%, var(--au-agent-3)) 100%);
+  box-shadow: inset 0 2.5px 1.5px -0.5px #FFFFFF,                                                  /* the light rim along the top */
+              inset 0 0 0 1px color-mix(in srgb, var(--au-agent-3) 55%, white),                    /* the glass edge */
+              inset 0 -7px 12px -2px color-mix(in srgb, var(--au-agent-3) 60%, transparent),       /* the light gathered at the bottom */
+              -24px 12px 26px -4px color-mix(in srgb, var(--au-agent-3) 45%, white),               /* the light it bends to either side */
+              24px 12px 26px -4px color-mix(in srgb, var(--au-agent-3) 45%, white),
+              0 0 24px 6px color-mix(in srgb, var(--au-agent-2) 30%, transparent); }
+/* the loading capsule (the agent thinking): the same glass, twice as wide */
+.au-ball--capsule { width: calc(var(--au-ball-d) * var(--au-ball-stretch)); }
+/* centred at the top of the screen, as in the tool (52 dp from the top) */
+.au-ball--top { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); }
+/* full screen: a glow along the screen's edges (place it as the screen's last child) */
+.au-ball-glow { position: absolute; inset: 0; z-index: 5; border-radius: inherit; pointer-events: none; opacity: var(--au-ball-alpha);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--au-agent-3) 70%, white), inset 0 0 30px 12px color-mix(in srgb, var(--au-agent-2) 85%, transparent),
+              inset 0 0 70px 10px color-mix(in srgb, var(--au-agent-1) 35%, transparent); background: rgba(0, 0, 0, .06); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------
+   10. The app behind the agent: thinking (out of focus) · receded (when the agent's list takes the screen)
+   --------------------------------------------------------------------------------------------------------------------------- */
+.au-thinking { filter: blur(var(--au-thinking-blur)); opacity: var(--au-thinking-opacity); }
+.au-receded { filter: blur(var(--au-recede-blur)); opacity: var(--au-recede-opacity); }

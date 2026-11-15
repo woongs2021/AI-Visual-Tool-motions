@@ -20,6 +20,8 @@ SEED의 코드(CSS, React 컴포넌트)는 포함하지 않았습니다. 다음 
 - **에이전트 볼이 만드는 리스트**(`ROWS`, `ROW_LOOK`, `rowStyles`, `drawItems2D`)
 - **생성되는 Kotlin 코드**(`android/AiVisualCue.kt`)
   - `cueItems`, `CueComponents`, `CUE_ICON_PATHS`
+- **새 화면용 디자인 키트**(`design/agent-ui.css`)
+  - 같은 토큰 값과 컴포넌트 스펙을 CSS 변수와 클래스로 옮겼습니다(`--au-fg-*`, `--au-t1`~`t6`, `.au-app-bar`, `.au-chip`, `.au-badge`, `.au-button`, `.au-list-item` 등).
 
 ## 바꾼 점
 

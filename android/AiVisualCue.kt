@@ -137,6 +137,7 @@ data class AiVisualCueSpec(
     val listAfterSteps: Int = 8,
     val listStepSteps: Int = 12,
     val readMs: Float = 1200f,
+    val cardOutGapMs: Float = 80f,   // the card's rows (L2), written in as the card settles, dissolve over transitionMs, this far apart
     val messageBlur: Float = 4.6667f,
     val messageDrift: Float = 3.3333f,
     val sphereDiameter: Float = 74f,
@@ -177,7 +178,6 @@ data class AiVisualCueSpec(
     // 4.7 dp and fade it to 72%); it comes back into focus as the capsule spreads, from 0.1 × spreadMs to thinkOutTailMs after it
     val thinkInMs: Float = 1000f,
     val thinkOutTailMs: Float = 300f,
-    val componentStaggerMs: Float = 60f,
     val phaseTransition: Boolean = false,
     val scrim: Boolean = true,
     val easing: CubicBezierEasing = CubicBezierEasing(0.6f, 0f, 0.1f, 1f),
@@ -285,16 +285,7 @@ fun AiVisualCue(
             pose = pose.copy(hx = mixf(pose.hx, pose.hy, b))
             glowW = 28f * (1f + 0.15f * b)
         }
-        val comps = FloatArray(3)
-        if (to !== poses.capsule) {
-            for (i in 0 until 3) {
-                comps[i] = when {
-                    to === poses.full -> 1f
-                    tl >= 1f -> clamp01((since - 120f - i * spec.componentStaggerMs) / 260f)
-                    else -> 0f
-                }
-            }
-        }
+        val cardMs = if (to === poses.card && tl >= 1f) since else -1f   // the card's rows are written in from when it has settled
         val inTransition = spec.phaseTransition && tl < 1f
         val phase = if (inTransition) 2f * PI.toFloat() * spec.easing.transform(tl) else 0f
         val phaseAmt = if (inTransition) sin(PI.toFloat() * tl) else 0f
@@ -305,13 +296,12 @@ fun AiVisualCue(
         val leave = FastOutSlowInEasing.transform(clamp01(sinceChange / max(spec.fadeMs, 1f)))
         val sayMs: Float
         val sayGone: Float
-        val cardOut: Float
         when {
-            to === poses.full -> { sayMs = sinceChange; sayGone = 1f - o; cardOut = cardOutAt(spec, sinceChange) }
-            fromFull && leave < 1f -> { sayMs = 1e7f; sayGone = leave; cardOut = 1f }
-            else -> { sayMs = -1f; sayGone = 0f; cardOut = 0f }
+            to === poses.full -> { sayMs = sinceChange; sayGone = 1f - o }
+            fromFull && leave < 1f -> { sayMs = 1e7f; sayGone = leave }
+            else -> { sayMs = -1f; sayGone = 0f }
         }
-        val frame = CueFrame(pose, phase, phaseAmt, glowW, cueItems(spec, poses.card, comps, o, w, sayMs, cardOut, sayGone), o, push,
+        val frame = CueFrame(pose, phase, phaseAmt, glowW, cueItems(spec, poses.card, cardMs, o, w, sayMs, sayGone), o, push,
             spec.loadBlur * cap, mixf(2f, spec.rimFrom, cap), mixf(3f, spec.rimTo, cap), mixf(1f, spec.rimGain, cap), thinking.value,
             sayMs, sayGone)
         underlay((push * (spec.cardHeight + spec.insertGap)).dp, (1f - pose.fill) * o, thinking.value)
@@ -359,12 +349,18 @@ private fun letterAt(s: AiVisualCueSpec, k: Int, ms: Float): FloatArray {
 /** What the agent says, in writing steps: every letter and every space (a line break stands for one). */
 private fun messageSteps(s: AiVisualCueSpec): Int = s.messageLines.sumOf { it.replace("*", "").length } + max(s.messageLines.size - 1, 0)
 
-/** The card's rows dissolving as the cue spreads to full screen ([ms] after it started): 0 … 1, as the tool's old sentence dissolves. */
-private fun cardOutAt(s: AiVisualCueSpec, ms: Float): Float {
-    val r0 = 0.1f * s.spreadMs
-    val r1 = s.spreadMs + s.thinkOutTailMs
-    return easeInOut3(clamp01((ms - r0) / (0.5f * (r1 - r0))))
+/**
+ * The card's row [i] leaving, [ms] after the cue started spreading to full screen: alpha, blur (dp), lift (dp). With the rest of the screen —
+ * over transitionMs, as your content recedes, evenly (a sine ease-in-out) — fading, its blur growing to letterBlur, drifting up; each row
+ * cardOutGapMs after the one above.
+ */
+private fun cardRowOut(s: AiVisualCueSpec, i: Int, ms: Float): FloatArray {
+    val g = easeSine(clamp01((ms - i * s.cardOutGapMs) / max(s.transitionMs, 1f)))
+    return floatArrayOf(1f - g, g * s.letterBlur, -s.messageDrift * g)
 }
+
+/** The demo loop's L2: until the card's last row is written, and readMs longer — at least l2HoldMs. */
+private fun cardHoldMs(s: AiVisualCueSpec): Float = max(s.l2HoldMs, 2 * s.listStepSteps * s.letterStaggerMs + s.letterMs + s.readMs)
 
 /** The demo loop's L3: until the list's last row is written, and readMs longer — at least l3HoldMs (counted from the end of the spread). */
 private fun fullHoldMs(s: AiVisualCueSpec): Float =
@@ -382,11 +378,11 @@ private fun interpPose(a: CuePose, b: CuePose, t: Float, ease: CubicBezierEasing
 }
 
 /**
- * The rows. Before full screen ([sayMs] < 0) the 3 rows inside the settled card. At full screen the card's rows dissolve as it spreads
- * ([cardOut]) and the 5-row list is written in after what the agent says, row by row as its letters are, [AiVisualCueSpec.listGap] below it;
- * as the cue goes they dissolve with it ([gone]).
+ * The rows. Before full screen ([sayMs] < 0) the 3 rows inside the settled card, written in row by row as letters are, [cardMs] after it settled
+ * (< 0: not yet). At full screen the card's rows leave the same way reversed, row by row, and the 5-row list is written in after what the agent
+ * says, row by row, [AiVisualCueSpec.listGap] below it; as the cue goes they dissolve with it ([gone]).
  */
-private fun cueItems(s: AiVisualCueSpec, card: CuePose, comps: FloatArray, opacity: Float, screenW: Float, sayMs: Float, cardOut: Float, gone: Float): List<CueItem> {
+private fun cueItems(s: AiVisualCueSpec, card: CuePose, cardMs: Float, opacity: Float, screenW: Float, sayMs: Float, gone: Float): List<CueItem> {
     val pad = 12f       // in the card: from its edges, rows 8 dp apart
     val gap = 8f
     val rowH = (card.hy * 2f - pad * 2f - gap * 2f) / 3f
@@ -401,11 +397,15 @@ private fun cueItems(s: AiVisualCueSpec, card: CuePose, comps: FloatArray, opaci
         val cx = card.cx - card.hx + pad
         val cy = card.cy - card.hy + pad + i * (rowH + gap)
         if (sayMs < 0f) {
-            if (i < 3) CueItem(cx, cy + (1f - comps[i]) * 10f, rowW, rowH, comps[i] * opacity, 0f) else CueItem(fx, 0f, fW, fH, 0f, 1f)
+            if (i < 3 && cardMs >= 0f) {
+                val w = letterAt(s, i * s.listStepSteps, cardMs + s.writeInMs)   // (its first row inked as the card settles)
+                CueItem(cx, cy, rowW, rowH, w[0] * opacity, 0f, w[1], w[2])
+            } else CueItem(fx, 0f, fW, fH, 0f, 1f)
         } else {
             val w = letterAt(s, steps + s.listAfterSteps + i * s.listStepSteps, sayMs)
-            if (i < 3 && cardOut < 1f && w[0] <= 0.001f) {
-                CueItem(cx, cy, rowW, rowH, 1f - cardOut, 0f, 0.5f * s.messageBlur * cardOut, -s.messageDrift * cardOut)
+            val out = cardRowOut(s, i, sayMs)
+            if (i < 3 && w[0] <= 0.001f && out[0] > 0.001f) {
+                CueItem(cx, cy, rowW, rowH, out[0], 0f, out[1], out[2])   // the card's row, leaving
             } else {
                 CueItem(fx, fTop + i * (fH + fGap), fW, fH, w[0] * (1f - gone), 1f, w[1] + 0.5f * s.messageBlur * gone, w[2] - s.messageDrift * gone)
             }
@@ -431,8 +431,7 @@ private class CuePoses(s: AiVisualCueSpec, w: Float, h: Float) {
 
 private class CueSegment(
     val hold: Boolean, val a: Int, val b: Int, val dur: Float,
-    val loading: Boolean = false, val spread: Boolean = false, val comps: Boolean = false, val breathe: Boolean = false,
-    val vanish: Boolean = false, val keep: Boolean = false,
+    val loading: Boolean = false, val spread: Boolean = false, val breathe: Boolean = false, val vanish: Boolean = false,
 ) { var t0 = 0f }
 
 private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, private val h: Float) {
@@ -440,10 +439,10 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
     private val segs = listOf(
         CueSegment(true, 0, 0, s.breathFromMs + s.breathCount * s.breathMs + s.breathRestMs, loading = true),   // L1 loading: fade in, breathe
         CueSegment(false, 0, 1, s.spreadMs, spread = true),                       // it spreads into the card (L2), which slots in
-        CueSegment(true, 1, 1, s.l2HoldMs, comps = true),                         // L2 list rows
-        CueSegment(false, 1, 2, s.transitionMs, keep = true),                     // L3 spread to full screen
-        CueSegment(true, 2, 2, fullHoldMs(s), breathe = true, keep = true),       // L3: what the agent says and its list, written in
-        CueSegment(true, 2, 2, s.vanishMs, vanish = true, keep = true),           // fade out, then the screen settles
+        CueSegment(true, 1, 1, cardHoldMs(s)),                                    // L2: the card's rows, written in
+        CueSegment(false, 1, 2, s.transitionMs),                                  // L3 spread to full screen
+        CueSegment(true, 2, 2, fullHoldMs(s), breathe = true),                    // L3: what the agent says and its list, written in
+        CueSegment(true, 2, 2, s.vanishMs, vanish = true),                        // fade out, then the screen settles
     )
     val loopMs: Float
 
@@ -457,7 +456,6 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
         val t = ((tMs % loopMs) + loopMs) % loopMs
         val g = segs.lastOrNull { it.t0 <= t } ?: segs.first()
         val local = t - g.t0
-        val comps = FloatArray(3)
         var glowW = 28f
         var phase = 0f
         var phaseAmt = 0f
@@ -494,11 +492,8 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
             }
         } else if (g.hold) {
             if (g.vanish) opacity = 1f - FastOutSlowInEasing.transform(clamp01(local / max(s.fadeMs, 1f)))
-            if (g.comps) {
-                for (i in 0 until 3) comps[i] = clamp01((local - 120f - i * s.componentStaggerMs) / 260f)
-            }
             if (g.breathe || g.vanish) {
-                glowW = 28f * (1f + 0.15f * sin(2f * PI.toFloat() * (local + if (g.vanish) s.l3HoldMs else 0f) / 2000f))
+                glowW = 28f * (1f + 0.15f * sin(2f * PI.toFloat() * (local + if (g.vanish) segs[4].dur else 0f) / 2000f))
             }
             pose = poses[g.a]
         } else {
@@ -509,15 +504,14 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
                 phaseAmt = sin(PI.toFloat() * tl)
             }
         }
-        if (g.keep) comps.fill(1f)
         val push = clamp01((1f - pose.elev) / 0.7f) * opacity
-        // full screen: its clock (ms since the cue started spreading to it), the card's rows dissolving, and all of it dissolving as the cue fades
+        // the card's clock (ms since it settled), the full screen's (ms since the cue started spreading to it), and all of it dissolving as the cue fades
+        val cardMs = if (t >= segs[2].t0) t - segs[2].t0 else -1f
         val full = segs[3]
         val vanish = segs[5]
         val sayMs = if (t >= full.t0) t - full.t0 else -1f
-        val cardOut = if (sayMs >= 0f) cardOutAt(s, sayMs) else 0f
         val gone = if (t >= vanish.t0) FastOutSlowInEasing.transform(clamp01((t - vanish.t0) / max(s.fadeMs, 1f))) else 0f
-        return CueFrame(pose, phase, phaseAmt, glowW, cueItems(s, poses[1], comps, opacity, w, sayMs, cardOut, gone), opacity, push,
+        return CueFrame(pose, phase, phaseAmt, glowW, cueItems(s, poses[1], cardMs, opacity, w, sayMs, gone), opacity, push,
             blur, rimFrom, rimTo, rimGain, thinking(t), sayMs, gone)
     }
 

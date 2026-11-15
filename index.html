@@ -504,8 +504,8 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
       <h2>한 사이클</h2>
       <table class="spec-table"><tbody>
         <tr><td>L1 · 로딩</td><td>에이전트가 생각하는 동안 화면 상단에 아래쪽이 블러로 흐려지는 가로 캡슐이 페이드 인하고, 원형으로 줄었다가 다시 늘어나며 천천히 두 번 숨쉼(큐 적용 사례와 같은 5.8초). ② 앱 화면은 블러로 흐려지고 하단 플로팅 바는 그대로</td></tr>
-        <tr><td>L2 · 확산 · 끼어들기</td><td>캡슐이 블러를 걷어내며 넓게 퍼져(1.5초) 카드가 되어 앱 콘텐츠 사이에 끼어듦. 앱은 다시 선명해지고 아래 콘텐츠는 밀려 내려가며, 하단 플로팅 바에서 일정 버튼이 물방울처럼 갈라져 나옴. 카드 안에 리스트 3줄이 차례로 생성</td></tr>
-        <tr><td>L3 · 전체 화면 리스트</td><td>화면 전체로 확산되어 가장자리 글로우가 되고, 카드의 리스트는 흐려지며 사라지고, 상단에 에이전트가 하는 말이 Adaptive Screen처럼 한 글자씩 블러에서 써진 뒤 그 24dp 아래로 리스트 5줄이 한 줄씩 같은 방식으로 나타남. 앱은 흐려지며 뒤로 물러남. 하단 플로팅 바는 탭(일정 · 메모 · 대화)으로 정리</td></tr>
+        <tr><td>L2 · 확산 · 끼어들기</td><td>캡슐이 블러를 걷어내며 넓게 퍼져(1.5초) 카드가 되어 앱 콘텐츠 사이에 끼어듦. 앱은 다시 선명해지고 아래 콘텐츠는 밀려 내려가며, 하단 플로팅 바에서 일정 버튼이 물방울처럼 갈라져 나옴. 카드가 자리 잡는 순간부터 카드 안 리스트 3줄이 Adaptive Screen처럼 한 줄씩 블러에서 써짐</td></tr>
+        <tr><td>L3 · 전체 화면 리스트</td><td>화면 전체로 확산되어 가장자리 글로우가 되고, 카드의 리스트는 앱 화면과 함께 같은 속도로 블러에 흐려지며 부드럽게 사라지고, 상단에 에이전트가 하는 말이 Adaptive Screen처럼 한 글자씩 블러에서 써진 뒤 그 24dp 아래로 리스트 5줄이 한 줄씩 같은 방식으로 나타남. 앱은 흐려지며 뒤로 물러남. 하단 플로팅 바는 탭(일정 · 메모 · 대화)으로 정리</td></tr>
         <tr><td>사라짐</td><td>제자리에서 페이드 아웃, 에이전트의 말은 흐려지며 사라지고, 밀렸던 콘텐츠는 원래 위치로, 하단 플로팅 바는 처음 모양으로 돌아온 뒤 무한 반복</td></tr>
       </tbody></table>
     </div>
@@ -623,7 +623,7 @@ function factorySpec(){
     diameter:74, cardH:220, cardThick:8, cardCorner:28, margin:16,
     shadow:0.6, shadowBlur:18, shadowOff:14,
     speed:1, transMs:800, fadeMs:600, l2Hold:2600, l3Hold:2600,   // (L1 is the loading: ASL_PRE, its two breaths)
-    drift:0.6, stagger:60, transition:'morph', easing:'reference',
+    drift:0.6, transition:'morph', easing:'reference',   // (the rows' rhythm is the writing's: SAY_IN)
     listAccent:null, listSurface:null, shadowColor:null, bgColor:null,   // null = automatic
     screenBg:{ preset:'meadow', top:SCREEN_BGS.meadow.top, mid:SCREEN_BGS.meadow.mid, bottom:SCREEN_BGS.meadow.bottom },   // the Adaptive Screen's background (preset: null = edited)
     alpha:0.5, lang:'en', specRev:5,
@@ -651,6 +651,7 @@ function normalizeSpec(o, d){
     s.specRev = d.specRev;
     delete s.flatRatio; delete s.flatThick; delete s.flatHoldMs;
     delete s.l1Hold; delete s.settleMs; delete s.floatAmp; delete s.floatPeriod;   // (L1 became the loading capsule: it breathes instead of floating)
+    delete s.stagger;   // (the card's rows are written in at the writing's own rhythm)
     if(!Array.isArray(s.stops) || !s.stops.length || s.stops.length>3) s.stops = d.stops;
     if(!MATS[s.material]) s.material = d.material;
     if(!EASINGS[s.easing]) s.easing = d.easing;
@@ -767,13 +768,13 @@ function buildTimeline(s){
   const segs = [
     {hold:true,  a:0,     dur:ASL_PRE*1000,    lv:1, name:'로딩', loading:true},
     {hold:false, a:0,b:1, dur:aslSpreadMs(s),  lv:2, name:'확산·끼어들기', spread:true, bar:1},
-    {hold:true,  a:1,     dur:s.l2Hold,        lv:2, name:'컴포넌트 생성', comps:true},
-    {hold:false, a:1,b:2, dur:T,               lv:3, name:'전체 확산', keep:true, bar:2},
-    {hold:true,  a:2,     dur:l3HoldMs(s),     lv:3, name:'전체 화면 리스트', breathe:true, keep:true},
-    {hold:true,  a:2,     dur:vanishMs(s),     lv:3, name:'사라짐', vanish:true, keep:true, bar:0},
+    {hold:true,  a:1,     dur:l2HoldMs(s),     lv:2, name:'컴포넌트 생성'},
+    {hold:false, a:1,b:2, dur:T,               lv:3, name:'전체 확산', bar:2},
+    {hold:true,  a:2,     dur:l3HoldMs(s),     lv:3, name:'전체 화면 리스트', breathe:true},
+    {hold:true,  a:2,     dur:vanishMs(s),     lv:3, name:'사라짐', vanish:true, bar:0},
   ];
   let t=0; for(const g of segs){ g.t0=t; t+=g.dur; }
-  return { segs, len:Math.max(t,1), load:segs[0], spread:segs[1], full:segs[3], vanish:segs[5] };
+  return { segs, len:Math.max(t,1), load:segs[0], spread:segs[1], card:segs[2], full:segs[3], vanish:segs[5] };
 }
 function interpPose(A,B,t,ez){
   const e=ez(clamp01(t)), ex=ez(clamp01(t*1.15)), ey=ez(clamp01((t-0.12)/0.88)), es=ez(clamp01((t-0.15)/0.85));
@@ -820,9 +821,11 @@ const CUE_SAY = {
 // into place, inked within its first `charInk` — so that a soft blurred tail trails the writing point (a progressive blur).
 // At full screen ② writes what its agent says the same way — slowed as the Adaptive Screen is (LOAD_SLOW), from when the cue starts spreading —
 // and then its list (SAY_IN): each row written as one more letter, `gap` steps after the sentence's last and `step` steps apart; `read`: how
-// long (ms) the finished screen holds at least before the cue goes.
+// long (ms) the finished screen holds at least before the cue goes. The card's rows (L2) are written the same way, row by row, from when the
+// card has settled; when the cue spreads to full screen they dissolve with the rest of the screen — over 전환 시간, as the app recedes, evenly
+// (a sine ease-in-out) — blurring as they fade, drifting up, each `outGap` ms after the one above (cardRowOut).
 const ASL_WRITE = { textIn:0.42, charStagger:0.011, charDur:1.15, charInk:0.30, charBlur:18, charRise:10 };
-const SAY_IN = { gap:8, step:12, read:1200 };
+const SAY_IN = { gap:8, step:12, read:1200, outGap:80 };
 const saySteps = (lang = S.lang) => (CUE_SAY[lang] || CUE_SAY.en).replace(/\*/g, '').length;   // its writing steps: its letters and spaces
 const rowStep = (i, lang) => saySteps(lang) + SAY_IN.gap + i*SAY_IN.step;                    // the list's row i, in the same writing
 // a letter (or a row) at writing step k, u s (of the original animation) into the writing: its alpha, blur (dp) and lift (dp) — the Adaptive
@@ -831,16 +834,26 @@ function writeAt(k, u){
   const W = ASL_WRITE, wp = clamp01((u - W.textIn - k*W.charStagger)/W.charDur), b = easeOut3(wp);
   return { a:easeSine(clamp01(wp/W.charInk)), blur:(1 - b)*W.charBlur/3, dy:(1 - b)*W.charRise/3 };
 }
+// the card's row i, ms after the cue started spreading to full screen: its alpha, blur (dp) and lift (dp) as it leaves — over 전환 시간, as the
+// app behind recedes, so that the whole screen moves together; evenly (a sine ease-in-out, the gentlest: no sudden drop): fading, its blur growing to the writing's,
+// drifting up; each row SAY_IN.outGap ms after the one above
+function cardRowOut(i, ms){
+  const g = easeSine(clamp01((ms - i*SAY_IN.outGap)/Math.max(S.transMs, 1)));
+  return { a:1 - g, blur:g*ASL_WRITE.charBlur/3, dy:-SAY.drift*g };
+}
+// L2 holds until the card's last row is written, and SAY_IN.read longer (at least 'L2 유지')
+const l2HoldMs = s => Math.max(s.l2Hold, Math.round((2*SAY_IN.step*ASL_WRITE.charStagger + ASL_WRITE.charDur)*LOAD_SLOW*1000) + SAY_IN.read);
 // L3 holds until its last row is written, and SAY_IN.read longer (at least 'L3 유지')
 const l3HoldMs = s => Math.max(s.l3Hold, Math.round((ASL_WRITE.textIn + rowStep(4, s.lang)*ASL_WRITE.charStagger + ASL_WRITE.charDur)*LOAD_SLOW*1000) - s.transMs + SAY_IN.read);
 // The full screen's clock at t ms of the loop (null before the cue starts spreading to full screen): u — s of the original animation since it
-// started (the writing's clock); out — the card's rows dissolving as it spreads, as the cue example's old sentence does; gone — all of it
-// dissolving as the cue fades out
+// started (the writing's clock, and the card's rows' leaving); gone — all of it dissolving as the cue fades out
 function sayClock(t){
   const f = TL.full, van = TL.vanish; if(t < f.t0) return null;
-  const e = aslSpreadMs()/1000, v = (t - f.t0)/1000, r0 = 0.1*e, r1 = e + 0.3;
-  return { u:v/LOAD_SLOW, out:easeInOut3(clamp01((v - r0)/(0.5*(r1 - r0)))), gone:t >= van.t0 ? FADE(clamp01((t - van.t0)/Math.max(S.fadeMs, 1))) : 0 };
+  return { u:(t - f.t0)/1000/LOAD_SLOW, gone:t >= van.t0 ? FADE(clamp01((t - van.t0)/Math.max(S.fadeMs, 1))) : 0 };
 }
+// The card's writing clock (s of the original animation, as writeAt counts it; null before the card has settled): its first row is inked as
+// the card settles
+const cardClock = t => t >= TL.card.t0 ? (t - TL.card.t0)/1000/LOAD_SLOW + ASL_WRITE.textIn : null;
 // The agent ball's list, as SEED list items (mirrored in the generated Kotlin: cueItems / CueComponents, from these same values).
 // ROWS — where: 3 rows inside its settled card (L2); at full screen (L3) a 5-row list, written in below what the agent says (SAY.listGap
 // under it: rowsTop), `fx` in from the screen's edges (SEED's global gutter), `fH` tall and `fGap` apart (SEED's component spacing) — never
@@ -859,16 +872,20 @@ const GLASS = { veil:0.6, blur:16, edge:0.55, wash:[0.2, 0.06] };
 // they run through the whole gradient, top to bottom
 const ROW_WASH = [0, 0.2, 0.4, 0.6, 0.8];
 // List rows (x, y, w, h dp; a: alpha; sf: 0 card style … 1 full-screen style; blur, dy: dp). Before full screen, the 3 rows inside the settled
-// card (L2). At full screen (l3: sayClock) the card's rows dissolve as it spreads, and the 5-row list is written in after what the agent says,
-// row by row, each as one of its letters (writeAt) — SAY.listGap below it; as the cue fades out it dissolves with it.
-function layoutItems(card, comps, opacity, W, l3){
+// card (L2), written in row by row as the Adaptive Screen writes (l2: cardClock). At full screen (l3: sayClock) the card's rows leave the same
+// way they came, row by row, dissolving evenly (cardRowOut), and the 5-row list is written in after what the agent says, row by row, each as one of its letters
+// (writeAt) — SAY.listGap below it; as the cue fades out it dissolves with it.
+function layoutItems(card, opacity, W, l2, l3){
   const { pad, gap, fx, fH, fGap } = ROWS, rowH = (card.hy*2 - pad*2 - gap*2)/3, rowW = card.hx*2 - pad*2, fW = W - fx*2, B = CUE_FOG.blur/3;
   const out = [];
   for(let i=0;i<5;i++){
     const inCard = i < 3 ? { x:card.cx - card.hx + pad, y:card.cy - card.hy + pad + i*(rowH + gap), w:rowW, h:rowH, sf:0 } : null;
-    if(!l3){ out.push(inCard ? { ...inCard, y:inCard.y + (1 - comps[i])*10, a:comps[i]*opacity, blur:0, dy:0 } : { x:fx, y:0, w:fW, h:fH, sf:1, a:0, blur:0, dy:0 }); continue; }
-    const w = writeAt(rowStep(i), l3.u);
-    if(inCard && l3.out < 1 && w.a <= 0.001) out.push({ ...inCard, a:1 - l3.out, blur:0.5*B*l3.out, dy:-SAY.drift*l3.out });   // the card's row, dissolving
+    if(!l3){
+      const w = inCard && l2 !== null ? writeAt(i*SAY_IN.step, l2) : null;   // the card's row, written in
+      out.push(w ? { ...inCard, a:w.a*opacity, blur:w.blur, dy:w.dy } : { x:fx, y:0, w:fW, h:fH, sf:1, a:0, blur:0, dy:0 }); continue;
+    }
+    const w = writeAt(rowStep(i), l3.u), o = inCard ? cardRowOut(i, l3.u*LOAD_SLOW*1000) : null;
+    if(o && w.a <= 0.001 && o.a > 0.001) out.push({ ...inCard, ...o });   // the card's row, leaving
     else out.push({ x:fx, y:rowsTop() + i*(fH + fGap), w:fW, h:fH, sf:1, a:w.a*(1 - l3.gone), blur:w.blur + 0.5*B*l3.gone, dy:w.dy - SAY.drift*l3.gone });
   }
   return out;
@@ -876,7 +893,7 @@ function layoutItems(card, comps, opacity, W, l3){
 function sampleFrame(tMs, P){
   const L = TL.len, t = ((tMs % L) + L) % L;
   let g = TL.segs[0]; for(const s of TL.segs) if(s.t0<=t) g=s;
-  const local = t - g.t0, comps=[0,0,0];
+  const local = t - g.t0;
   let glowW=28, phase=0, phaseAmt=0, opacity=1, pose, blur=0, rimFrom=2, rimTo=3, rimGain=1;   // (no blur, no limit on the rim light)
   if(g.loading){   // L1, the agent thinking: the capsule fades in and breathes (the cue example's loading)
     const c = loadingCue(local, g.dur, P[0]);
@@ -886,18 +903,16 @@ function sampleFrame(tMs, P){
   } else if(g.hold){
     pose = {...P[g.a]};
     if(g.vanish) opacity = 1 - FADE(clamp01(local/Math.max(S.fadeMs,1)));   // (it fades over 나타남·사라짐; the rest of the segment the screen settles)
-    if(g.comps) for(let i=0;i<3;i++) comps[i] = clamp01((local-120-i*S.stagger)/260);
     if(g.breathe || g.vanish) glowW = 28*(1+0.15*Math.sin(2*Math.PI*(local+(g.vanish?TL.segs[4].dur:0))/2000));   // (on through the vanish)
   } else {
     const tl = clamp01(local/g.dur);
     pose = interpPose(P[g.a], P[g.b], tl, EASE);
     if(S.transition==='phase'){ phase = 2*Math.PI*EASE(tl); phaseAmt = Math.sin(Math.PI*tl); }
   }
-  if(g.keep) comps.fill(1);
   const push = clamp01((1-pose.elev)/0.7) * opacity;   // how far in-app content is pushed down for the inserted card
   const full = (1-pose.fill) * opacity;                  // how far the screen has become the full-screen list
   const say = sayClock(t);   // (the full screen's writing)
-  return { pose, level:g.lv, seg:g, items:layoutItems(P[1], comps, opacity, SCREEN.w, say), glowW, phase, phaseAmt, opacity, push, full,
+  return { pose, level:g.lv, seg:g, items:layoutItems(P[1], opacity, SCREEN.w, cardClock(t), say), glowW, phase, phaseAmt, opacity, push, full,
            blur, rimFrom, rimTo, rimGain, fog:appFog(t), say, t };
 }
 let EASE, POSES_A, POSES_B, TL;
@@ -2555,7 +2570,7 @@ const ctrlSets = [];
 function addSet(host, defs){ defs.forEach(([k,label,unit,min,max,step])=>ctrlSets.push(rangeCtrl($(host),label,unit,min,max,step,()=>S[k],v=>{S[k]=v;changed({motion:true, thumbs:k==='diameter'});},()=>defaultSpec()[k]))); }
 addSet('#sizeCtrls', [['diameter','구 지름','dp',64,220,1],['cardH','안착 높이','dp',120,360,1],['cardThick','안착 두께','dp',2,40,1],['cardCorner','안착 모서리','dp',0,48,1],['margin','좌우 여백','dp',0,40,1]]);
 addSet('#loadCtrls', [['loadStretch','가로 길이','×',1,3,0.05],['loadBlur','하단 프로그레시브 블러','dp',0,120,1],['loadBreath','숨쉬기 폭','%',0,100,1]]);
-addSet('#motionCtrls', [['speed','재생 속도','×',0.25,2,0.05],['transMs','전환 시간','ms',300,1600,10],['l2Hold','L2 유지','ms',500,6000,50],['l3Hold','L3 유지','ms',500,6000,50],['fadeMs','나타남·사라짐','ms',150,2000,10],['drift','하이라이트 흔들림','',0,1,0.01],['stagger','컴포넌트 간격','ms',0,200,5]]);   // (L1 is the loading: its length is its two breaths, 로딩 형태)
+addSet('#motionCtrls', [['speed','재생 속도','×',0.25,2,0.05],['transMs','전환 시간','ms',300,1600,10],['l2Hold','L2 유지','ms',500,6000,50],['l3Hold','L3 유지','ms',500,6000,50],['fadeMs','나타남·사라짐','ms',150,2000,10],['drift','하이라이트 흔들림','',0,1,0.01]]);   // (L1 is the loading: its length is its two breaths, 로딩 형태)
 addSet('#shadowCtrls', [['shadow','그림자 강도','',0,1,0.01],['shadowBlur','그림자 번짐','dp',2,40,1],['shadowOff','그림자 거리','dp',0,32,1]]);
 const alphaCtrl = rangeCtrl($('#alphaCtrl'),'투명도','%',0.05,1,0.01,()=>S.alpha,v=>{S.alpha=v;changed({thumbs:true});},()=>defaultSpec().alpha, v=>Math.round(v*100));
 ctrlSets.push(alphaCtrl);
@@ -2567,7 +2582,7 @@ const SECTION_KEYS = {
   mat:['material','matParams','alpha'],
   size:['diameter','cardH','cardThick','cardCorner','margin'],
   load:['loadStretch','loadBlur','loadBreath'],
-  motion:['speed','transMs','fadeMs','l2Hold','l3Hold','drift','stagger','transition','easing'],
+  motion:['speed','transMs','fadeMs','l2Hold','l3Hold','drift','transition','easing'],
   shadow:['shadow','shadowBlur','shadowOff'],
 };
 const SECTION_NAMES = { color:'컬러', mat:'물성', size:'크기', load:'로딩 형태', motion:'모션', shadow:'그림자' };
@@ -2979,6 +2994,7 @@ ${sayLinesMarkup().map(l=>`        "${l.replace(/[\\"$]/g,'\\$&').replace(/\u00a
     val listAfterSteps: Int = ${SAY_IN.gap},
     val listStepSteps: Int = ${SAY_IN.step},
     val readMs: Float = ${dur(SAY_IN.read)},
+    val cardOutGapMs: Float = ${dur(SAY_IN.outGap)},   // the card's rows (L2), written in as the card settles, dissolve over transitionMs, this far apart
     val messageBlur: Float = ${kf(CUE_FOG.blur/3)},
     val messageDrift: Float = ${kf(SAY.drift)},
     val sphereDiameter: Float = ${kf(S.diameter)},
@@ -3019,7 +3035,6 @@ ${sayLinesMarkup().map(l=>`        "${l.replace(/[\\"$]/g,'\\$&').replace(/\u00a
     // ${(CUE_FOG.blur/3).toFixed(1)} dp and fade it to ${Math.round(CUE_FOG.alpha*100)}%); it comes back into focus as the capsule spreads, from 0.1 × spreadMs to thinkOutTailMs after it
     val thinkInMs: Float = ${dur(CUE_FOG.in*1000)},
     val thinkOutTailMs: Float = ${dur(300)},
-    val componentStaggerMs: Float = ${dur(S.stagger)},
     val phaseTransition: Boolean = ${S.transition==='phase'},
     val scrim: Boolean = true,
     val easing: CubicBezierEasing = CubicBezierEasing(${ez.map(kf).join(', ')}),
@@ -3127,16 +3142,7 @@ fun AiVisualCue(
             pose = pose.copy(hx = mixf(pose.hx, pose.hy, b))
             glowW = 28f * (1f + 0.15f * b)
         }
-        val comps = FloatArray(3)
-        if (to !== poses.capsule) {
-            for (i in 0 until 3) {
-                comps[i] = when {
-                    to === poses.full -> 1f
-                    tl >= 1f -> clamp01((since - 120f - i * spec.componentStaggerMs) / 260f)
-                    else -> 0f
-                }
-            }
-        }
+        val cardMs = if (to === poses.card && tl >= 1f) since else -1f   // the card's rows are written in from when it has settled
         val inTransition = spec.phaseTransition && tl < 1f
         val phase = if (inTransition) 2f * PI.toFloat() * spec.easing.transform(tl) else 0f
         val phaseAmt = if (inTransition) sin(PI.toFloat() * tl) else 0f
@@ -3147,13 +3153,12 @@ fun AiVisualCue(
         val leave = FastOutSlowInEasing.transform(clamp01(sinceChange / max(spec.fadeMs, 1f)))
         val sayMs: Float
         val sayGone: Float
-        val cardOut: Float
         when {
-            to === poses.full -> { sayMs = sinceChange; sayGone = 1f - o; cardOut = cardOutAt(spec, sinceChange) }
-            fromFull && leave < 1f -> { sayMs = 1e7f; sayGone = leave; cardOut = 1f }
-            else -> { sayMs = -1f; sayGone = 0f; cardOut = 0f }
+            to === poses.full -> { sayMs = sinceChange; sayGone = 1f - o }
+            fromFull && leave < 1f -> { sayMs = 1e7f; sayGone = leave }
+            else -> { sayMs = -1f; sayGone = 0f }
         }
-        val frame = CueFrame(pose, phase, phaseAmt, glowW, cueItems(spec, poses.card, comps, o, w, sayMs, cardOut, sayGone), o, push,
+        val frame = CueFrame(pose, phase, phaseAmt, glowW, cueItems(spec, poses.card, cardMs, o, w, sayMs, sayGone), o, push,
             spec.loadBlur * cap, mixf(2f, spec.rimFrom, cap), mixf(3f, spec.rimTo, cap), mixf(1f, spec.rimGain, cap), thinking.value,
             sayMs, sayGone)
         underlay((push * (spec.cardHeight + spec.insertGap)).dp, (1f - pose.fill) * o, thinking.value)
@@ -3201,12 +3206,18 @@ private fun letterAt(s: AiVisualCueSpec, k: Int, ms: Float): FloatArray {
 /** What the agent says, in writing steps: every letter and every space (a line break stands for one). */
 private fun messageSteps(s: AiVisualCueSpec): Int = s.messageLines.sumOf { it.replace("*", "").length } + max(s.messageLines.size - 1, 0)
 
-/** The card's rows dissolving as the cue spreads to full screen ([ms] after it started): 0 … 1, as the tool's old sentence dissolves. */
-private fun cardOutAt(s: AiVisualCueSpec, ms: Float): Float {
-    val r0 = 0.1f * s.spreadMs
-    val r1 = s.spreadMs + s.thinkOutTailMs
-    return easeInOut3(clamp01((ms - r0) / (0.5f * (r1 - r0))))
+/**
+ * The card's row [i] leaving, [ms] after the cue started spreading to full screen: alpha, blur (dp), lift (dp). With the rest of the screen —
+ * over transitionMs, as your content recedes, evenly (a sine ease-in-out) — fading, its blur growing to letterBlur, drifting up; each row
+ * cardOutGapMs after the one above.
+ */
+private fun cardRowOut(s: AiVisualCueSpec, i: Int, ms: Float): FloatArray {
+    val g = easeSine(clamp01((ms - i * s.cardOutGapMs) / max(s.transitionMs, 1f)))
+    return floatArrayOf(1f - g, g * s.letterBlur, -s.messageDrift * g)
 }
+
+/** The demo loop's L2: until the card's last row is written, and readMs longer — at least l2HoldMs. */
+private fun cardHoldMs(s: AiVisualCueSpec): Float = max(s.l2HoldMs, 2 * s.listStepSteps * s.letterStaggerMs + s.letterMs + s.readMs)
 
 /** The demo loop's L3: until the list's last row is written, and readMs longer — at least l3HoldMs (counted from the end of the spread). */
 private fun fullHoldMs(s: AiVisualCueSpec): Float =
@@ -3224,11 +3235,11 @@ private fun interpPose(a: CuePose, b: CuePose, t: Float, ease: CubicBezierEasing
 }
 
 /**
- * The rows. Before full screen ([sayMs] < 0) the 3 rows inside the settled card. At full screen the card's rows dissolve as it spreads
- * ([cardOut]) and the 5-row list is written in after what the agent says, row by row as its letters are, [AiVisualCueSpec.listGap] below it;
- * as the cue goes they dissolve with it ([gone]).
+ * The rows. Before full screen ([sayMs] < 0) the 3 rows inside the settled card, written in row by row as letters are, [cardMs] after it settled
+ * (< 0: not yet). At full screen the card's rows leave the same way reversed, row by row, and the 5-row list is written in after what the agent
+ * says, row by row, [AiVisualCueSpec.listGap] below it; as the cue goes they dissolve with it ([gone]).
  */
-private fun cueItems(s: AiVisualCueSpec, card: CuePose, comps: FloatArray, opacity: Float, screenW: Float, sayMs: Float, cardOut: Float, gone: Float): List<CueItem> {
+private fun cueItems(s: AiVisualCueSpec, card: CuePose, cardMs: Float, opacity: Float, screenW: Float, sayMs: Float, gone: Float): List<CueItem> {
     val pad = ${kf(ROWS.pad)}       // in the card: from its edges, rows ${ROWS.gap} dp apart
     val gap = ${kf(ROWS.gap)}
     val rowH = (card.hy * 2f - pad * 2f - gap * 2f) / 3f
@@ -3243,11 +3254,15 @@ private fun cueItems(s: AiVisualCueSpec, card: CuePose, comps: FloatArray, opaci
         val cx = card.cx - card.hx + pad
         val cy = card.cy - card.hy + pad + i * (rowH + gap)
         if (sayMs < 0f) {
-            if (i < 3) CueItem(cx, cy + (1f - comps[i]) * 10f, rowW, rowH, comps[i] * opacity, 0f) else CueItem(fx, 0f, fW, fH, 0f, 1f)
+            if (i < 3 && cardMs >= 0f) {
+                val w = letterAt(s, i * s.listStepSteps, cardMs + s.writeInMs)   // (its first row inked as the card settles)
+                CueItem(cx, cy, rowW, rowH, w[0] * opacity, 0f, w[1], w[2])
+            } else CueItem(fx, 0f, fW, fH, 0f, 1f)
         } else {
             val w = letterAt(s, steps + s.listAfterSteps + i * s.listStepSteps, sayMs)
-            if (i < 3 && cardOut < 1f && w[0] <= 0.001f) {
-                CueItem(cx, cy, rowW, rowH, 1f - cardOut, 0f, 0.5f * s.messageBlur * cardOut, -s.messageDrift * cardOut)
+            val out = cardRowOut(s, i, sayMs)
+            if (i < 3 && w[0] <= 0.001f && out[0] > 0.001f) {
+                CueItem(cx, cy, rowW, rowH, out[0], 0f, out[1], out[2])   // the card's row, leaving
             } else {
                 CueItem(fx, fTop + i * (fH + fGap), fW, fH, w[0] * (1f - gone), 1f, w[1] + 0.5f * s.messageBlur * gone, w[2] - s.messageDrift * gone)
             }
@@ -3273,8 +3288,7 @@ private class CuePoses(s: AiVisualCueSpec, w: Float, h: Float) {
 
 private class CueSegment(
     val hold: Boolean, val a: Int, val b: Int, val dur: Float,
-    val loading: Boolean = false, val spread: Boolean = false, val comps: Boolean = false, val breathe: Boolean = false,
-    val vanish: Boolean = false, val keep: Boolean = false,
+    val loading: Boolean = false, val spread: Boolean = false, val breathe: Boolean = false, val vanish: Boolean = false,
 ) { var t0 = 0f }
 
 private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, private val h: Float) {
@@ -3282,10 +3296,10 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
     private val segs = listOf(
         CueSegment(true, 0, 0, s.breathFromMs + s.breathCount * s.breathMs + s.breathRestMs, loading = true),   // L1 loading: fade in, breathe
         CueSegment(false, 0, 1, s.spreadMs, spread = true),                       // it spreads into the card (L2), which slots in
-        CueSegment(true, 1, 1, s.l2HoldMs, comps = true),                         // L2 list rows
-        CueSegment(false, 1, 2, s.transitionMs, keep = true),                     // L3 spread to full screen
-        CueSegment(true, 2, 2, fullHoldMs(s), breathe = true, keep = true),       // L3: what the agent says and its list, written in
-        CueSegment(true, 2, 2, s.vanishMs, vanish = true, keep = true),           // fade out, then the screen settles
+        CueSegment(true, 1, 1, cardHoldMs(s)),                                    // L2: the card's rows, written in
+        CueSegment(false, 1, 2, s.transitionMs),                                  // L3 spread to full screen
+        CueSegment(true, 2, 2, fullHoldMs(s), breathe = true),                    // L3: what the agent says and its list, written in
+        CueSegment(true, 2, 2, s.vanishMs, vanish = true),                        // fade out, then the screen settles
     )
     val loopMs: Float
 
@@ -3299,7 +3313,6 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
         val t = ((tMs % loopMs) + loopMs) % loopMs
         val g = segs.lastOrNull { it.t0 <= t } ?: segs.first()
         val local = t - g.t0
-        val comps = FloatArray(3)
         var glowW = 28f
         var phase = 0f
         var phaseAmt = 0f
@@ -3336,11 +3349,8 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
             }
         } else if (g.hold) {
             if (g.vanish) opacity = 1f - FastOutSlowInEasing.transform(clamp01(local / max(s.fadeMs, 1f)))
-            if (g.comps) {
-                for (i in 0 until 3) comps[i] = clamp01((local - 120f - i * s.componentStaggerMs) / 260f)
-            }
             if (g.breathe || g.vanish) {
-                glowW = 28f * (1f + 0.15f * sin(2f * PI.toFloat() * (local + if (g.vanish) s.l3HoldMs else 0f) / 2000f))
+                glowW = 28f * (1f + 0.15f * sin(2f * PI.toFloat() * (local + if (g.vanish) segs[4].dur else 0f) / 2000f))
             }
             pose = poses[g.a]
         } else {
@@ -3351,15 +3361,14 @@ private class CueTimeline(private val s: AiVisualCueSpec, private val w: Float, 
                 phaseAmt = sin(PI.toFloat() * tl)
             }
         }
-        if (g.keep) comps.fill(1f)
         val push = clamp01((1f - pose.elev) / 0.7f) * opacity
-        // full screen: its clock (ms since the cue started spreading to it), the card's rows dissolving, and all of it dissolving as the cue fades
+        // the card's clock (ms since it settled), the full screen's (ms since the cue started spreading to it), and all of it dissolving as the cue fades
+        val cardMs = if (t >= segs[2].t0) t - segs[2].t0 else -1f
         val full = segs[3]
         val vanish = segs[5]
         val sayMs = if (t >= full.t0) t - full.t0 else -1f
-        val cardOut = if (sayMs >= 0f) cardOutAt(s, sayMs) else 0f
         val gone = if (t >= vanish.t0) FastOutSlowInEasing.transform(clamp01((t - vanish.t0) / max(s.fadeMs, 1f))) else 0f
-        return CueFrame(pose, phase, phaseAmt, glowW, cueItems(s, poses[1], comps, opacity, w, sayMs, cardOut, gone), opacity, push,
+        return CueFrame(pose, phase, phaseAmt, glowW, cueItems(s, poses[1], cardMs, opacity, w, sayMs, gone), opacity, push,
             blur, rimFrom, rimTo, rimGain, thinking(t), sayMs, gone)
     }
 
