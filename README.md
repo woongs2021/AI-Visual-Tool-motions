@@ -71,7 +71,8 @@ AI 에이전트가 활성화될 때 화면에 나타나는 **비주얼 큐(AI Vi
 │  ├─ CLAUDE_GUIDE.md         #   Claude로 변형을 만드는 가이드
 │  └─ fonts/                  #   Urbanist (OFL)
 ├─ design/
-│  └─ agent-ui.css           # 새 화면용 디자인 키트 (CSS 변수 · 클래스, 애니메이션 값 없음)
+│  ├─ agent-ui.css           # 새 화면용 디자인 키트 (CSS 변수 · 클래스, 애니메이션 값 없음)
+│  └─ progressive-blur.js    # 프로그레시브 블러 (글자 · 콘텐츠가 블러에서 써지는 애니메이션)
 ├─ docs/
 │  ├─ development-plan.md     # Phase별 개발 계획서
 │  └─ prompt.md               # 최초 요구사항 프롬프트
@@ -137,7 +138,7 @@ AiVisualCueDemoLoop(
 
 지금 시안의 디자인을 CSS 파일 하나에 담았습니다. 화면 배경, 유리 카드, SEED 앱 UI, 에이전트 볼의 카드 · 리스트 · 말, 플로팅 바가 들어 있습니다. 새 화면을 HTML로 만들 때 클래스를 붙이면 지금 시안과 같은 모습으로 나옵니다.
 
-**애니메이션 값(시간, 이징, 키프레임)은 넣지 않았습니다.** 움직임은 툴에서 정하고 Kotlin 코드로 가져갑니다.
+**애니메이션 값(시간, 이징, 키프레임)은 넣지 않았습니다.** 움직임은 툴에서 정하고 Kotlin 코드로 가져갑니다. 글자와 콘텐츠가 나타나는 프로그레시브 블러만 [`design/progressive-blur.js`](#애니메이션-프로그레시브-블러-designprogressive-blurjs)에 따로 있습니다.
 
 ### 1. 연결
 
@@ -233,6 +234,85 @@ AiVisualCueDemoLoop(
 - **글꼴**: 앱 UI는 시스템 글꼴, 에이전트의 말은 Samsung Sharp Sans입니다. Samsung Sharp Sans가 없는 컴퓨터에서는 Urbanist와 IBM Plex Sans KR로 나옵니다. 둘 다 Google Fonts에서 불러옵니다.
 - 앱 UI는 SEED Design의 값을 따릅니다. 라이선스는 [`licenses/seed-design/`](licenses/seed-design/USAGE.md)에 있습니다.
 - 이 파일은 지금 툴(`index.html`)의 값을 옮긴 것입니다. 툴에서 디자인 값을 바꾸면 이 파일은 자동으로 바뀌지 않으니 같이 맞춰 주세요.
+
+## 애니메이션: 프로그레시브 블러 (`design/progressive-blur.js`)
+
+툴의 프로그레시브 블러 두 가지를 JS 파일 하나로 옮겼습니다. 다른 프로젝트에서 그대로 쓸 수 있고, 의존성은 없습니다. 시간, 블러, 이징은 툴과 같은 값입니다.
+
+| 효과 | 함수 | 툴에서 |
+|---|---|---|
+| 1. 상단 글자가 한 글자씩 블러에서 써짐 | `writeText(el)` | Adaptive Screen 상단 문장 |
+| 2. 에이전트의 말, 그다음 리스트가 차례로 블러에서 나타남 | `writeContent({ text, rows })` | 전체 비교의 전체 화면(L3)과 카드(L2) |
+
+### 연결
+
+```html
+<!-- 저장소 안에서 -->
+<script src="design/progressive-blur.js"></script>
+<!-- 다른 곳에서 (배포본) -->
+<script src="https://woongs2021.github.io/AI-Visual-Tool-motions/design/progressive-blur.js"></script>
+```
+
+번들러에서는 `import './progressive-blur.js'`로 불러온 뒤 `window.ProgressiveBlur`를 씁니다. CommonJS에서는 `require`로 불러옵니다.
+
+### 1. Adaptive Screen 상단 글자
+
+```html
+<p id="headline">맥락에 따라 <strong>스스로 재구성되고</strong> 미래 앱 화면의 비전입니다.</p>
+<script>
+  ProgressiveBlur.writeText('#headline');
+</script>
+```
+
+읽는 순서대로 한 글자씩 블러에서 나타나며 떠올라 자리를 잡습니다. 글자는 먼저 진해지고 블러는 천천히 풀립니다. 그래서 글자를 쓰는 자리 뒤로 흐린 꼬리가 따라옵니다. `<strong>` 같은 태그는 그대로 남습니다.
+
+### 2. 전체 비교 콘텐츠
+
+```js
+// 전체 화면: 에이전트의 말을 다 쓴 뒤 리스트가 한 줄씩
+ProgressiveBlur.writeContent({ text: '.au-say', rows: '.au-agent-list .au-agent-row' });
+
+// 카드: 카드가 자리 잡는 순간부터 행이 한 줄씩
+ProgressiveBlur.writeContent({ rows: '.au-agent-card .au-agent-row' });
+```
+
+리스트의 행은 하나가 글자 한 개처럼 써집니다. 첫 행은 문장이 끝나고 8글자 뒤에 시작하고, 다음 행부터는 12글자 간격입니다.
+
+### 제어
+
+두 함수 모두 컨트롤러를 돌려줍니다.
+
+```js
+const anim = ProgressiveBlur.writeText('#headline', { autoplay: false });
+anim.play();   anim.pause();   anim.seek(1200);   anim.finish();   anim.restart();
+anim.duration;          // 마지막 글자(행)가 선명해지는 시간(ms)
+await anim.finished;    // 끝날 때까지 기다리기
+```
+
+### 옵션 (기본값 = 툴의 값)
+
+| 옵션 | 기본값 | 의미 |
+|---|---|---|
+| `delay` | 630ms (글자가 있을 때) · 0 (행만) | 첫 글자가 시작하기까지 |
+| `stagger` | 16.5ms | 다음 글자까지의 간격. 공백도 한 글자로 셉니다 |
+| `duration` | 1725ms | 글자 하나가 블러에서 선명해지기까지 |
+| `ink` | 0.3 | `duration` 중 이 비율 안에 완전히 불투명해짐 |
+| `blur` | 6px | 시작할 때 블러 |
+| `rise` | 3.33px | 아래에서 떠오르는 거리 |
+| `gap`, `step` | 8, 12 | 리스트 첫 행의 시작, 행 사이 간격 (글자 수) |
+| `autoplay` | `true` | 바로 재생 |
+| `respectReducedMotion` | `true` | 기기에서 '동작 줄이기'를 켰으면 애니메이션 없이 바로 끝 상태로 |
+
+투명도는 sine in-out, 블러와 떠오름은 cubic out 이징입니다. 툴의 값(`ASL_WRITE`, `SAY_IN`)에 Adaptive Screen의 감속 1.5배를 곱하고, 3배 스테이지의 px을 3으로 나눈 값입니다.
+
+### 참고
+
+- 블러와 떠오르는 거리는 28dp(Adaptive Screen)와 26dp(전체 비교) 글자에 맞춘 값입니다. 글자가 훨씬 크면 `blur`와 `rise`를 비례해서 키우세요.
+- 글자는 단어 단위로 묶여서 줄은 단어 사이에서만 바뀝니다. `<strong>`은 단어 전체를 감싸 주세요. 한국어는 조사까지 함께 감쌉니다(`<strong>디자인 회의가</strong>`).
+- 화면 읽기 프로그램에는 글자 단위가 아니라 문장 전체가 한 번에 읽힙니다.
+- 재생하는 동안에는 글자와 행에 인라인 `opacity`, `filter`, `translate`를 쓰고, 끝나면 지웁니다.
+- 같은 요소에 다시 호출하면 원래 글로 되돌린 뒤 처음부터 다시 씁니다.
+- Android(Compose)에서는 생성 코드 `AiVisualCue.kt`에 같은 방식의 글쓰기(`letterAt`)가 들어 있습니다.
 
 ## GitHub Pages 설정
 
