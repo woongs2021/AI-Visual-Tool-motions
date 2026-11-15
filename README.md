@@ -70,6 +70,8 @@ AI 에이전트가 활성화될 때 화면에 나타나는 **비주얼 큐(AI Vi
 │  ├─ render.py               #   HTML → MP4 렌더러
 │  ├─ CLAUDE_GUIDE.md         #   Claude로 변형을 만드는 가이드
 │  └─ fonts/                  #   Urbanist (OFL)
+├─ design/
+│  └─ agent-ui.css           # 새 화면용 디자인 키트 (CSS 변수 · 클래스, 애니메이션 값 없음)
 ├─ docs/
 │  ├─ development-plan.md     # Phase별 개발 계획서
 │  └─ prompt.md               # 최초 요구사항 프롬프트
@@ -130,6 +132,107 @@ AiVisualCueDemoLoop(
 | 의존성 | Compose BOM 기본 라이브러리(ui, foundation, animation)만 사용 |
 
 > 생성 코드는 아직 실제 Android 기기에서 컴파일·실행 검증을 거치지 않았습니다. 빌드 오류가 나면 이슈로 남겨 주세요.
+
+## 새 화면 만들기: 디자인 키트 (`design/agent-ui.css`)
+
+지금 시안의 디자인을 CSS 파일 하나에 담았습니다. 화면 배경, 유리 카드, SEED 앱 UI, 에이전트 볼의 카드 · 리스트 · 말, 플로팅 바가 들어 있습니다. 새 화면을 HTML로 만들 때 클래스를 붙이면 지금 시안과 같은 모습으로 나옵니다.
+
+**애니메이션 값(시간, 이징, 키프레임)은 넣지 않았습니다.** 움직임은 툴에서 정하고 Kotlin 코드로 가져갑니다.
+
+### 1. 연결
+
+```html
+<!-- 저장소 안에서 -->
+<link rel="stylesheet" href="design/agent-ui.css">
+<!-- 다른 곳에서 (배포본) -->
+<link rel="stylesheet" href="https://woongs2021.github.io/AI-Visual-Tool-motions/design/agent-ui.css">
+```
+
+### 2. 화면 뼈대
+
+앱 화면 사이에 에이전트 볼 카드가 끼워진 상태(L2)입니다. `.au-screen`이 폰 화면(360 × 780dp)입니다. 1dp는 CSS 1px로 씁니다.
+
+```html
+<div class="au-screen" data-au-set="meadow">
+  <div class="au-status-bar"><span>9:41</span></div>
+
+  <div class="au-app-bar">
+    <span class="au-app-bar__title">오늘</span>
+    <span class="au-dot"><i class="au-icon au-icon--bell"></i></span>
+    <span class="au-avatar"></span>
+  </div>
+  <div class="au-chips">
+    <span class="au-chip is-selected">전체</span>
+    <span class="au-chip">일정</span>
+  </div>
+
+  <div class="au-glass au-card" style="margin: 12px 16px 0">
+    <span class="au-badge">30분 뒤 시작</span>
+    <div class="au-title">주간 디자인 회의</div>
+    <div class="au-text-meta">오후 2:00 · 3층 회의실</div>
+  </div>
+
+  <!-- 에이전트 볼이 만든 카드: 행 3개 -->
+  <div class="au-agent-card" style="margin-top: 24px">
+    <div class="au-agent-row">
+      <span class="au-agent-row__icon"><i class="au-icon au-icon--calendar"></i></span>
+      <div class="au-agent-row__text">
+        <div class="au-agent-row__title">회의를 오후 3시로 옮기기</div>
+        <div class="au-agent-row__detail">모두 참석할 수 있는 시간이에요</div>
+      </div>
+    </div>
+    <!-- … -->
+  </div>
+
+  <div class="au-floating-bar">
+    <span class="au-bar-button"><i class="au-icon au-icon--plus"></i></span>
+    <span class="au-bar-input">무엇이든 물어보세요</span>
+  </div>
+  <span class="au-home-indicator"></span>
+</div>
+```
+
+### 3. 상태별 조합
+
+| 상태 | 조합 |
+|---|---|
+| 생각 중 (L1) | 앱 콘텐츠를 `.au-thinking`으로 감싸면 블러로 흐려집니다. 화면에 `<div class="au-ball au-ball--capsule au-ball--top">`(로딩 캡슐)을 둡니다. |
+| 카드 (L2) | 앱 콘텐츠 사이에 `.au-agent-card`(높이 220dp)를 끼우고, 안에 `.au-agent-row`를 3개 넣습니다. |
+| 전체 화면 (L3) | 앱은 `.au-receded`로 뒤로 물립니다. `.au-say`(에이전트의 말) 다음에 `.au-agent-list`를 두면 24dp 아래에 리스트가 놓입니다. 화면의 마지막 자식으로 `.au-ball-glow`를 넣고, 하단은 `.au-floating-bar--tabs` 안에 `.au-bar-tabs`를 씁니다. |
+
+에이전트의 말에서 강조할 단어는 `<strong>`으로 감쌉니다. 진하고 굵게 나옵니다.
+
+### 4. 색 바꾸기
+
+`.au-screen`이나 그 바깥 요소에 속성을 붙입니다.
+
+- `data-au-set`: 화면 배경과 에이전트 컬러를 세트로 바꿉니다. 툴의 "세트"와 같습니다.
+  - `meadow`(기본), `lavender`, `sky`, `sunrise`, `dune`, `lagoon`, `blush`, `cloud`, `citrus`, `sage`, `dusk`
+- `data-au-bg`: 화면 배경만 바꿉니다. 값은 세트와 같습니다.
+- `data-au-agent`: 에이전트 컬러만 바꿉니다.
+  - `azure`, `blossom`, `indigo`, `ember`, `amber`, `rose`, `mint`, `jade`, `lime`
+
+세부 값은 `--au-*` 변수로 덮어씁니다(예: `--au-say-size`, `--au-gutter`, `--au-r-card`). 변수 목록과 툴의 어느 값에서 왔는지는 파일 맨 위 `:root`에 주석으로 적혀 있습니다.
+
+### 5. 클래스
+
+| 영역 | 클래스 |
+|---|---|
+| 화면 | `.au-screen`, `.au-status-bar`, `.au-home-indicator` |
+| 아이콘 | `.au-icon` + `.au-icon--bag` · `bell` · `book` · `calendar` · `chat` · `chevron` · `clock` · `doc` · `link` · `pin` · `plus` |
+| 앱 UI (SEED) | `.au-app-bar`, `.au-dot`, `.au-chips` · `.au-chip`(`.is-selected`), `.au-badge`, `.au-button`(`--solid`), `.au-avatar`(`--sm`, `--ring`) · `.au-avatars`, `.au-title`, `.au-text-meta`, `.au-section-head`, `.au-list-item`, `.au-scroll-fog` |
+| 유리 | `.au-glass`(`--wash-end`), `.au-card` |
+| 에이전트 볼 | `.au-agent-card`, `.au-agent-list` · `.au-agent-row`, `.au-say`, `.au-hero`(Adaptive Screen 문장 28dp), `.au-ball`(`--capsule`, `--top`), `.au-ball-glow` |
+| 플로팅 바 | `.au-floating-bar`(`--tabs`), `.au-bar-button`, `.au-bar-input`, `.au-bar-tabs` |
+| 뒤 화면 | `.au-thinking`(로딩 중 블러), `.au-receded`(전체 화면일 때) |
+
+### 참고
+
+- **에이전트 볼은 근사치입니다.** 툴에서는 셰이더로 그리는 물성이어서, CSS의 `.au-ball`은 기본 물성(Aura)이 멈춰 있는 모습을 흉내 낸 것입니다. 정확한 모양과 움직임은 툴과 생성된 Kotlin 코드를 따릅니다.
+- **플로팅 바는 멈춰 있는 모습입니다.** 물방울처럼 갈라지고 합쳐지는 효과는 움직임이어서 넣지 않았습니다. 버튼과 입력창이 각각 떨어진 유리 알약으로 나옵니다.
+- **글꼴**: 앱 UI는 시스템 글꼴, 에이전트의 말은 Samsung Sharp Sans입니다. Samsung Sharp Sans가 없는 컴퓨터에서는 Urbanist와 IBM Plex Sans KR로 나옵니다. 둘 다 Google Fonts에서 불러옵니다.
+- 앱 UI는 SEED Design의 값을 따릅니다. 라이선스는 [`licenses/seed-design/`](licenses/seed-design/USAGE.md)에 있습니다.
+- 이 파일은 지금 툴(`index.html`)의 값을 옮긴 것입니다. 툴에서 디자인 값을 바꾸면 이 파일은 자동으로 바뀌지 않으니 같이 맞춰 주세요.
 
 ## GitHub Pages 설정
 
