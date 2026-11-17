@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Processing</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/meeting-notes.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="meeting-notes" data-au-screen="meeting-notes-processing" data-au-store="meeting-notes">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <span class="fl-spacer" aria-hidden="true"></span>
+      <h1 class="au-app-bar__title" id="app-title">Processing</h1>
+      <span class="fl-spacer" aria-hidden="true"></span>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <section class="fl-center" style="padding-top:24px" aria-labelledby="mn-p-title">
+        <span class="au-icon-box fl-pulse" style="width:72px;height:72px;border-radius:50%" aria-hidden="true"><i class="au-icon au-icon--sparkle" aria-hidden="true" style="width:32px;height:32px"></i></span>
+        <h2 class="au-title" style="margin-top:16px" id="mn-p-title">Creating your notes</h2>
+        <p class="au-text-meta" id="mn-p-meta">Q4 Product Sync, 02:36, 4 speakers</p>
+        <span class="au-demo-tag" style="margin-top:12px">Demo</span>
+      </section>
+      <section class="au-card fl-gap" aria-labelledby="mn-p-prog">
+        <div class="au-card__head"><h2 class="au-card__title" id="mn-p-prog">Progress</h2><span class="au-num" style="font-weight:700" id="mn-p-pct">55%</span></div>
+        <div class="au-progress" role="progressbar" aria-labelledby="mn-p-prog" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55" id="mn-p-bar-wrap" style="margin-top:12px"><span class="au-progress__value" id="mn-p-bar" style="--au-value:55%"></span></div>
+        <div class="fl-status" id="mn-p-steps" style="margin-top:8px"></div>
+      </section>
+    </main>
+
+    <footer class="au-footer">
+      <button class="au-button au-button--secondary" type="button" data-action="nav" data-href="meeting-notes-home.html"><span>Run in Background</span></button>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

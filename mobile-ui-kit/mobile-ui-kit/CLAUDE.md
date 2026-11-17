@@ -1,0 +1,107 @@
+# Mobile UI Kit — 작업 규칙 (IDE 에이전트용)
+
+이 저장소는 **순수 HTML · CSS · JavaScript** 모바일 앱 UI 키트입니다. 앱마다 화면 1개(390 × 844)를 만들고, 라이트·다크 두 테마를 지원합니다. 결과물은 실제 스마트폰 사진에 합성할 PNG를 뽑는 데 씁니다. 앱 목록은 `apps/backlog.md`, 등록된 앱은 `apps/registry.js`에 있습니다.
+
+## 절대 규칙
+1. **프레임워크·빌드 도구·외부 UI 라이브러리를 쓰지 않는다.** HTML5, CSS3, Vanilla JS만 쓴다. 아이콘은 `components.css`의 SVG 마스크 아이콘(`au-icon au-icon--이름`)을 쓰고, 없으면 같은 방식(24×24, stroke 1.8, round)으로 추가한다.
+2. **색은 토큰으로만 쓴다.** 화면 CSS에는 `var(--au-…)`만 쓴다. hex 값은 `styles/apps/<id>.css` 맨 위의 액센트 규칙에만 둔다. 이 규칙은 `scripts/new-app.mjs`가 대비를 계산해 만든다.
+3. **라이트·다크 둘 다 통과해야 완료다.** 한쪽 테마만 확인하고 끝내지 않는다.
+4. **장식을 쓰지 않는다.** 글래스모피즘, blur 배경, 3D, 장식용 그라데이션·일러스트를 쓰지 않는다. 그림자는 시트·토스트 같은 떠 있는 층에만 쓴다.
+5. **레이아웃 규칙**
+   - 화면 크기는 390 × 844이고, 안전 영역은 위 47px, 아래 34px로 비워 둔다. 상태바를 숨겨도 그대로 둔다.
+   - 좌우 여백 24px(`--au-gutter`), 카드 반경 16px, 간격은 8px 단위(4px 반단계)를 쓴다.
+   - 글자 크기는 타입 토큰(`--au-t2`~`--au-t9`, `--au-display`)만 쓴다.
+   - **기본 상태는 스크롤 없이 390 × 844에 들어가야 한다.** `.au-content`의 내용 높이가 영역 높이를 넘으면 안 된다.
+6. **접근성**
+   - 터치 영역은 최소 44 × 44이고, 키보드 포커스 링(`:focus-visible`)이 보여야 한다.
+   - 모든 컨트롤에는 이름(텍스트 또는 `aria-label`)이 있어야 한다.
+   - 탭은 `role="tab"` + 화살표 키, 선택지는 `role="radio"`/`radiogroup`, 펼침은 `aria-expanded`, 시트는 `role="dialog"`로 만든다.
+7. **실제 API를 연결하지 않는다.**
+   - 마이크, 카메라, 하드웨어, 결제, 위치, 서버를 쓰지 않는다. 데모 데이터로 흉내 낸다.
+   - AI 결과, 측정값, 녹음처럼 **실제로 오해할 수 있는 데이터**는 화면에 `au-demo-tag`("Demo")를 표시한다. 수치는 "5개 중 3개"처럼 근거가 보이게 쓴다.
+8. **주요 버튼(`.au-button`)은 앱 액센트를 쓴다**(`--au-cta-bg` / `--au-cta-fg`). 액센트가 밝으면 글자를 어둡게 한다(PC Health처럼). 직접 바꾸지 말고 생성 스크립트 값을 따른다.
+9. **공유 파일은 신중히 고친다.**
+   - `styles/tokens.css`, `styles/components.css`, `scripts/app.js`의 공통 부분은 앱 하나 때문에 바꾸지 않는다.
+   - 여러 앱에 필요한 공통 컴포넌트가 생기면 `components.css`에 토큰만 써서 추가하고, README의 컴포넌트 표에 적는다.
+10. 요청이 없으면 **기존 앱(01–03)은 건드리지 않는다.**
+11. UI 문구는 백로그에 적힌 언어를 따른다(기본은 영어). 문구는 짧게 쓰고, 긴 텍스트는 말줄임(`au-truncate`, `au-clamp-2`)으로 깨지지 않게 한다.
+
+## 폴더
+```
+index.html                 미리보기 — 시나리오별 화면 목록(▶ Play), 테마, 상태바, UI-only, 캡처 가이드, 390×844 검사
+flows.html                 모든 화면을 시나리오 흐름 순서로 나열한 보드
+<id>.html                  앱 화면 하나
+apps/registry.js           앱 목록(미리보기·캡처·검사가 읽음) — 새 앱은 "@new-apps" 줄 위에 추가됨
+apps/backlog.md            만들 앱 목록과 진행 상태
+apps/scenarios.md          시나리오별 화면 흐름표 (상세 화면 17개)
+styles/tokens.css          토큰 (라이트 + 다크, OS 자동 / data-au-theme 강제)
+styles/components.css      공통 컴포넌트
+styles/screens.css         기존 데모 3개 전용
+styles/flows.css           시나리오 상세 화면 공용 (fl-*)
+styles/apps/<id>.css       새 앱의 액센트 + 전용 스타일 (클래스 접두사 = id 머리글자, 예: habit-tracker → ht-)
+scripts/app.js             셸: 테마, 시트, 토스트, 스크롤 포그, 검사, 미리보기, 기존 3개 로직
+scripts/apps/<id>.js       새 앱 로직: AUKit.defineScreen('<id>', ctx => ({ actions, reset, apply }))
+scripts/new-app.mjs        새 앱 생성기
+scripts/new-screen.mjs     기존 앱에 상세 화면 추가
+scripts/flows/<app-id>.js  시나리오 상세 화면 로직
+scripts/walkthrough.mjs    시나리오 자동 클릭 점검
+scripts/capture.mjs        PNG 캡처 (Playwright)
+templates/starter.html     참고용 최소 화면
+prompts/                   작업별 프롬프트
+tools/composite/           캡처 PNG를 폰 사진에 합성하는 도구 (Python)
+```
+
+## 시나리오 화면과 프로토타입
+- 앱마다 대표 화면(★) 앞뒤로 이어지는 **상세 화면**이 있습니다. 흐름표는 `apps/scenarios.md`, 화면 보드는 `flows.html`입니다. 사용자 관점의 스토리(페르소나·여정·시연 대본)는 `docs/scenario-stories.md`이며, 화면이나 흐름을 바꾸면 함께 고칩니다.
+- 상세 화면 추가: `node scripts/new-screen.mjs <app-id> <screen-id> "<Title>" --back="<부모.html> [<다른 부모.html>]" [--scroll]`. 로직은 `scripts/flows/<app-id>.js`, 공용 스타일은 `styles/flows.css`(`fl-*`)에 둡니다.
+- **이동 규칙**
+  - 버튼은 `data-action="nav" data-href="x.html"`, 링크는 `<a href="x.html" data-nav>`로 이동합니다.
+  - 자동으로 넘어가는 단계는 `nav(href, { replace: true })`로 이동합니다.
+  - Back은 `data-au-back`에 적은 부모 중 들어온 곳으로, 아니면 첫 번째 부모로 갑니다.
+  - 루트 화면(시나리오 첫 화면)은 Back 자리에 `fl-spacer`를 둡니다.
+- **공유 데이터:** 시나리오 화면들은 `store.get/set('<app-id>')`를 함께 씁니다(`data-au-store`). 저장할 때 다른 화면의 필드를 지우지 않고, 기존 값에 덮어씁니다. 데모 데이터 원본은 `AUKit.data`(`scripts/app.js` 상단)에 있습니다.
+- **범위:** PoC는 시나리오를 끝까지 따라가는 데 필요한 **핵심 기능만** 만듭니다. 실제 API는 연결하지 않습니다.
+- **추가 검증:** `node scripts/walkthrough.mjs`가 모든 시나리오를 처음부터 끝까지 통과해야 합니다. 새 화면을 추가하면 단계도 함께 추가합니다.
+
+## 언어 (한국어·영어)
+- **원문은 영어입니다.** HTML·JS에는 영어로 씁니다. 한국어는 `scripts/i18n/ko.js` 사전이 화면을 그린 뒤 자동으로 바꿉니다(텍스트, `aria-label`, `placeholder`, `title`). 화면 코드에 `if (lang === 'ko')`를 넣지 않습니다.
+- 새 문구를 넣으면 같은 작업에서 `ko.js`에도 넣습니다. 정확한 문장은 `strings`, 숫자·이름·날짜가 섞이면 `patterns`(정규식 → 함수, 받침에 맞는 조사는 `josa()`), 번역하지 않을 제품명·코드는 `keep`에 둡니다. 번역하지 않을 요소에는 `translate="no"`를 붙입니다.
+- 말투: 문장은 해요체, 버튼·레이블은 짧은 명사형. 앱 이름(PC Health 등)과 제품명은 영어 그대로, 사람 이름은 한국 이름으로 바꿉니다(Mina → 미나).
+- 전환: URL `?lang=ko|en`, `AUKit.i18n.set('ko')`(localStorage `au-lang`에 저장), 미리보기의 Language 버튼·`L` 키, 단독 페이지 하단의 한국어/English 버튼. 이벤트 `au:lang`.
+- JS에서 문구를 직접 만들어야 하면 `AUKit.i18n.t('English text')`를 씁니다. 언어가 바뀔 때 다시 그려야 하면 `au:lang` 이벤트를 듣습니다.
+- **검사:** `npm run i18n-check`가 `✓ everything is translated (ko)`로 끝나야 합니다. 모든 화면·상태를 한국어로 열어서 빠진 문구를 화면 이름과 함께 알려 줍니다. 페이지 안에서는 `AUKit.i18n.missing()`.
+- 한국어는 영어보다 짧거나 길 수 있습니다. 390×844 검사를 한국어로도 돌리고(미리보기에서 Language → 한국어 → Run check), `npm run capture:ko`로 캡처해 눈으로 줄바꿈과 잘림을 확인합니다.
+
+## 새 앱 만드는 순서
+1. `apps/backlog.md`에서 앱 정보를 읽는다(번호, id, 이름, 목적, 화면 구성, 액센트, 인터랙션).
+2. 생성: `node scripts/new-app.mjs <id> "<Name>" "<#accent>" "<한 줄 설명>" --num=<번호>`
+3. `<id>.html`의 `<main class="au-content">` 안을 백로그의 화면 구성대로 위에서 아래로 채운다. 먼저 공통 컴포넌트를 쓰고, 화면 전용 스타일은 `styles/apps/<id>.css`에 접두사 클래스로 둔다.
+4. `scripts/apps/<id>.js`에 데모 데이터(`DEFAULTS`), 인터랙션(`actions`), 초기화(`reset`), URL 상태(`apply`)를 구현한다.
+   - 버튼은 `data-action="이름"`으로 연결한다.
+   - 시트는 `sheets.open(id, button)`, 알림은 `toast()`, 스크린리더 안내는 `announce()`로 띄운다.
+   - 저장할 값은 `store.get/set`을 쓴다.
+5. `apps/registry.js`에서 그 앱의 `states`(캡처할 상태와 URL 쿼리)와 `notes`를 채운다. `apply()`가 그 쿼리를 처리해야 한다.
+6. **검증**(아래)을 통과하면 백로그 상태를 `done`으로 바꾼다.
+
+## 검증 (완료 조건)
+- `python3 -m http.server 8080` 또는 `npm start`로 서버를 띄운 뒤 `http://localhost:8080/index.html`을 연다.
+  - Theme **Light**에서 "Run check on all N screens"를 실행해 모두 Pass인지 확인한다.
+  - Theme **Dark**에서 같은 검사를 다시 실행해 모두 Pass인지 확인한다.
+- 검사 항목: 390×844, 페이지 스크롤 없음, 내용이 스크롤 없이 들어감, 화면 밖 요소 없음, 안전 영역, 좌우 24px, 터치 44×44, 컨트롤 이름, (데모 앱이면) DEMO 표시.
+- `node scripts/capture.mjs --theme=both --app=<id>`로 캡처한 PNG를 **직접 열어서 눈으로 확인한다.** 볼 것은 겹침, 잘림, 대비, 빈 공간 균형이다.
+- 각 상태를 URL로 열어 인터랙션을 직접 눌러 본다: 버튼, 시트 열기·닫기(Esc), 탭 화살표 키, 초기화.
+- `npm run i18n-check`가 통과하고, 한국어로도 390×844 검사를 통과해야 한다.
+- 브라우저 콘솔 에러가 없어야 한다. 단, 오프라인일 때 나는 폰트 CDN 오류는 무시해도 된다.
+
+## 자주 쓰는 컴포넌트
+| 용도 | 클래스 |
+|---|---|
+| 셸 | `au-screen` `au-app-bar` `au-content` `au-footer` `au-status-bar` `au-home-indicator` |
+| 버튼 | `au-button` (주요 56) `--secondary` `--danger` `--md`(44) `--text` `--hug` · `au-icon-button` |
+| 카드·목록 | `au-card` `au-card__head` `au-card__title` · `au-section` `au-section-head` · `au-rows` `au-row` |
+| 상태 | `au-badge[data-tone]` `au-notice[data-tone]` `au-progress` `au-segmented` `au-demo-tag` `au-icon-box` `au-avatar` |
+| 떠 있는 층 | `au-sheet` + `au-scrim` · `au-menu` · `au-toast` |
+| 톤 | `data-tone="positive|warning|critical|accent"` |
+| 텍스트 | `au-title` `au-text-meta` `au-truncate` `au-clamp-2` `au-num`(숫자 고정폭) |
+
+URL 모드: `?theme=light|dark` `?ui=1`(UI만) `?capture=1`(고정 상태, 애니메이션 정지) `?statusbar=1`.

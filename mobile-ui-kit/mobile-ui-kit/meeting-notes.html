@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Meeting Notes</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen mn" id="screen" data-au-app="meeting-notes" data-au-screen="meeting-notes" data-au-back="meeting-notes-home.html" data-rec="recording">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back"></i></button>
+      <h1 class="au-app-bar__title">Meeting Notes</h1>
+      <button class="au-icon-button" type="button" aria-label="More options" aria-haspopup="dialog" aria-controls="mn-menu" data-action="menu"><i class="au-icon au-icon--more"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+      <section class="mn-rec" aria-label="Recording">
+        <div class="mn-rec__row">
+          <p class="mn-rec__status" id="mn-status"><span class="mn-rec__dot" aria-hidden="true"></span><span id="mn-status-text">Recording</span></p>
+          <span class="au-demo-tag" title="Demo — no microphone is used">Demo</span>
+        </div>
+        <p class="mn-rec__time" id="mn-time" role="timer" aria-label="Elapsed time">02:36</p>
+        <p class="mn-rec__title"><span>Q4 Product Sync</span><span>4 speakers</span></p>
+      </section>
+
+      <div class="mn-wave" aria-hidden="true">
+        <svg id="mn-wave" viewBox="0 0 342 72" preserveAspectRatio="none" focusable="false"></svg>
+      </div>
+
+      <div class="mn-cards">
+        <section class="au-card mn-transcript" aria-labelledby="mn-transcript-title">
+          <div class="au-card__head">
+            <h2 class="au-card__title" id="mn-transcript-title">Live Transcript</h2>
+            <span class="mn-live" id="mn-live">Live</span>
+          </div>
+          <div class="mn-transcript__lines" id="mn-lines" aria-live="off"></div>
+        </section>
+
+        <section class="au-card mn-summary" aria-labelledby="mn-summary-title">
+          <div class="au-card__head">
+            <i class="au-icon au-icon--sparkle" aria-hidden="true"></i>
+            <h2 class="au-card__title" id="mn-summary-title">AI Summary</h2>
+            <span class="au-text-meta" id="mn-summary-meta">Updated live</span>
+          </div>
+          <div class="au-segmented" role="tablist" aria-label="Summary view">
+            <button class="au-segmented__tab" type="button" role="tab" id="mn-tab-points" aria-controls="mn-panel-points" aria-selected="true" data-tab="points">Key points</button>
+            <button class="au-segmented__tab" type="button" role="tab" id="mn-tab-actions" aria-controls="mn-panel-actions" aria-selected="false" tabindex="-1" data-tab="actions">Action items</button>
+          </div>
+          <div role="tabpanel" id="mn-panel-points" aria-labelledby="mn-tab-points">
+            <ul class="mn-points" id="mn-points"></ul>
+          </div>
+          <div role="tabpanel" id="mn-panel-actions" aria-labelledby="mn-tab-actions" hidden>
+            <div class="mn-actions" id="mn-actions"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="au-footer mn-controls" id="mn-controls"><!-- Pause / Stop, rendered by app.js --></footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+    <section class="au-sheet" id="mn-menu" role="dialog" aria-modal="true" aria-labelledby="mn-menu-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="mn-menu-title">Options</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close"></i></button>
+      </div>
+      <div class="au-sheet__body">
+        <p class="au-notice" style="margin-bottom:12px"><i class="au-icon au-icon--info"></i><span class="au-notice__text">This is a demo. No microphone is used — the transcript and summary are sample data.</span></p>
+        <div class="au-menu">
+          <button class="au-menu__item" type="button" data-action="share"><i class="au-icon au-icon--share"></i>Share notes</button>
+          <button class="au-menu__item" type="button" data-action="reset" data-tone="critical"><i class="au-icon au-icon--reset"></i>Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="index.html"><i class="au-icon au-icon--back"></i>All screens</a>
+    <button type="button" data-dev="theme" aria-label="Theme: System">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

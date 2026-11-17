@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Mobile UI Kit — Preview</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/preview.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="apps/registry.js" defer></script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+</head>
+<body data-au-page="index">
+<div class="ix">
+  <aside class="ix-side" aria-label="Screens and display">
+    <div class="ix-brand">
+      <h1 class="ix-brand__title">Mobile UI Kit</h1>
+      <p class="ix-brand__meta"><span id="ix-count">Screens</span> · one design system · 390 × 844</p>
+      <a class="fb-btn" href="flows.html" style="margin-top:12px">All screens by scenario →</a>
+    </div>
+
+    <div>
+      <p class="ix-label" id="ix-screens-label">Screens</p>
+      <div class="ix-screens" role="tablist" aria-orientation="vertical" aria-labelledby="ix-screens-label"><!-- built from apps/registry.js -->
+      </div>
+    </div>
+
+    <div>
+      <p class="ix-label" id="ix-theme-label">Theme</p>
+      <div class="au-segmented ix-theme" role="radiogroup" aria-labelledby="ix-theme-label">
+        <button class="au-segmented__tab" type="button" role="radio" data-theme="system" aria-checked="true">System</button>
+        <button class="au-segmented__tab" type="button" role="radio" data-theme="light" aria-checked="false" tabindex="-1">Light</button>
+        <button class="au-segmented__tab" type="button" role="radio" data-theme="dark" aria-checked="false" tabindex="-1">Dark</button>
+      </div>
+      <p class="ix-label" id="ix-lang-label" style="margin-top:16px">Language</p>
+      <div class="au-segmented ix-theme ix-lang" role="radiogroup" aria-labelledby="ix-lang-label" translate="no">
+        <button class="au-segmented__tab" type="button" role="radio" data-lang="en" aria-checked="true" lang="en">English</button>
+        <button class="au-segmented__tab" type="button" role="radio" data-lang="ko" aria-checked="false" tabindex="-1" lang="ko">한국어</button>
+      </div>
+    </div>
+
+    <div>
+      <p class="ix-label">Display</p>
+      <div class="ix-switches">
+        <button class="ix-switch" type="button" role="switch" aria-checked="false" data-switch="system-bars">
+          <span>Status bar<small>Status bar and home indicator</small></span><span class="ix-switch__track" aria-hidden="true"></span>
+        </button>
+        <button class="ix-switch" type="button" role="switch" aria-checked="false" data-switch="ui-only">
+          <span>UI-only mode<small>The screen alone, 100 %, top-left · Esc to exit</small></span><span class="ix-switch__track" aria-hidden="true"></span>
+        </button>
+        <button class="ix-switch" type="button" role="switch" aria-checked="true" data-switch="fit">
+          <span>Fit to window<small>Off: 100 % (1 pt = 1 px)</small></span><span class="ix-switch__track" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <p class="ix-label">Demo data</p>
+      <div class="ix-actions">
+        <button class="au-button au-button--secondary au-button--md" type="button" data-ix="reset"><i class="au-icon au-icon--reset" style="width:18px;height:18px"></i><span>Reset this screen</span></button>
+        <button class="au-button au-button--secondary au-button--md" type="button" data-ix="reset-all"><i class="au-icon au-icon--reset" style="width:18px;height:18px"></i><span>Reset all screens</span></button>
+      </div>
+    </div>
+
+    <p class="ix-hint">Keys: <span class="ix-kbd">1</span>–<span class="ix-kbd">9</span> screens · <span class="ix-kbd">T</span> theme · <span class="ix-kbd">L</span> language · <span class="ix-kbd">S</span> status bar · <span class="ix-kbd">U</span> UI-only · <span class="ix-kbd">Esc</span> exit</p>
+  </aside>
+
+  <main class="ix-stage" id="ix-stage" aria-label="Preview">
+    <div class="ix-frame-wrap" id="ix-frame-wrap">
+      <iframe class="ix-frame" id="ix-frame" title="Screen preview" src="pc-health.html?embed=1&amp;ui=1"></iframe>
+    </div>
+    <div class="ix-stage__meta">
+      <span id="ix-size">390 × 844 · 100%</span>
+      <button type="button" data-ix="open">Open standalone ↗</button>
+    </div>
+  </main>
+
+  <aside class="ix-panel" aria-label="Capture guide and checks">
+    <section class="ix-guide" id="ix-guide" aria-live="polite"></section>
+
+    <section class="ix-guide">
+      <h2>390 × 844 check</h2>
+      <p>Loads every screen at exactly 390 × 844 in its capture state and checks size, overflow, safe areas, touch targets and labels.</p>
+      <button class="au-button au-button--md" type="button" data-ix="validate"><span id="ix-check-label">Run check on all screens</span></button>
+      <div class="ix-report" id="ix-report"></div>
+    </section>
+  </aside>
+</div>
+</body>
+</html>

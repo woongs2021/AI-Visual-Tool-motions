@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Connect PC</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/pc-health.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="pc-health" data-au-screen="pc-health-connect" data-au-back="pc-health-home.html" data-au-store="pc-health">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back" aria-hidden="true"></i></button>
+      <h1 class="au-app-bar__title" id="app-title">Connect PC</h1>
+      <button class="au-icon-button" type="button" aria-label="More options" aria-haspopup="dialog" aria-controls="pc-health-connect-menu" data-action="sheet"><i class="au-icon au-icon--more" aria-hidden="true"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <section class="au-card fl-device" id="ph-c-device" data-state="waiting" aria-live="polite">
+        <span class="au-icon-box au-icon-box--lg" aria-hidden="true"><i class="au-icon au-icon--monitor" aria-hidden="true"></i></span>
+        <div class="fl-item__text"><p class="fl-item__title" id="ph-c-name">Looking for a PC…</p><p class="fl-item__meta" id="ph-c-meta">Connect with a USB-C cable</p></div>
+        <span class="au-badge" id="ph-c-badge">Searching</span>
+      </section>
+      <section class="au-card fl-gap" aria-labelledby="ph-c-code-title">
+        <div class="au-card__head"><h2 class="au-card__title" id="ph-c-code-title">Pairing code</h2><span class="au-text-meta au-num" id="ph-c-expires">Expires in 4:52</span></div>
+        <p class="fl-code" role="img" aria-label="Pairing code 4 8 2 1"><span aria-hidden="true">4</span><span aria-hidden="true">8</span><span aria-hidden="true">2</span><span aria-hidden="true">1</span></p>
+        <p class="au-text-meta" style="margin-top:12px">Enter this code in PC Health Agent on the PC.</p>
+      </section>
+      <section class="au-section fl-gap" aria-labelledby="ph-c-how">
+        <div class="au-section-head"><h2 class="au-section-head__title" id="ph-c-how">How to connect</h2></div>
+        <ol class="fl-steps" id="ph-c-steps">
+          <li class="fl-step">Open PC Health Agent on the PC</li>
+          <li class="fl-step">Connect the phone with a USB-C cable</li>
+          <li class="fl-step">Enter the pairing code</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="au-footer">
+      <button class="au-button" type="button" data-action="start" id="ph-c-start" disabled><span>Start Scan</span></button>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+    <section class="au-sheet" id="pc-health-connect-menu" role="dialog" aria-modal="true" aria-labelledby="pc-health-connect-menu-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="pc-health-connect-menu-title">Options</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close" aria-hidden="true"></i></button>
+      </div>
+      <div class="au-sheet__body">
+        <div class="au-menu">
+          <a class="au-menu__item" href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+          <button class="au-menu__item" type="button" data-action="reset" data-tone="critical"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

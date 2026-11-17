@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Transcript</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/meeting-notes.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="meeting-notes" data-au-screen="meeting-notes-transcript" data-au-back="meeting-notes-notes.html" data-au-store="meeting-notes" data-au-scroll="true">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back" aria-hidden="true"></i></button>
+      <h1 class="au-app-bar__title" id="app-title">Transcript</h1>
+      <button class="au-icon-button" type="button" aria-label="More options" aria-haspopup="dialog" aria-controls="meeting-notes-transcript-menu" data-action="sheet"><i class="au-icon au-icon--more" aria-hidden="true"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <label class="fl-search"><i class="au-icon au-icon--search" aria-hidden="true"></i><span class="au-visually-hidden">Search transcript</span><input type="search" id="mn-t-search" placeholder="Search transcript" autocomplete="off" enterkeyhint="search"></label>
+      <div class="fl-chips" role="group" aria-label="Speaker" id="mn-t-chips" style="margin-top:4px"></div>
+      <div style="margin-top:4px"><div class="fl-lines" id="mn-t-lines" aria-live="polite"></div></div>
+    </main>
+
+    <footer class="au-footer">
+      <div class="fl-player">
+        <button class="fl-player__play" type="button" data-action="play" aria-label="Play" id="mn-t-play"><i class="au-icon au-icon--play" aria-hidden="true"></i></button>
+        <div class="fl-player__track">
+          <input type="range" id="mn-t-seek" min="0" max="156" value="48" step="1" aria-label="Playback position">
+          <div class="fl-player__time"><span id="mn-t-cur">00:48</span><span id="mn-t-dur">02:36</span></div>
+        </div>
+      </div>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+    <section class="au-sheet" id="meeting-notes-transcript-menu" role="dialog" aria-modal="true" aria-labelledby="meeting-notes-transcript-menu-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="meeting-notes-transcript-menu-title">Options</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close" aria-hidden="true"></i></button>
+      </div>
+      <div class="au-sheet__body">
+        <div class="au-menu">
+          <a class="au-menu__item" href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+          <button class="au-menu__item" type="button" data-action="reset" data-tone="critical"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>
