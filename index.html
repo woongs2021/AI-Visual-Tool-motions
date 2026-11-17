@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="AI 비주얼 큐의 컬러·물성·크기·모션을 조절하고 Kotlin + Jetpack Compose 코드로 내보내는 디자인 툴">
+<meta name="description" content="AI 비주얼 큐의 컬러, 물성, 크기, 모션을 조절하고 Kotlin + Jetpack Compose 코드로 내보내는 디자인 툴">
 <style>*,*::before,*::after{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>AI Visual Cue Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,6 +193,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;bac
 .copy-btn{height:32px;padding:0 14px;border-radius:var(--r-s);border:0;background:var(--ink);color:var(--bg);cursor:pointer;font-weight:500}
 .code-meta{flex:none;padding:10px 20px;font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--line-soft);display:flex;flex-direction:column;gap:2px}
 .code-meta b{color:var(--ink);font-weight:500}
+.code-meta .cm{display:flex;flex-wrap:wrap;gap:0 12px}   /* file, lines, material, loop: apart, with space between them */
 .code-wrap{flex:1;min-height:0;overflow:auto;background:var(--raise)}
 pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.5px;line-height:1.6;white-space:pre;tab-size:4;color:var(--ink)}
 .t-kw{color:var(--k-kw)} .t-str{color:var(--k-str)} .t-num{color:var(--k-num)} .t-com{color:var(--k-com);font-style:italic} .t-type{color:var(--k-type)} .t-ann{color:var(--k-ann)}
@@ -204,6 +205,7 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
 .stage-head{flex:none;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 0 20px}
 .stage-title{display:flex;align-items:baseline;gap:10px;min-width:0}
 .stage-title b{font-weight:600;font-size:14px;flex:none;white-space:nowrap}
+.stage-title .vn-n{font-family:var(--f-mono);font-weight:400;font-size:12px;color:var(--faint);margin-right:10px}
 .stage-title span{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stage-head .spacer{flex:1}
 .nav-btn{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--raise);cursor:pointer;display:grid;place-items:center;font-size:14px}
@@ -263,12 +265,103 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
 .about p{margin:0}
 .about ol,.about ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .about .lead{font-size:16px;color:var(--muted)}
+.about .hist{list-style:none;padding:0;gap:14px}   /* 작업 기록: the date, then what was done */
+.about .hist li{display:grid;grid-template-columns:92px 1fr;gap:2px 16px}
+.about .hist .mono{font-size:12px;color:var(--muted);padding-top:4px}
+@media (max-width:480px){ .about .hist li{grid-template-columns:1fr} }
 .spec-table{width:100%;border-collapse:collapse;font-size:13px}
 .spec-table td{padding:8px 0;border-bottom:1px solid var(--line-soft);vertical-align:top}
 .spec-table td:first-child{color:var(--muted);width:38%}
 .pal-row{display:flex;gap:8px;flex-wrap:wrap}
 .pal-row span{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12px}
 .pal-row i{width:14px;height:14px;display:inline-block}
+
+/* Mobile UI PoC: the three scenarios of mobile-ui-kit/, played in a phone (an iframe of the kit's own screens) beside their story */
+.poc{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--stage)}
+.poc-head{flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px max(16px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px))}
+.poc-head .spacer{flex:1}
+.poc-scn{display:flex;gap:6px;flex-wrap:wrap}
+.poc-scn button{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--raise);color:var(--muted);cursor:pointer;font-weight:500;white-space:nowrap}
+.poc-scn button i{font-style:normal;font-family:var(--f-mono);font-size:11px;color:var(--faint)}
+.poc-scn button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.poc-scn button[aria-selected="true"] i{color:inherit;opacity:.6}
+.poc-lang{flex:none}
+.poc-lang button{padding:6px 12px;font-family:var(--f-mono);font-size:12px}
+.poc-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:48px;padding:16px max(16px,env(safe-area-inset-right,0px)) 20px max(20px,env(safe-area-inset-left,0px))}
+.poc-phone{--s:.8;flex:none;display:flex;flex-direction:column;align-items:center;gap:12px}   /* the phone and its player; --s: its scale */
+.poc-device{flex:none;position:relative;overflow:hidden;isolation:isolate;width:calc(390px * var(--s));height:calc(844px * var(--s));border-radius:calc(47px * var(--s));background:var(--raise);box-shadow:0 0 0 1px var(--line),0 18px 50px -24px rgba(10,14,40,.35)}
+.poc-device iframe{position:absolute;left:0;top:0;width:390px;height:844px;border:0;transform:scale(var(--s));transform-origin:0 0;transition:opacity .2s ease}
+/* 자동 재생: the finger (a soft disc, as a screen recording shows touches) glides to what it presses, presses, and lifts (times: at the autoplay's 1.5 ×) */
+.poc-touch{position:absolute;left:0;top:0;z-index:2;pointer-events:none;opacity:0;transition:transform .4s cubic-bezier(.45,0,.25,1),opacity .17s ease}
+.poc-touch.on{opacity:1}
+.poc-touch i{position:absolute;left:calc(-22px * var(--s));top:calc(-22px * var(--s));width:calc(44px * var(--s));height:calc(44px * var(--s));border-radius:50%;
+  background:rgba(120,124,134,.42);box-shadow:inset 0 0 0 calc(1.5px * var(--s)) rgba(255,255,255,.75),0 2px 10px rgba(0,0,0,.18);transition:transform .1s ease-out,background .1s}
+.poc-touch.down i{transform:scale(.8);background:rgba(120,124,134,.62)}
+.poc-touch i::after{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 calc(2px * var(--s)) rgba(120,124,134,.55);opacity:0}
+.poc-touch.ripple i::after{animation:pocRipple .34s ease-out}
+@keyframes pocRipple{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.9)}}
+.poc-player{display:flex;align-items:center;gap:10px;width:calc(390px * var(--s));min-width:220px}
+.poc-player .play{width:32px;height:32px;font-size:12px}
+.poc-play-label{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
+.poc-prog{flex:1;min-width:40px;height:3px;border-radius:3px;background:var(--line);overflow:hidden}
+.poc-prog i{display:block;height:100%;width:0;background:var(--ink);transition:width .6s ease}
+/* 클릭 영역 보기: the phone's clickable areas, drawn over it for a second (fades in 0.15 s, out 0.25 s) */
+.poc-hits{--hit:#FF6A1A;position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .25s ease-in}
+.poc-hits.on{opacity:1;transition:opacity .15s ease-out}
+.poc-hits i{position:absolute;background:color-mix(in srgb,var(--hit) 16%,transparent);box-shadow:inset 0 0 0 1.5px var(--hit)}
+.poc-intro{display:flex;align-items:flex-start;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.poc-hint-btn{display:inline-flex;align-items:center;gap:6px;flex:none}
+.poc-hint-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round}
+.poc-info{flex:0 1 380px;min-width:0;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:18px;padding:4px 2px;word-break:keep-all}   /* (Korean wraps between words) */
+.poc-kicker{margin:0;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.poc-title{margin:6px 0 0;font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.poc-lead{margin:6px 0 0;font-size:14px;color:var(--muted);text-wrap:pretty}
+.poc-facts{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px}
+.poc-facts dt{color:var(--faint);white-space:nowrap}
+.poc-facts dd{margin:0}
+.poc-flow-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.poc-count{font-size:12px;color:var(--faint)}
+.poc-steps{list-style:none;margin:8px 0 0;padding:0;border-top:1px solid var(--line-soft)}
+.poc-steps li{border-bottom:1px solid var(--line-soft)}
+.poc-steps button{width:100%;display:grid;grid-template-columns:30px 1fr;gap:1px 8px;align-items:baseline;padding:8px 6px;border:0;border-radius:var(--r-s);background:none;color:var(--ink);cursor:pointer;text-align:left}
+.poc-steps button:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.poc-steps .n{font-family:var(--f-mono);font-size:11px;color:var(--faint)}
+.poc-steps b{font-weight:500;font-size:13px}
+.poc-steps small{grid-column:2;font-size:12px;line-height:1.5;color:var(--muted)}
+.poc-steps button[aria-current="step"]{background:var(--raise)}
+.poc-steps button[aria-current="step"] .n,.poc-steps button[aria-current="step"] b{color:var(--accent)}
+.poc-key{font-style:normal;font-size:10.5px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:1px}
+.poc-foot{display:flex;align-items:center;gap:12px}
+/* 시나리오 소개: the three scenarios as a one-page story. Photos: mobile-ui-kit/scenarios/web/*.jpg (the photos in mobile-ui-kit/scenarios/,
+   their thin black bands cut away, 2400 × 1350), with rounded corners so they sit softly on the page */
+.poc-story{flex:1;min-height:0;overflow:auto;word-break:keep-all;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 28px);mask-image:linear-gradient(to bottom,transparent 0,#000 28px)}   /* (what scrolls up fades under the tabs) */
+.ps-in{max-width:1040px;margin:0 auto;padding:40px max(24px,env(safe-area-inset-right,0px)) 96px max(24px,env(safe-area-inset-left,0px))}
+.ps-kicker{margin:0;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ps-hero{max-width:720px}
+.ps-hero h1{margin:10px 0 0;font-size:40px;line-height:1.18;font-weight:600;letter-spacing:-.025em;text-wrap:balance}
+.ps-hero p{margin:16px 0 0;font-size:17px;line-height:1.7;color:var(--muted);text-wrap:pretty}
+.ps-scn{margin-top:88px}
+.ps-shot{margin:0;aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:var(--line-soft)}
+.ps-shot img{display:block;width:100%;height:100%;object-fit:cover}
+.ps-head{margin-top:28px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px 24px;flex-wrap:wrap}
+.ps-head h2{margin:6px 0 0;font-size:32px;line-height:1.2;font-weight:600;letter-spacing:-.02em}
+.ps-lead{margin:8px 0 0;font-size:17px;line-height:1.6;color:var(--muted)}
+.ps-acts{display:flex;gap:8px;flex-wrap:wrap}
+.ps-btn{height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--raise);color:var(--ink);cursor:pointer;font-weight:500;white-space:nowrap}
+.ps-btn.solid{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.ps-grid{margin-top:32px;padding-top:32px;border-top:1px solid var(--line-soft);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:36px 56px}
+.ps-block + .ps-block{margin-top:28px}
+.ps-block h3{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.ps-block p{margin:0;font-size:14.5px;line-height:1.75}
+.ps-block p b{font-weight:600}
+.ps-block .ps-promise{font-size:17px;line-height:1.6;font-weight:500;text-wrap:pretty}
+.ps-flow{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-soft)}
+.ps-flow li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:14px;line-height:1.6}
+.ps-flow .n{font-family:var(--f-mono);font-size:11.5px;color:var(--faint);padding-top:2px}
+.ps-ok{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.6}
+.ps-foot{margin-top:88px;padding-top:24px;border-top:1px solid var(--line-soft);max-width:720px;font-size:12.5px;line-height:1.75;color:var(--faint)}
+
+.poc-note{flex:1;font-size:11.5px;line-height:1.5;color:var(--faint)}
 
 @media (max-width:900px){
   body{overflow:auto;height:auto}
@@ -283,9 +376,27 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
   .code-wrap{max-height:70vh}
   .stage{height:78vh;min-height:520px}
   .pane-design{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .poc{flex:none}
+  .poc-body{flex-direction:column;gap:28px;padding-bottom:48px}
+  .poc-info{flex:none;width:100%;max-width:560px;max-height:none;overflow:visible}
+  .poc-story{flex:none;overflow:visible;-webkit-mask-image:none;mask-image:none}
+}
+@media (max-width:600px){
+  .ps-hero h1{font-size:30px}
+  .ps-head h2{font-size:26px}
+  .ps-shot{border-radius:14px}
+  .ps-scn{margin-top:64px}
 }
 @media (max-width:480px){
   .default-btn{padding:0 10px;font-size:12px}
+  .tab{padding:6px 9px}
+  .tab-long{display:none}   /* the tabs read Cue · PoC · About */
+  .poc-head .spacer{display:none}
+  .poc-scn{flex:1 1 100%}
+  .poc-scn button{flex:1 1 auto;justify-content:center;padding:0 8px;font-size:12px}
+  .poc-scn button i{display:none}
+  .poc-scn [data-i="story"]{flex-basis:100%}   /* 시나리오 소개 on its own row, the three scenarios side by side under it */
+  .poc-lang{margin-left:auto}
   .brand span{display:none}
   .ctrl-grid{grid-template-columns:1fr}
   .levels{display:none}
@@ -301,7 +412,8 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
 <header class="topbar">
   <div class="brand"><i class="brand-mark" aria-hidden="true"></i><span>AI Visual Cue Studio</span><small>v0.1</small></div>
   <nav class="tabs" role="tablist" aria-label="메인 탭">
-    <button class="tab" role="tab" id="tab-btn-cue" aria-selected="true" aria-controls="view-cue">AI Visual Cue</button>
+    <button class="tab" role="tab" id="tab-btn-cue" aria-selected="true" aria-controls="view-cue"><span class="tab-long">AI Visual </span>Cue</button>
+    <button class="tab" role="tab" id="tab-btn-poc" aria-selected="false" aria-controls="view-poc"><span class="tab-long">Mobile UI </span>PoC</button>
     <button class="tab" role="tab" id="tab-btn-about" aria-selected="false" aria-controls="view-about">About</button>
   </nav>
   <div class="top-actions">
@@ -322,13 +434,13 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
 
     <div class="pane pane-design" id="paneDesign">
       <section class="sec" aria-labelledby="h-color">
-        <div class="sec-h"><h3 id="h-color">컬러</h3><span class="hint">세트 · 화면 배경 · 에이전트</span></div>
+        <div class="sec-h"><h3 id="h-color">컬러</h3><span class="hint">세트, 화면 배경, 에이전트</span></div>
         <div class="sub-h" id="h-sets">세트<small>화면 배경 + 에이전트 컬러 + 물성</small></div>
         <div class="sets" id="sets" role="group" aria-labelledby="h-sets"></div>
-        <div class="sub-h" id="h-bgs">화면 배경<small>Adaptive Screen · 에이전트는 그대로 두고 배경만</small></div>
+        <div class="sub-h" id="h-bgs">화면 배경<small>에이전트는 그대로 두고 Adaptive Screen 배경만</small></div>
         <div class="bgs" id="bgs" role="group" aria-labelledby="h-bgs"></div>
         <div class="bg-edit" id="bgEdit" role="group" aria-label="화면 배경 직접 편집"></div>
-        <div class="sub-h" id="h-agent">에이전트 컬러<small>칩 클릭: 색 변경 · 드래그: 위치</small></div>
+        <div class="sub-h" id="h-agent">에이전트 컬러<small>칩을 눌러 색을, 끌어서 위치를 바꿉니다</small></div>
         <div class="presets" id="presets" role="group" aria-labelledby="h-agent"></div>
         <div class="grad" id="grad"><div class="grad-rail"></div><span class="grad-pos" id="gradPos"></span></div>
         <div class="stop-edit">
@@ -357,12 +469,12 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
       </section>
 
       <section class="sec" aria-labelledby="h-size">
-        <div class="sec-h"><h3 id="h-size">크기</h3><span class="hint">단위 dp · 화면 360 × 780</span></div>
+        <div class="sec-h"><h3 id="h-size">크기</h3><span class="hint">화면 360 × 780 dp 기준</span></div>
         <div class="ctrl-grid" id="sizeCtrls"></div>
       </section>
 
       <section class="sec" aria-labelledby="h-load">
-        <div class="sec-h"><h3 id="h-load">로딩 형태</h3><span class="hint">큐 적용 사례 · 전체 비교 · 퍼지기 전 상단 캡슐</span></div>
+        <div class="sec-h"><h3 id="h-load">로딩 형태</h3><span class="hint">퍼지기 전 상단 캡슐 (큐 적용 사례, 전체 비교)</span></div>
         <div class="ctrl-grid" id="loadCtrls"></div>
       </section>
 
@@ -395,7 +507,7 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
     </div>
   </aside>
 
-  <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" aria-label="컨트롤 영역과 프리뷰 너비 조절" aria-valuemin="15" aria-valuemax="65" tabindex="0" title="드래그해서 컨트롤 영역 너비 조절 · 더블클릭: 기본 너비 · ←/→ 키"><i aria-hidden="true"></i></div>
+  <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" aria-label="컨트롤 영역과 프리뷰 너비 조절" aria-valuemin="15" aria-valuemax="65" tabindex="0" title="끌어서 컨트롤 영역 너비를 바꿉니다. 더블클릭하면 기본 너비로, ←/→ 키로도 조절합니다"><i aria-hidden="true"></i></div>
 
   <section class="stage" aria-label="프리뷰">
     <div class="stage-head">
@@ -414,7 +526,7 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
       </div>
       <div class="ex-btns"><button class="copy-btn" id="exMp4" type="button">MP4 저장</button><button class="copy-btn" id="exGif" type="button">GIF 저장</button></div>
       <div class="ex-prog" id="exProg" hidden><div class="ex-bar"><i id="exBar"></i></div><span id="exMsg"></span></div>
-      <p class="ex-note">현재 설정 그대로, 루프 처음부터 끝까지 한 번을 렌더링합니다. MP4는 720 × 1560 · 30fps, GIF는 360 × 780 · 15fps이고 무한 반복으로 저장됩니다.</p>
+      <p class="ex-note">현재 설정 그대로, 루프 처음부터 끝까지 한 번을 렌더링합니다. MP4는 720 × 1560에 30fps, GIF는 360 × 780에 15fps이고 무한 반복으로 저장됩니다.</p>
     </div>
     <div class="stage-body" id="stageBody">
       <div class="frames" id="frames">
@@ -487,6 +599,22 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
   </section>
 </main>
 
+<main class="poc" id="view-poc" role="tabpanel" aria-labelledby="tab-btn-poc" hidden>
+  <div class="poc-head">
+    <div class="poc-scn" id="pocScn" role="tablist" aria-label="시나리오"></div>
+    <span class="spacer"></span>
+    <div class="seg poc-lang" id="pocLang" role="group" aria-label="언어"><button type="button" data-v="en" lang="en">EN</button><button type="button" data-v="ko" lang="ko">KO</button></div>
+  </div>
+  <div class="poc-body" id="pocBody">
+    <div class="poc-phone" id="pocPhone">
+      <div class="poc-device" id="pocDevice"><iframe id="pocFrame" title="Mobile UI PoC"></iframe><div class="poc-hits" id="pocHits" aria-hidden="true"></div><div class="poc-touch" id="pocTouch" aria-hidden="true"><i></i></div></div>
+      <div class="poc-player"><button class="play" id="pocPlay" type="button" aria-label="자동 재생">▶</button><span class="poc-play-label" id="pocPlayLabel" aria-live="polite"></span><span class="poc-prog" aria-hidden="true"><i id="pocProg"></i></span></div>
+    </div>
+    <section class="poc-info" id="pocInfo"></section>
+  </div>
+  <div class="poc-story" id="pocStory" hidden></div>
+</main>
+
 <main class="about" id="view-about" role="tabpanel" aria-labelledby="tab-btn-about" hidden>
   <div class="about-in">
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -496,11 +624,12 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
     <div>
       <h2>사용 방법</h2>
       <ol>
-        <li>Design 탭에서 컬러(세트 · 화면 배경 · 에이전트 그라데이션 스톱 최대 3개), 물성, 크기, 모션을 조절합니다. 세트는 화면 배경과 그 배경에 어울리는 에이전트 컬러 · 물성을 한 번에 바꾸고, 화면 배경만 따로 고르거나 위 · 가운데 · 아래 색을 직접 바꿀 수도 있습니다. 프리뷰는 바로 바뀝니다.</li>
-        <li>프리뷰는 3개 뷰입니다. 첫 번째는 맥락에 따라 화면이 스스로 재구성되는 <b>Adaptive Screen</b> 시안(전체 화면), 두 번째는 같은 화면에 AI Visual Cue를 적용한 <b>큐 적용 사례</b>(왼쪽 현재 그대로, 오른쪽 큐 적용: 상태가 바뀔 때마다 먼저 에이전트가 생각하는 로딩 단계가 있습니다. 글씨 전체가 블러로 흐려지고 하단 플로팅은 그대로인 채, 상단에 아래쪽이 블러로 흐려지는 가로 캡슐 모양의 로딩 큐가 나타나 숨쉬듯 원형으로 줄어들었다가 다시 원래 너비로 늘어납니다. 모든 상태가 같은 5.8초 로딩 동안 한 번에 약 2.7초씩(줄어드는 데 1.35초, 늘어나는 데 1.35초) 천천히 두 번 숨쉰 뒤 원래 너비에서 펴집니다(캡슐 윗가장자리를 따라 보이는 테두리 빛은 조금 더 강하게, 위쪽 30%까지는 그대로 비치다가 중간까지 서서히 이어지고 아래로 가면서 사라져 맨 아래에서는 없습니다). 그다음 큐가 카드 단계 없이 전체 화면으로 천천히(기본 1.5초) 쫙 펴지면서 흐려진 글씨는 사라지고 새 글씨가 왼쪽 화면처럼 한 글자씩 블러에서 써지며, 하단 플로팅이 바뀝니다. 왼쪽 화면은 로딩 동안 그대로 머물러 두 화면이 같은 순간에 바뀝니다. 큐는 배경에만 그려지고 글씨 위를 덮지 않습니다. 하단 플로팅은 맨 위 레이어라 큐의 영향을 받지 않고, 큐는 플로팅 가장자리까지 닿아 플로팅의 그림자만 큐 위에 드리워집니다), 세 번째는 ① 비주얼 큐와 ② 앱 적용을 같은 시계로 나란히 보는 <b>전체 비교</b>입니다(두 화면 모두 화면 배경과 세트를 따르고, ② 앱 화면과 에이전트 볼이 만드는 리스트는 SEED 디자인 시스템의 토큰과 컴포넌트 스펙대로 그립니다. 상단의 에이전트 볼은 큐 적용 사례와 똑같은 로딩 캡슐로 나타나 같은 5.8초 동안 두 번 숨쉰 뒤, 같은 1.5초에 걸쳐 블러를 걷어내며 카드로 펴집니다. 그동안 ② 앱 화면은 큐 적용 사례의 글씨처럼 블러로 흐려졌다가 캡슐이 펴지며 다시 선명해집니다. ② 하단에는 입력창 대신 큐 적용 사례의 플로팅 바가 있어, 카드가 끼어들 때 일정 버튼이 물방울처럼 갈라져 나오고, 전체 화면에서는 탭(일정 · 메모 · 대화)으로 정리됐다가, 큐가 사라지면 처음 모양으로 돌아옵니다. 전체 화면에서는 상단에 큐 적용 사례의 문장처럼 에이전트가 하는 말이 Adaptive Screen처럼 한 글자씩 블러에서 써지고, 그 24dp 아래로 리스트가 한 줄씩 같은 방식으로 나타납니다. 글자 크기는 리스트가 잘리지 않도록 26dp로 맞췄습니다). 좌우 화살표, 키보드 ←/→, 드래그로 넘기고 스페이스바로 재생을 멈춥니다. Design 탭의 설정은 큐 적용 사례와 전체 비교에 반영되고, 컬러의 화면 배경은 Adaptive Screen 시안에도 반영됩니다.</li>
+        <li>Design 탭에서 컬러(세트, 화면 배경, 에이전트 그라데이션 스톱 최대 3개), 물성, 크기, 모션을 조절합니다. 세트는 화면 배경과 그 배경에 어울리는 에이전트 컬러와 물성을 한 번에 바꾸고, 화면 배경만 따로 고르거나 위, 가운데, 아래 색을 직접 바꿀 수도 있습니다. 프리뷰는 바로 바뀝니다.</li>
+        <li>프리뷰는 3개 뷰입니다. 첫 번째는 맥락에 따라 화면이 스스로 재구성되는 <b>Adaptive Screen</b> 시안(전체 화면), 두 번째는 같은 화면에 AI Visual Cue를 적용한 <b>큐 적용 사례</b>(왼쪽 현재 그대로, 오른쪽 큐 적용: 상태가 바뀔 때마다 먼저 에이전트가 생각하는 로딩 단계가 있습니다. 글씨 전체가 블러로 흐려지고 하단 플로팅은 그대로인 채, 상단에 아래쪽이 블러로 흐려지는 가로 캡슐 모양의 로딩 큐가 나타나 숨쉬듯 원형으로 줄어들었다가 다시 원래 너비로 늘어납니다. 모든 상태가 같은 5.8초 로딩 동안 한 번에 약 2.7초씩(줄어드는 데 1.35초, 늘어나는 데 1.35초) 천천히 두 번 숨쉰 뒤 원래 너비에서 펴집니다(캡슐 윗가장자리를 따라 보이는 테두리 빛은 조금 더 강하게, 위쪽 30%까지는 그대로 비치다가 중간까지 서서히 이어지고 아래로 가면서 사라져 맨 아래에서는 없습니다). 그다음 큐가 카드 단계 없이 전체 화면으로 천천히(기본 1.5초) 쫙 펴지면서 흐려진 글씨는 사라지고 새 글씨가 왼쪽 화면처럼 한 글자씩 블러에서 써지며, 하단 플로팅이 바뀝니다. 왼쪽 화면은 로딩 동안 그대로 머물러 두 화면이 같은 순간에 바뀝니다. 큐는 배경에만 그려지고 글씨 위를 덮지 않습니다. 하단 플로팅은 맨 위 레이어라 큐의 영향을 받지 않고, 큐는 플로팅 가장자리까지 닿아 플로팅의 그림자만 큐 위에 드리워집니다), 세 번째는 ① 비주얼 큐와 ② 앱 적용을 같은 시계로 나란히 보는 <b>전체 비교</b>입니다(두 화면 모두 화면 배경과 세트를 따르고, ② 앱 화면과 에이전트 볼이 만드는 리스트는 SEED 디자인 시스템의 토큰과 컴포넌트 스펙대로 그립니다. 상단의 에이전트 볼은 큐 적용 사례와 똑같은 로딩 캡슐로 나타나 같은 5.8초 동안 두 번 숨쉰 뒤, 같은 1.5초에 걸쳐 블러를 걷어내며 카드로 펴집니다. 그동안 ② 앱 화면은 큐 적용 사례의 글씨처럼 블러로 흐려졌다가 캡슐이 펴지며 다시 선명해집니다. ② 하단에는 입력창 대신 큐 적용 사례의 플로팅 바가 있어, 카드가 끼어들 때 일정 버튼이 물방울처럼 갈라져 나오고, 전체 화면에서는 탭(일정, 메모, 대화)으로 정리됐다가, 큐가 사라지면 처음 모양으로 돌아옵니다. 전체 화면에서는 상단에 큐 적용 사례의 문장처럼 에이전트가 하는 말이 Adaptive Screen처럼 한 글자씩 블러에서 써지고, 그 24dp 아래로 리스트가 한 줄씩 같은 방식으로 나타납니다. 글자 크기는 리스트가 잘리지 않도록 26dp로 맞췄습니다). 좌우 화살표, 키보드 ←/→, 드래그로 넘기고 스페이스바로 재생을 멈춥니다. Design 탭의 설정은 큐 적용 사례와 전체 비교에 반영되고, 컬러의 화면 배경은 Adaptive Screen 시안에도 반영됩니다.</li>
         <li>컨트롤 영역과 프리뷰 사이의 바를 드래그하면 컨트롤 영역 너비를 조절할 수 있습니다. 더블클릭하면 기본 너비로 돌아가고, 바를 선택한 뒤 ←/→ 키(Shift는 크게), Home/End로도 조절합니다. 너비는 브라우저에 저장되고, 좁아지면 컨트롤이 다음 줄로 넘어가 다시 배치됩니다.</li>
         <li>상단 "Set as default"를 누르면 지금 설정과 보고 있는 뷰가 이 브라우저에 기본값으로 저장됩니다. 다음에 열면 그 화면에서 시작하고, 초기화하면 그 값으로 돌아갑니다. 패널 맨 아래 "처음 기본값으로"를 누르면 저장한 기본값이 지워집니다.</li>
-        <li>패널 위 Design · Code 탭 오른쪽의 "초기화"를 누르면 컬러뿐 아니라 물성 · 크기 · 로딩 형태 · 모션 · 그림자 · 언어까지 모든 값이 기본값(저장한 기본값이 있으면 그 값)으로 돌아갑니다. 값 하나만 되돌릴 때는 슬라이더 옆 ↺ 버튼을 누릅니다.</li>
+        <li>상단 <b>Mobile UI PoC</b> 탭에서는 mobile-ui-kit의 세 시나리오(PC Health, Meeting Notes, Our Discussion)를 폰 화면에서 직접 눌러 보며 따라갑니다. 오른쪽 흐름에서 화면을 고르면 그 화면으로 이동하고, 제목 오른쪽의 "클릭 영역 보기"를 누르면 지금 화면에서 누를 수 있는 곳이 1초 동안 표시됩니다. 폰 아래 ▶를 누르면 손가락 표시가 실제로 화면을 누르며 시나리오를 끝까지 재생하고, 첫 화면으로 돌아와 반복합니다(❚❚ 일시정지, 폰을 직접 누르면 멈춤). 맨 앞의 "시나리오 소개" 탭에서는 세 시나리오를 사진과 함께 한 페이지로 읽고, 각 시나리오에서 바로 눌러 보거나 자동 재생으로 넘어갈 수 있습니다. "처음부터"를 누르면 데모 데이터를 초기화해 다시 시작합니다. 다크/라이트는 시스템 모드(또는 ☾ 버튼)를 따르고, 한글/영문은 EN / KO 토글로 바꿉니다.</li>
+        <li>패널 위 Design, Code 탭 오른쪽의 "초기화"를 누르면 컬러뿐 아니라 물성, 크기, 로딩 형태, 모션, 그림자, 언어까지 모든 값이 기본값(저장한 기본값이 있으면 그 값)으로 돌아갑니다. 값 하나만 되돌릴 때는 슬라이더 옆 ↺ 버튼을 누릅니다.</li>
         <li>전체 비교 화면의 "내보내기"에서 ① 비주얼 큐 / ② 앱 적용 / 전체 비교 중 하나를 골라 루프 한 번을 MP4(720 × 1560, 30fps) 또는 GIF(360 × 780, 15fps, 무한 반복)로 저장합니다. Adaptive Screen 시안과 큐 적용 사례는 내보내기 대상이 아닙니다.</li>
         <li>Code 탭에서 Kotlin 파일 전체를 복사해 Android 프로젝트에 붙여넣고 <span class="mono">AiVisualCueDemoLoop()</span> 또는 <span class="mono">AiVisualCue(level)</span>을 호출합니다.</li>
       </ol>
@@ -508,9 +637,9 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
     <div>
       <h2>한 사이클</h2>
       <table class="spec-table"><tbody>
-        <tr><td>L1 · 로딩</td><td>에이전트가 생각하는 동안 화면 상단에 아래쪽이 블러로 흐려지는 가로 캡슐이 페이드 인하고, 원형으로 줄었다가 다시 늘어나며 천천히 두 번 숨쉼(큐 적용 사례와 같은 5.8초). ② 앱 화면은 블러로 흐려지고 하단 플로팅 바는 그대로</td></tr>
-        <tr><td>L2 · 확산 · 끼어들기</td><td>캡슐이 블러를 걷어내며 넓게 퍼져(1.5초) 카드가 되어 앱 콘텐츠 사이에 끼어듦. 앱은 다시 선명해지고 아래 콘텐츠는 밀려 내려가며, 하단 플로팅 바에서 일정 버튼이 물방울처럼 갈라져 나옴. 카드가 자리 잡는 순간부터 카드 안 리스트 3줄이 Adaptive Screen처럼 한 줄씩 블러에서 써짐</td></tr>
-        <tr><td>L3 · 전체 화면 리스트</td><td>화면 전체로 확산되어 가장자리 글로우가 되고, 카드의 리스트는 앱 화면과 함께 같은 속도로 블러에 흐려지며 부드럽게 사라지고, 상단에 에이전트가 하는 말이 Adaptive Screen처럼 한 글자씩 블러에서 써진 뒤 그 24dp 아래로 리스트 5줄이 한 줄씩 같은 방식으로 나타남. 앱은 흐려지며 뒤로 물러남. 하단 플로팅 바는 탭(일정 · 메모 · 대화)으로 정리</td></tr>
+        <tr><td>L1 로딩</td><td>에이전트가 생각하는 동안 화면 상단에 아래쪽이 블러로 흐려지는 가로 캡슐이 페이드 인하고, 원형으로 줄었다가 다시 늘어나며 천천히 두 번 숨쉼(큐 적용 사례와 같은 5.8초). ② 앱 화면은 블러로 흐려지고 하단 플로팅 바는 그대로</td></tr>
+        <tr><td>L2 확산과 끼어들기</td><td>캡슐이 블러를 걷어내며 넓게 퍼져(1.5초) 카드가 되어 앱 콘텐츠 사이에 끼어듦. 앱은 다시 선명해지고 아래 콘텐츠는 밀려 내려가며, 하단 플로팅 바에서 일정 버튼이 물방울처럼 갈라져 나옴. 카드가 자리 잡는 순간부터 카드 안 리스트 3줄이 Adaptive Screen처럼 한 줄씩 블러에서 써짐</td></tr>
+        <tr><td>L3 전체 화면 리스트</td><td>화면 전체로 확산되어 가장자리 글로우가 되고, 카드의 리스트는 앱 화면과 함께 같은 속도로 블러에 흐려지며 부드럽게 사라지고, 상단에 에이전트가 하는 말이 Adaptive Screen처럼 한 글자씩 블러에서 써진 뒤 그 24dp 아래로 리스트 5줄이 한 줄씩 같은 방식으로 나타남. 앱은 흐려지며 뒤로 물러남. 하단 플로팅 바는 탭(일정, 메모, 대화)으로 정리</td></tr>
         <tr><td>사라짐</td><td>제자리에서 페이드 아웃, 에이전트의 말은 흐려지며 사라지고, 밀렸던 콘텐츠는 원래 위치로, 하단 플로팅 바는 처음 모양으로 돌아온 뒤 무한 반복</td></tr>
       </tbody></table>
     </div>
@@ -528,14 +657,26 @@ pre.code{margin:0;padding:16px 20px 40px;font-family:var(--f-mono);font-size:11.
       <h2>기본 팔레트</h2>
       <p style="color:var(--muted);margin-bottom:10px">레퍼런스 영상에서 추출한 3스톱 팔레트입니다.</p>
       <div style="display:flex;flex-direction:column;gap:8px" id="aboutPalettes"></div>
-      <p style="color:var(--muted);margin:18px 0 10px">화면 배경(Adaptive Screen)과, 각 배경에 어울리는 에이전트 컬러 · 물성 세트입니다. 배경은 위 → 가운데 → 아래 그라디언트이고, 세트로 고르거나 배경만 따로 고를 수 있습니다.</p>
+      <p style="color:var(--muted);margin:18px 0 10px">화면 배경(Adaptive Screen)과, 각 배경에 어울리는 에이전트 컬러와 물성 세트입니다. 배경은 위 → 가운데 → 아래 그라디언트이고, 세트로 고르거나 배경만 따로 고를 수 있습니다.</p>
       <div style="display:flex;flex-direction:column;gap:8px" id="aboutScreenBgs"></div>
     </div>
     <div>
       <h2>디자인 시스템</h2>
-      <p>전체 비교의 ② 앱 화면과 에이전트 볼이 만드는 리스트는 <a href="https://seed-design.io" target="_blank" rel="noopener">SEED Design</a>(© 주식회사 당근마켓, Apache License 2.0)의 파운데이션(색 역할, 글자 크기, 간격, 라운드, 그림자, 스크롤 포그)과 컴포넌트 스펙(앱바, 칩, 배지, 버튼, 리스트 아이템)을 따릅니다. 값은 <span class="mono">@seed-design/css</span> 3.1.0 기준이고, 코드는 포함하지 않고 캔버스와 생성 Kotlin으로 다시 그렸습니다. 카드와 리스트는 SEED의 흰 레이어 대신 화면 배경에 묻히는 유리입니다. 흰색 60%에 배경 블러를 주고, 세트의 에이전트 컬러 그라디언트를 옅게 깔고, 얇은 흰 테두리를 둡니다. 하단 입력은 SEED의 입력창 대신 큐 적용 사례의 플로팅 바를 쓰고, 그 안의 아이콘과 플레이스홀더만 SEED를 따릅니다. 당근의 로고 · 이름 같은 브랜드 리소스는 쓰지 않습니다. 라이선스 사본과 고지는 저장소의 <span class="mono">licenses/seed-design/</span>에 있습니다.</p>
+      <p>전체 비교의 ② 앱 화면과 에이전트 볼이 만드는 리스트는 <a href="https://seed-design.io" target="_blank" rel="noopener">SEED Design</a>(© 주식회사 당근마켓, Apache License 2.0)의 파운데이션(색 역할, 글자 크기, 간격, 라운드, 그림자, 스크롤 포그)과 컴포넌트 스펙(앱바, 칩, 배지, 버튼, 리스트 아이템)을 따릅니다. 값은 <span class="mono">@seed-design/css</span> 3.1.0 기준이고, 코드는 포함하지 않고 캔버스와 생성 Kotlin으로 다시 그렸습니다. 카드와 리스트는 SEED의 흰 레이어 대신 화면 배경에 묻히는 유리입니다. 흰색 60%에 배경 블러를 주고, 세트의 에이전트 컬러 그라디언트를 옅게 깔고, 얇은 흰 테두리를 둡니다. 하단 입력은 SEED의 입력창 대신 큐 적용 사례의 플로팅 바를 쓰고, 그 안의 아이콘과 플레이스홀더만 SEED를 따릅니다. 당근의 로고나 이름 같은 브랜드 리소스는 쓰지 않습니다. 라이선스 사본과 고지는 저장소의 <span class="mono">licenses/seed-design/</span>에 있습니다.</p>
     </div>
-    <p style="color:var(--faint);font-size:12px">v0.1 · 물성 9종(소프트 글로우, 오라, 워터, 가스, 네온, 프로스티드 글래스, 리퀴드 메탈, 펄, 매트 클레이). 프리뷰 화면 텍스트는 상단 EN / KO로 바꿉니다.</p>
+    <div>
+      <h2>작업 기록</h2>
+      <ul class="hist">
+        <li><span class="mono">2026-11-17</span><p><b>Mobile UI PoC</b>&ensp;상단에 Mobile UI PoC 탭을 추가했습니다. mobile-ui-kit의 세 시나리오를 폰 화면에서 눌러 보고(다크/라이트는 시스템 모드, EN / KO 토글), 맨 앞의 시나리오 소개 탭에서 사진과 함께 읽습니다. 클릭 영역 보기(1초 표시)와 1.5배속 자동 재생(실제로 누르며 반복)이 있습니다. 가운데 점 구분자는 툴, 키트, README에서 모두 없앴습니다.</p></li>
+        <li><span class="mono">2026-11-16</span><p><b>초기화</b>&ensp;패널 위 "초기화" 하나로 컬러뿐 아니라 모든 값을 기본값으로 되돌립니다.</p></li>
+        <li><span class="mono">2026-11-15</span><p><b>디자인 키트와 프로그레시브 블러</b>&ensp;새 화면용 디자인 키트(design/agent-ui.css)와 프로그레시브 블러 스크립트(design/progressive-blur.js)를 추가했습니다. 에이전트 볼 카드의 리스트가 블러에서 써지고 전환 속도에 맞춰 사라집니다.</p></li>
+        <li><span class="mono">2026-11-14</span><p><b>전체 비교 재구성</b>&ensp;로딩 캡슐의 숨쉬기와 펴짐, 화면 배경 11종과 세트, SEED로 다시 만든 ② 앱 화면과 유리 표면, 프로그레시브 블러로 써지는 에이전트의 말과 리스트를 더했습니다.</p></li>
+        <li><span class="mono">2026-11-09</span><p><b>Adaptive Screen</b>&ensp;Adaptive Screen 시안을 첫 번째 프리뷰로 추가했습니다.</p></li>
+        <li><span class="mono">2026-10-21</span><p><b>팔레트</b>&ensp;따뜻한 프리셋과 초록 프리셋 각 3종을 추가하고, ① 뷰는 큐 물성만 보여 줍니다.</p></li>
+        <li><span class="mono">2026-10-20</span><p><b>v0.1</b>&ensp;AI Visual Cue Studio v0.1을 공개했습니다. 페이드, 카드 끼어들기, 컬러 피커, 루프 내보내기, 새 물성, EN / KO, Set as default를 같은 날 더했습니다.</p></li>
+      </ul>
+    </div>
+    <p style="color:var(--faint);font-size:12px"><span class="mono" style="margin-right:10px">v0.1</span>물성 9종(소프트 글로우, 오라, 워터, 가스, 네온, 프로스티드 글래스, 리퀴드 메탈, 펄, 매트 클레이). 프리뷰 화면 텍스트는 상단 EN / KO로 바꿉니다.</p>
   </div>
 </main>
 
@@ -613,7 +754,7 @@ const MATS = {
                   params:[['바깥 빛 번짐',0,1,0.01],['감싸는 빛 세기',0,1,0.01],['빛 회전 속도',0,1,0.01]], def:[0.8,0.7,0.4,0] },
   water:        { name:'워터', en:'Water', desc:'맑은 물방울. 뒤 화면이 굴절되고 가장자리에 색이 갈라지며, 표면에 물결과 반짝임이 흐름.',
                   params:[['굴절',0,1,0.01],['물결',0,1,0.01],['색 물듦',0,1,0.01]], def:[0.6,0.6,0.5,0] },
-  gas:          { name:'가스', en:'Gas', desc:'연기·성운 같은 기체. 형태 안에서 결이 흐르고 가장자리가 흩어짐.',
+  gas:          { name:'가스', en:'Gas', desc:'연기나 성운 같은 기체. 형태 안에서 결이 흐르고 가장자리가 흩어짐.',
                   params:[['밀도',0,1,0.01],['가장자리 흩어짐',0,1,0.01],['흐름 속도',0,1,0.01]], def:[0.7,0.5,0.4,0] },
   neon:         { name:'네온', en:'Neon', desc:'윤곽을 따라 빛나는 네온 라인과 은은한 후광. 안쪽은 비워 둠.',
                   params:[['안쪽 채움',0,1,0.01],['선 두께',0,1,0.01],['깜빡임',0,1,0.01]], def:[0.25,0.4,0.2,0] },
@@ -772,7 +913,7 @@ function buildTimeline(s){
   const T = s.transMs;
   const segs = [
     {hold:true,  a:0,     dur:ASL_PRE*1000,    lv:1, name:'로딩', loading:true},
-    {hold:false, a:0,b:1, dur:aslSpreadMs(s),  lv:2, name:'확산·끼어들기', spread:true, bar:1},
+    {hold:false, a:0,b:1, dur:aslSpreadMs(s),  lv:2, name:'확산과 끼어들기', spread:true, bar:1},
     {hold:true,  a:1,     dur:l2HoldMs(s),     lv:2, name:'컴포넌트 생성'},
     {hold:false, a:1,b:2, dur:T,               lv:3, name:'전체 확산', bar:2},
     {hold:true,  a:2,     dur:l3HoldMs(s),     lv:3, name:'전체 화면 리스트', breathe:true},
@@ -907,7 +1048,7 @@ function sampleFrame(tMs, P){
     ({ pose, blur, rimFrom, rimTo, rimGain, glowW, phase, phaseAmt } = spreadCue(clamp01(local/g.dur), P[0], P[1]));
   } else if(g.hold){
     pose = {...P[g.a]};
-    if(g.vanish) opacity = 1 - FADE(clamp01(local/Math.max(S.fadeMs,1)));   // (it fades over 나타남·사라짐; the rest of the segment the screen settles)
+    if(g.vanish) opacity = 1 - FADE(clamp01(local/Math.max(S.fadeMs,1)));   // (it fades over 나타남과 사라짐; the rest of the segment the screen settles)
     if(g.breathe || g.vanish) glowW = 28*(1+0.15*Math.sin(2*Math.PI*(local+(g.vanish?TL.segs[4].dur:0))/2000));   // (on through the vanish)
   } else {
     const tl = clamp01(local/g.dur);
@@ -1382,21 +1523,21 @@ const ICONS = {
 };
 // ② the app — a day planner, written the SEED way: plain words, what you get done, no full stops in titles, labels and buttons
 const APP_TEXT = {
-  en:{ title:'Today', chips:['All','Schedule','Notes','Photos','Places'], badge:'Starts in 30 min', ftitle:'Weekly design meeting', fmeta:'2:00 PM · Room 3B',
+  en:{ title:'Today', chips:['All','Schedule','Notes','Photos','Places'], badge:'Starts in 30 min', ftitle:'Weekly design meeting', fmeta:'2:00 PM in Room 3B',
        people:'and 2 others', fbtn:'View notes', recent:'Recent', seeAll:'See all',
-       rows:[['Design review notes','Mina edited · 4 comments','9:12'],['Lunch spots near the office','6 places saved','Yesterday'],
-             ['Tokyo trip plan','Flights · Hotel · 4 days','Mon'],['Reading list','3 new articles this week','Sun']],
+       rows:[['Design review notes','Edited by Mina, 4 comments','9:12'],['Lunch spots near the office','6 places saved','Yesterday'],
+             ['Tokyo trip plan','Flights and hotel for 4 days','Mon'],['Reading list','3 new articles this week','Sun']],
        ask:'Ask anything' },
-  ko:{ title:'오늘', chips:['전체','일정','메모','사진','장소'], badge:'30분 뒤 시작', ftitle:'주간 디자인 회의', fmeta:'오후 2:00 · 3층 회의실',
+  ko:{ title:'오늘', chips:['전체','일정','메모','사진','장소'], badge:'30분 뒤 시작', ftitle:'주간 디자인 회의', fmeta:'오후 2:00, 3층 회의실',
        people:'외 2명', fbtn:'메모 보기', recent:'최근 항목', seeAll:'전체 보기',
-       rows:[['디자인 리뷰 메모','민아님이 고쳤어요 · 댓글 4개','9:12'],['회사 근처 점심 맛집','장소 6곳을 저장했어요','어제'],
-             ['도쿄 출장 일정','항공권 · 호텔 · 4일','월'],['읽을거리','이번 주 새 글 3개','일']],
+       rows:[['디자인 리뷰 메모','민아님이 고쳤고 댓글은 4개예요','9:12'],['회사 근처 점심 맛집','장소 6곳을 저장했어요','어제'],
+             ['도쿄 출장 일정','4일 동안의 항공권과 호텔','월'],['읽을거리','이번 주 새 글 3개','일']],
        ask:'무엇이든 물어보세요' },
 };
 const APP_ROW_ICONS = ['doc','pin','bag','book'];
 // the list the agent ball makes (L2 card: the first 3, L3 full-screen list: all 5): what it can do for this meeting, each with its icon
 const CUE_ITEMS = {
-  en:[['Move the meeting to 3:00 PM','Everyone can join · Room 3B is free'],['Draft an agenda from notes','3 topics from the last review'],['Send the prototype link','To all 5 attendees'],
+  en:[['Move the meeting to 3:00 PM','Everyone’s free, and so is Room 3B'],['Draft an agenda from notes','3 topics from the last review'],['Send the prototype link','To all 5 attendees'],
       ['Summarize Mina’s comments','4 new since yesterday'],['Block focus time','Tomorrow 10:00–12:00']],
   ko:[['회의를 오후 3시로 옮기기','모두 참석할 수 있는 시간이에요'],['메모로 회의 안건 만들기','지난 리뷰에서 주제 3개를 찾았어요'],['시안 링크 보내기','참석자 5명에게 보내요'],
       ['민아님 댓글 요약하기','어제부터 새 댓글 4개'],['집중 시간 잡기','내일 오전 10시–12시']],
@@ -2145,9 +2286,9 @@ for(const k of ['A','B']){
 const hudA = { tl:$('#hudA [data-k=tl]'), tr:$('#hudA [data-k=tr]'), bl:$('#hudA [data-k=bl]'), br:$('#hudA [data-k=br]') };
 
 const VIEWS = [
-  { id:'adaptive', asl:true, name:'Adaptive Screen', desc:'맥락에 따라 화면이 스스로 재구성되는 시안 · 큐 설정은 다음 두 뷰에(화면 배경은 여기도) 반영', show:['C'] },
-  { id:'adaptive-cue', asl:true, name:'큐 적용 사례', desc:'왼쪽 현재 그대로 · 오른쪽 AI Visual Cue 적용: 생각하는 동안 글씨 블러 + 상단 캡슐 숨쉬기 → 전체 화면으로 펴지며 새 글씨가 한 글자씩 블러에서 써짐 → 하단 플로팅 변경', show:['L','R'] },
-  { id:'compare', name:'전체 비교', desc:'① 비주얼 큐와 ② 앱 적용을 같은 시계로: 생각하는 동안 상단 캡슐 숨쉬기 + ② 화면 블러 → 카드로 펴지며 선명해짐 → 전체 화면: 에이전트의 말과 그 아래 리스트가 차례로 블러에서 써짐 · ② 하단 플로팅 변경', show:['A','B'] },
+  { id:'adaptive', asl:true, name:'Adaptive Screen', desc:'맥락에 따라 화면이 스스로 재구성되는 시안. 큐 설정은 다음 두 뷰에 반영(화면 배경은 여기도)', show:['C'] },
+  { id:'adaptive-cue', asl:true, name:'큐 적용 사례', desc:'왼쪽은 현재 그대로, 오른쪽은 AI Visual Cue 적용: 생각하는 동안 글씨 블러 + 상단 캡슐 숨쉬기 → 전체 화면으로 펴지며 새 글씨가 한 글자씩 블러에서 써짐 → 하단 플로팅 변경', show:['L','R'] },
+  { id:'compare', name:'전체 비교', desc:'① 비주얼 큐와 ② 앱 적용을 같은 시계로: 생각하는 동안 상단 캡슐 숨쉬기 + ② 화면 블러 → 카드로 펴지며 선명해짐 → 전체 화면: 에이전트의 말과 그 아래 리스트가 차례로 블러에서 써지고 ② 하단 플로팅도 바뀜', show:['A','B'] },
 ];
 const viewIndex = id => VIEWS.findIndex(v=>v.id===id);
 let view = 0;
@@ -2169,7 +2310,7 @@ function setView(i, dir){
   const fr = $('#frames');
   fr.style.transition='none'; fr.style.opacity='0'; fr.style.transform=`translateX(${(dir||0)*40}px)`;
   for(const k in frames) frames[k].col.hidden = !VIEWS[view].show.includes(k);
-  $('#viewName').textContent = `${view+1} / ${VIEWS.length} · ${VIEWS[view].name}`;
+  $('#viewName').innerHTML = `<span class="vn-n">${view+1} / ${VIEWS.length}</span>${VIEWS[view].name}`;   // (the count apart, in its own type)
   exportBtn.hidden = !!VIEWS[view].asl; if(exportBtn.hidden) closeExport();   // video export covers the cue views only
   $('#viewDesc').textContent = VIEWS[view].desc;
   [...dotsEl.children].forEach((b,j)=>b.setAttribute('aria-current', j===view));
@@ -2249,7 +2390,7 @@ function buildLanes(){   // the strip under the scrubber follows the view: cue s
   const asl = aslView(), len = asl ? aslOn.loopMs : TL.len;
   const segs = asl ? aslOn.steps.map(s=>({ name:`상태 ${s.idx+1}`, t0:s.t0*1000, dur:s.D*1000 })) : TL.segs;
   segs.forEach((g,i)=>{ const d=document.createElement('div'); d.className='lane'; d.style.left=(g.t0/len*100)+'%'; d.style.width=(g.dur/len*100)+'%';
-    d.textContent = g.name; d.title = `${g.name} · ${Math.round(g.dur)}ms`; d.dataset.i=i; lanesEl.appendChild(d); });
+    d.textContent = g.name; d.title = `${g.name} (${Math.round(g.dur)}ms)`; d.dataset.i=i; lanesEl.appendChild(d); });
   $('#loopHint').textContent = `루프 ${(len/1000/S.speed).toFixed(2)}s`;
 }
 buildLanes();
@@ -2374,7 +2515,7 @@ function renderFrame(k, fr){
    2) the change — with no card step it spreads straight to full screen while the new sentence comes into focus and the bar reorganises,
       then fades out.
    It is drawn on the background, under the text and the bottom bar, so only the background is affected. It follows the Design tab:
-   colour, material, sphere size, easing, 전환 시간 (spread), 나타남·사라짐 (fade) and 로딩 형태 (width, blur, breathing).
+   colour, material, sphere size, easing, 전환 시간 (spread), 나타남과 사라짐 (fade) and 로딩 형태 (width, blur, breathing).
    The loading and the spread are the same as 전체 비교's L1 → L2 (loadingCue, spreadCue; ASL_BREATH, ASL_CUE in section 3). */
 function aslCueFrame(tMs){
   const { upMs, preMs:L } = ASL_R.locate(tMs), slow = ASL_R.slow, u = upMs - L;   // upMs = ms since the state began (its loading, L ms long), u = ms since its change
@@ -2464,7 +2605,7 @@ for(const [k,p] of Object.entries(PRESETS)){
 // about palettes
 $('#aboutPalettes').innerHTML = Object.values(PRESETS).map(p=>`<div class="pal-row"><span style="width:70px;font-family:var(--f-ui);font-weight:600">${p.name}</span>${p.stops.map(s=>`<span><i style="background:${s.color}"></i>${s.name} ${s.color}</span>`).join('')}</div>`).join('');
 $('#aboutScreenBgs').innerHTML = THEME_SETS.map(t=>{ const p = SCREEN_BGS[t.bg];
-  return `<div class="pal-row"><span style="width:70px;font-family:var(--f-ui);font-weight:600">${p.name}</span>${BG_PARTS.map(([k, l])=>`<span><i style="background:${p[k]}"></i>${l} ${p[k]}</span>`).join('')}<span style="font-family:var(--f-ui);color:var(--muted)">+ ${PRESETS[t.color].name} · ${MATS[t.material].name}</span></div>`; }).join('');
+  return `<div class="pal-row"><span style="width:70px;font-family:var(--f-ui);font-weight:600">${p.name}</span>${BG_PARTS.map(([k, l])=>`<span><i style="background:${p[k]}"></i>${l} ${p[k]}</span>`).join('')}<span style="font-family:var(--f-ui);color:var(--muted)">+ ${PRESETS[t.color].name} + ${MATS[t.material].name}</span></div>`; }).join('');
 
 // screen backgrounds (the Adaptive Screen's own gradient) — on their own, or in a set with an agent colour and material
 const bgsEl = $('#bgs'), bgEditEl = $('#bgEdit'), setsEl = $('#sets');
@@ -2472,7 +2613,7 @@ function bgCss(c, sp = 0.30){ return `linear-gradient(180deg, ${c.top} 0%, ${c.t
 function setScreenBg(bg){ S.screenBg = bg; applyScreenBg(); paintScreenBg(); changed(); }
 for(const [k, p] of Object.entries(SCREEN_BGS)){
   const b = document.createElement('button'); b.type = 'button'; b.className = 'bgp'; b.dataset.k = k;
-  b.title = `${p.name} · ${p.top} → ${p.mid} → ${p.bottom}`; b.setAttribute('aria-label', `화면 배경 ${p.name}`);
+  b.title = `${p.name}: ${p.top} → ${p.mid} → ${p.bottom}`; b.setAttribute('aria-label', `화면 배경 ${p.name}`);
   b.innerHTML = `<i style="background:${bgCss(p)}"></i><span>${p.name}</span>`;
   b.onclick = ()=>setScreenBg({ preset:k, top:p.top, mid:p.mid, bottom:p.bottom });   // the agent stays as it is
   bgsEl.appendChild(b);
@@ -2486,7 +2627,7 @@ BG_PARTS.forEach(([part, label])=>{   // its own colours, one by one (it then be
 THEME_SETS.forEach((t, i)=>{
   const bg = SCREEN_BGS[t.bg], col = PRESETS[t.color], mat = MATS[t.material];
   const b = document.createElement('button'); b.type = 'button'; b.className = 'set'; b.dataset.i = i;
-  b.title = `${bg.name} 배경 + ${col.name} · ${mat.name}`; b.setAttribute('aria-label', `세트 ${bg.name}: 화면 배경 ${bg.name}, 에이전트 컬러 ${col.name}, 물성 ${mat.name}`);
+  b.title = `${bg.name} 배경 + ${col.name} + ${mat.name}`; b.setAttribute('aria-label', `세트 ${bg.name}: 화면 배경 ${bg.name}, 에이전트 컬러 ${col.name}, 물성 ${mat.name}`);
   // the tile: its agent on its background (drawn with the material thumbnails), the background's name and the material's (short, to fit;
   // the colour is in the picture, everything in the tooltip)
   b.innerHTML = `<img alt="" width="64" height="64" style="background:${bgCss(bg)}"><b>${bg.name}</b><small>${MAT_SHORT[t.material] || mat.name}</small>`;
@@ -2527,14 +2668,14 @@ function paintGrad(){
   const st = S.stops[selStop];
   stopColor.style.background = st.color; stopHex.value = st.color.toUpperCase(); stopName.value = st.name||'';
   stopDel.disabled = S.stops.length<=1; stopAdd.disabled = S.stops.length>=3;
-  $('#gradPos').textContent = `${st.name||'Stop'} · ${Math.round(st.pos*100)}%`;
+  $('#gradPos').textContent = `${st.name||'Stop'} ${Math.round(st.pos*100)}%`;
 }
 function startDrag(e, i){
   e.preventDefault(); selStop = i; paintGrad();
   const rect = gradEl.getBoundingClientRect(), y0 = e.clientY; let moved = false;
   const move = ev=>{ if(!moved && Math.abs(ev.clientY-y0) < 3) return; moved = true; S.stops[i].pos = clamp01((ev.clientY - rect.top - PAD)/(rect.height-PAD*2)); S.preset=null;
     const n = gradEl.querySelectorAll('.stop')[i]; n.style.top = (PAD + S.stops[i].pos*(rect.height-PAD*2))+'px';
-    gradEl.style.background = cssGrad(S.stops); $('#gradPos').textContent = `${S.stops[i].name||'Stop'} · ${Math.round(S.stops[i].pos*100)}%`; changed(); };
+    gradEl.style.background = cssGrad(S.stops); $('#gradPos').textContent = `${S.stops[i].name||'Stop'} ${Math.round(S.stops[i].pos*100)}%`; changed(); };
   const up = ()=>{ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',up); paintGrad(); paintPresets();
     if(moved) changed({thumbs:true}); else openPicker(gradEl.querySelectorAll('.stop .sq')[i], S.stops[i].color, setStopColor); };
   window.addEventListener('pointermove',move); window.addEventListener('pointerup',up);
@@ -2575,7 +2716,7 @@ const ctrlSets = [];
 function addSet(host, defs){ defs.forEach(([k,label,unit,min,max,step])=>ctrlSets.push(rangeCtrl($(host),label,unit,min,max,step,()=>S[k],v=>{S[k]=v;changed({motion:true, thumbs:k==='diameter'});},()=>defaultSpec()[k]))); }
 addSet('#sizeCtrls', [['diameter','구 지름','dp',64,220,1],['cardH','안착 높이','dp',120,360,1],['cardThick','안착 두께','dp',2,40,1],['cardCorner','안착 모서리','dp',0,48,1],['margin','좌우 여백','dp',0,40,1]]);
 addSet('#loadCtrls', [['loadStretch','가로 길이','×',1,3,0.05],['loadBlur','하단 프로그레시브 블러','dp',0,120,1],['loadBreath','숨쉬기 폭','%',0,100,1]]);
-addSet('#motionCtrls', [['speed','재생 속도','×',0.25,2,0.05],['transMs','전환 시간','ms',300,1600,10],['l2Hold','L2 유지','ms',500,6000,50],['l3Hold','L3 유지','ms',500,6000,50],['fadeMs','나타남·사라짐','ms',150,2000,10],['drift','하이라이트 흔들림','',0,1,0.01]]);   // (L1 is the loading: its length is its two breaths, 로딩 형태)
+addSet('#motionCtrls', [['speed','재생 속도','×',0.25,2,0.05],['transMs','전환 시간','ms',300,1600,10],['l2Hold','L2 유지','ms',500,6000,50],['l3Hold','L3 유지','ms',500,6000,50],['fadeMs','나타남과 사라짐','ms',150,2000,10],['drift','하이라이트 흔들림','',0,1,0.01]]);   // (L1 is the loading: its length is its two breaths, 로딩 형태)
 addSet('#shadowCtrls', [['shadow','그림자 강도','',0,1,0.01],['shadowBlur','그림자 번짐','dp',2,40,1],['shadowOff','그림자 거리','dp',0,32,1]]);
 const alphaCtrl = rangeCtrl($('#alphaCtrl'),'투명도','%',0.05,1,0.01,()=>S.alpha,v=>{S.alpha=v;changed({thumbs:true});},()=>defaultSpec().alpha, v=>Math.round(v*100));
 ctrlSets.push(alphaCtrl);
@@ -2632,7 +2773,7 @@ function paintExtras(){
   }
   COLOR_EXTRAS.forEach(([k,,resolve,autoLabel])=>{
     const r = host.querySelector(`[data-k="${k}"]`), [sw,t,auto] = r.children, v = resolve();
-    sw.style.background = v; t.querySelector('small').textContent = S[k] ? v : `${v} · 자동(${autoLabel})`; auto.hidden = !S[k];
+    sw.style.background = v; t.querySelector('small').textContent = S[k] ? v : `자동(${autoLabel}) ${v}`; auto.hidden = !S[k];
   });
 }
 function onExtraChanged(k){ changed({thumbs: k==='shadowColor' || k==='bgColor'}); if(k==='bgColor') layout(); }
@@ -2801,7 +2942,7 @@ async function runExport(fmt){
     const N = Math.max(1, Math.round(TL.len / S.speed / 1000 * fps));
     const frameAt = i => composeExportFrame(keys, scale, (i/N)*TL.len, (i/fps)*S.speed, pad, gap, stageCol);
     const blob = fmt==='gif' ? await encodeGif(N, fps, frameAt, W, H) : await encodeMp4(N, fps, frameAt, W, H);
-    exProgress(1, `완료 · ${(blob.size/1048576).toFixed(1)}MB`);
+    exProgress(1, `완료 (${(blob.size/1048576).toFixed(1)}MB)`);
     await saveFile(`ai-visual-cue-${{A:'cue', B:'in-app', both:'compare'}[exTarget]}-loop.${fmt}`, blob);
   }catch(e){ console.error(e); exProgress(0, e && e.message ? e.message : String(e)); }
   finally{ exporting = false; $('#exMp4').disabled = $('#exGif').disabled = false; }
@@ -2857,8 +2998,9 @@ function genKotlin(){
   const glowV = matGlow(), edgeV = matEdgeSoft();
   return `// ─────────────────────────────────────────────────────────────────────────────
 // AI Visual Cue — generated by AI Visual Cue Studio v0.1
-// Material: ${m.en} · Palette: ${st.map(s=>(s.name||s.color)).join(' → ')}
-// minSdk 26 · Android 13 (API 33)+ renders the AGSL shader below,
+// Material: ${m.en}
+// Palette: ${st.map(s=>(s.name||s.color)).join(' → ')}
+// minSdk 26. Android 13 (API 33)+ renders the AGSL shader below,
 // API 26–32 falls back to Brush gradients. No extra dependencies (Compose BOM only).
 //
 // Usage:
@@ -2954,7 +3096,7 @@ ${st.map(s=>`        CueStop(${kargb(s.color)}, ${kf(s.pos)}),${s.name?` // ${s.
     val highlightX: Float = ${kf(S.hlX)},
     val highlightY: Float = ${kf(S.hlY)},
     val highlightDrift: Float = ${kf(S.drift)},
-    val materialParams: List<Float> = listOf(${[0,1,2,3].map(i=>kf(mp[i]||0)).join(', ')}), // ${m.params.map(p=>p[0]).join(' · ')}
+    val materialParams: List<Float> = listOf(${[0,1,2,3].map(i=>kf(mp[i]||0)).join(', ')}), // ${m.params.map(p=>p[0]).join(', ')}
     val glow: Float = ${kf(glowV)},
     val edgeSoftness: Float = ${kf(edgeV)},
     val alpha: Float = ${kf(S.alpha)},                  // overall cue opacity
@@ -3714,9 +3856,9 @@ function renderCode(){
   codeOut.innerHTML = highlight(codeText, codeMode==='json'?'json':codeMode);
   const lines = codeText.split('\n').length;
   $('#codeMeta').innerHTML = codeMode==='kotlin'
-    ? `<span><b>AiVisualCue.kt</b> · ${lines}줄 · 물성 ${MATS[S.material].en} · 루프 ${(TL.len/1000/S.speed).toFixed(2)}s</span><span>minSdk 26 · Android 13(API 33)+ AGSL 셰이더 · API 26–32는 그라데이션으로 대체</span>`
-    : codeMode==='agsl' ? `<span><b>cue.agsl</b> · ${lines}줄 · 웹 프리뷰와 같은 소스 (GLSL은 타입 이름만 매크로로 치환)</span><span>RuntimeShader(CUE_AGSL) · setFloatUniform으로 값 전달</span>`
-    : `<span><b>spec.json</b> · 현재 설정 전체</span><span>프리뷰와 코드가 모두 이 값에서 만들어집니다</span>`;
+    ? `<span class="cm"><b>AiVisualCue.kt</b><span>${lines}줄</span><span>물성 ${MATS[S.material].en}</span><span>루프 ${(TL.len/1000/S.speed).toFixed(2)}s</span></span><span>minSdk 26. Android 13(API 33) 이상은 AGSL 셰이더, API 26–32는 그라데이션으로 대체</span>`
+    : codeMode==='agsl' ? `<span class="cm"><b>cue.agsl</b><span>${lines}줄</span><span>웹 프리뷰와 같은 소스 (GLSL은 타입 이름만 매크로로 치환)</span></span><span>RuntimeShader(CUE_AGSL)에 setFloatUniform으로 값 전달</span>`
+    : `<span class="cm"><b>spec.json</b><span>현재 설정 전체</span></span><span>프리뷰와 코드가 모두 이 값에서 만들어집니다</span>`;
 }
 function scheduleCode(){ clearTimeout(codeTimer); codeTimer = setTimeout(()=>{ if(!$('#paneCode').hidden) renderCode(); }, 120); }
 segCtrl($('#codeMode'), ()=>codeMode, v=>{ codeMode=v; renderCode(); });
@@ -3732,14 +3874,13 @@ function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('sh
 /* ======================================================================
    10. Tabs, theme, boot
    ====================================================================== */
+const TABS = ['cue','poc','about'];   // AI Visual Cue · Mobile UI PoC · About
 function selectTab(which){
-  const cue = which==='cue';
-  $('#tab-btn-cue').setAttribute('aria-selected', cue); $('#tab-btn-about').setAttribute('aria-selected', !cue);
-  $('#view-cue').hidden = !cue; $('#view-about').hidden = cue;
-  if(cue) layout();
+  for(const k of TABS){ $(`#tab-btn-${k}`).setAttribute('aria-selected', k===which); $(`#view-${k}`).hidden = k!==which; }
+  if(which==='cue') layout();
+  if(which==='poc') pocShow(); else pocPlayPause();   // (leaving the tab pauses the autoplay)
 }
-$('#tab-btn-cue').onclick = ()=>selectTab('cue');
-$('#tab-btn-about').onclick = ()=>selectTab('about');
+for(const k of TABS) $(`#tab-btn-${k}`).onclick = ()=>selectTab(k);
 function selectSub(which){
   const d = which==='design';
   $('#sub-design').setAttribute('aria-selected', d); $('#sub-code').setAttribute('aria-selected', !d);
@@ -3758,7 +3899,451 @@ if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListene
 new MutationObserver(()=>{ paintThemeBtn(); layout(); scheduleThumbs(); }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
 
 /* ======================================================================
-   11. Splitter between the control panel and the preview
+   11. Mobile UI PoC — the three scenarios of mobile-ui-kit/ (PC Health · Meeting Notes · Our Discussion), played in a phone beside their
+       story. The phone is an iframe of the kit's own screens (?embed=1&ui=1&statusbar=1): its screens, flows, demo data and Korean
+       dictionary are the kit's, and they talk to this page through the kit's preview messages (au:ready · au:theme · au:lang).
+       Theme: this page's (the system's, unless ☾ was pressed), followed live. Language: its own toggle (EN / KO), kept in the browser.
+   ====================================================================== */
+const POC_KIT = 'mobile-ui-kit/mobile-ui-kit/';
+const POC_TEXT = {
+  ko:{ tabs:'시나리오', story:'시나리오 소개', scenario:n=>`시나리오 ${n}`, screens:n=>`화면 ${n}개`, who:'주인공', moment:'핵심 순간', end:'끝', flow:'흐름', key:'대표',
+       restart:'처음부터', autoplay:'자동 재생', play:'자동 재생', pause:'일시정지', paused:'일시정지됨', playing:'재생 중', hints:'클릭 영역 보기', hintsNone:'이 화면에는 누를 수 있는 곳이 없어요', note:'데모 데이터로 동작해요. 하드웨어, 마이크, 서버는 쓰지 않아요.', frame:n=>`${n} 프로토타입`, restarted:n=>`${n}: 처음부터 다시 시작합니다`, lang:'언어' },
+  en:{ tabs:'Scenarios', story:'Overview', scenario:n=>`Scenario ${n}`, screens:n=>`${n} screens`, who:'Who', moment:'The moment', end:'Ends with', flow:'Flow', key:'Key',
+       restart:'Restart', autoplay:'Autoplay', play:'Play', pause:'Pause', paused:'Paused', playing:'Playing', hints:'Show clickable areas', hintsNone:'Nothing to tap on this screen', note:'Runs on demo data. No hardware, microphone or server is used.', frame:n=>`${n} prototype`, restarted:n=>`${n}: restarted from the first screen`, lang:'Language' },
+};
+const POC = [
+  { id:'pc-health', name:'PC Health',
+    ko:{ lead:'중고 PC를 사기 전, 그 자리에서 2분 점검', who:'중고 노트북을 직거래로 사려는 대학원생 민준', moment:'판매자 앞에서 “이거 사도 될까?”', end:'판매자에게 보낼 질문과 리포트 공유' },
+    en:{ lead:'A 2-minute check of a used PC, right where you buy it', who:'Minjun, a grad student buying a used laptop in person', moment:'In front of the seller: “Should I buy this?”', end:'A question for the seller and a shared report' },
+    steps:[
+      { id:'pc-health-home', file:'pc-health-home.html', ko:['홈','새 점검으로 시작해요. 지난 점검 3건이 보여요.'], en:['Home','Start with New Check. The last three checks are listed.'] },
+      { id:'pc-health-connect', file:'pc-health-connect.html', ko:['PC 연결','USB-C로 연결하고 페어링 코드를 입력하면 2초쯤 뒤 연결돼요.'], en:['Connect PC','Connect over USB-C and enter the pairing code. It connects in about 2 seconds.'] },
+      { id:'pc-health-scan', file:'pc-health-scan.html', ko:['점검 중','CPU → GPU → 메모리 → 저장장치 → 배터리 순으로 점검해요(약 7초).'], en:['Scanning','CPU → GPU → memory → storage → battery, one after another (about 7 seconds).'] },
+      { id:'pc-health', file:'pc-health.html', key:true, ko:['결과','98% 양호. 숫자 대신 판단 한 문장을 줘요. 다시 점검하면 보통과 점검 필요도 볼 수 있어요.'], en:['Result','98% Healthy: a verdict in one sentence, not just numbers. Rescan shows Fair and Needs attention.'] },
+      { id:'pc-health-part', file:'pc-health-part.html?part=gpu', ko:['부품 상세','부하 온도 그래프와, 판매자에게 그대로 보낼 질문 메시지.'], en:['Part detail','A load-temperature chart, and a question ready to send the seller.'] },
+      { id:'pc-health-report', file:'pc-health-report.html', ko:['전체 리포트','요약과 부품 3개, 7일 동안 열리는 공유 링크.'], en:['Full report','A summary, three parts and a share link that works for 7 days.'] },
+    ] },
+  { id:'meeting-notes', name:'Meeting Notes',
+    ko:{ lead:'회의는 대화에 집중하고, 정리는 AI가', who:'하루에 회의를 3~5개 하는 제품 리드 지호', moment:'회의 직후 “뭘 정했고, 누가 뭘 하지?”', end:'할 일을 체크하고 참석자에게 노트 공유' },
+    en:{ lead:'Stay in the conversation; the AI takes the notes', who:'Alex, a product lead with three to five meetings a day', moment:'Right after: “What did we decide, and who does what?”', end:'Actions checked off and notes shared with everyone' },
+    steps:[
+      { id:'meeting-notes-home', file:'meeting-notes-home.html', ko:['홈','새 녹음으로 시작해요. 지난 회의 노트로 바로 돌아갈 수도 있어요.'], en:['Home','Start with New Recording, or go back to a past meeting’s notes.'] },
+      { id:'meeting-notes', file:'meeting-notes.html?fresh=1', key:true, ko:['녹음 중','실시간 전사가 화자 이름과 함께 올라오고, AI 요약이 채워져요. 일시정지했다가 이어서 녹음해요.'], en:['Recording','A live transcript with speaker names while the AI summary fills in. Pause and resume.'] },
+      { id:'meeting-notes-processing', file:'meeting-notes-processing.html', ko:['처리 중','정지하면 전사 → 요약 → 할 일 찾기가 차례로 끝나요(약 5초).'], en:['Processing','After Stop: the transcript, the summary, then the action items (about 5 seconds).'] },
+      { id:'meeting-notes-notes', file:'meeting-notes-notes.html?m=q4', ko:['노트','핵심 내용, 결정 사항, 할 일로 정리돼요. 할 일을 체크하고 노트를 공유해요.'], en:['Notes','Key points, decisions and actions. Check off actions and share the notes.'] },
+      { id:'meeting-notes-transcript', file:'meeting-notes-transcript.html?m=q4', ko:['전사','검색하고 화자로 거르고, 재생하면 지금 줄이 따라와요.'], en:['Transcript','Search, filter by speaker, and play: the current line follows.'] },
+    ] },
+  { id:'our-discussion', name:'Our Discussion',
+    ko:{ lead:'둘이서 정해야 할 일을 항목별로 합의', who:'여름휴가지를 정하는 부부 미나와 준', moment:'“우린 대체 어디까지 합의한 거지?”', end:'결정 확정, 다음 할 일, 캘린더 등록' },
+    en:{ lead:'Two people agree on a decision, point by point', who:'Mina and Joon, a couple choosing their summer trip', moment:'“How much have we actually agreed on?”', end:'The decision made official, with next steps and a calendar entry' },
+    steps:[
+      { id:'our-discussion-home', file:'our-discussion-home.html', ko:['홈','진행 중인 토픽과 결정된 토픽, 합의 진행률이 보여요. 여행 계획을 열어요.'], en:['Home','Open and decided topics with their progress. Open Travel Plans.'] },
+      { id:'our-discussion', file:'our-discussion.html', key:true, ko:['토픽','이탈리아(준) vs 일본(나). 합의 60% = 5개 중 3개.'], en:['Topic','Italy (Joon) vs Japan (you). 60% agreed: 3 of 5 points.'] },
+      { id:'our-discussion-compare', file:'our-discussion-compare.html', ko:['비교','예산, 비행, 날씨, 볼거리를 나란히 비교해요. 이탈리아를 고르면 목적지가 합의돼요(80%).'], en:['Compare','Budget, flight, weather and sights side by side. Pick Italy and the destination is agreed (80%).'] },
+      { id:'our-discussion-thread', file:'our-discussion-thread.html', ko:['대화','빠른 답장을 보내면 준이 답해요(시뮬레이션).'], en:['Discussion','Send a quick reply and Joon answers (simulated).'] },
+      { id:'our-discussion-agreement', file:'our-discussion-agreement.html', ko:['합의','5개 항목 × 두 사람. 5개 중 5개가 되면 확정하기가 켜져요.'], en:['Agreement','Five points × two people. Make It Official turns on at 5 of 5.'] },
+      { id:'our-discussion-decision', file:'our-discussion-decision.html', ko:['결정','결정 결과와 다음 할 일, 캘린더에 추가.'], en:['Decision','The decision, the next steps and Add to Calendar.'] },
+    ] },
+];
+let pocI = 0, pocLang = 'ko', pocScreen = '', pocBooted = false, pocStoryOn = false;   // (pocStoryOn: the 시나리오 소개 tab, the first and the default; pocI stays the last scenario)
+const pocAt = {};           // where each scenario's phone was (its URL), so switching back resumes it
+const pocFresh = new Set(); // scenarios started in this visit (the first start clears their demo data, so a visit begins at the start)
+try{ const l = localStorage.getItem('avc-poc-lang'); if(l==='ko'||l==='en') pocLang = l;
+     const k = localStorage.getItem('avc-poc-scn'), i = POC.findIndex(s=>s.id===k); if(i>=0) pocI = i; else pocStoryOn = true; }catch(e){ pocStoryOn = true; }
+const pocFrame = $('#pocFrame');
+const pocTheme = ()=>effectiveDark() ? 'dark' : 'light';
+function pocUrl(href){   // a kit screen in the phone's modes, the current theme and language
+  const u = new URL(href, new URL(POC_KIT, location.href));
+  for(const [k,v] of [['embed','1'],['ui','1'],['statusbar','1'],['theme',pocTheme()],['lang',pocLang]]) u.searchParams.set(k, v);
+  return u.href;
+}
+function pocGo(href){ const url = pocUrl(href); try{ pocFrame.contentWindow.location.replace(url); }catch(e){ pocFrame.src = url; } }   // (replace: the page's Back stays the page's)
+function pocPost(msg){ try{ pocFrame.contentWindow.postMessage(msg, '*'); }catch(e){} }
+function pocClear(id){ try{ Object.keys(localStorage).filter(k=>k.startsWith('au-demo:'+id)).forEach(k=>localStorage.removeItem(k)); }catch(e){} }   // the kit's demo data of that scenario
+function pocOpen(i, { restart=false }={}){
+  pocPlayStop();
+  pocStoryOn = false; pocBooted = true; $('#pocStory').hidden = true; $('#pocBody').hidden = false;
+  pocI = i; const s = POC[i];
+  try{ localStorage.setItem('avc-poc-scn', s.id); }catch(e){}
+  if(restart || !pocFresh.has(s.id)){ pocClear(s.id); pocFresh.add(s.id); delete pocAt[s.id]; }
+  pocScreen = ''; pocHintsOff();
+  pocGo(pocAt[s.id] || s.steps[0].file);
+  paintPoc(); pocLayout();
+}
+function pocOpenStory(){
+  pocPlayStop(); pocHintsOff();
+  const first = !pocStoryOn; pocStoryOn = true;
+  try{ localStorage.setItem('avc-poc-scn', 'story'); }catch(e){}
+  $('#pocBody').hidden = true; $('#pocStory').hidden = false;
+  paintPoc(); if(first) $('#pocStory').scrollTop = 0;
+}
+function paintPoc(){
+  const s = POC[pocI], L = POC_TEXT[pocLang], c = s[pocLang];
+  document.querySelectorAll('#pocScn [role="tab"]').forEach(b=>{ const on = b.dataset.i === 'story' ? pocStoryOn : !pocStoryOn && +b.dataset.i === pocI; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+  $('#pocScn [data-i="story"]').textContent = L.story;
+  if(pocStoryOn) paintStory();
+  document.querySelectorAll('#pocLang button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===pocLang));
+  $('#pocScn').setAttribute('aria-label', L.tabs); $('#pocLang').setAttribute('aria-label', L.lang);
+  $('#pocInfo').lang = pocLang;
+  $('#pocInfo').innerHTML = `
+    <div class="poc-intro"><div><p class="poc-kicker">${L.scenario(pocI+1)}</p><h2 class="poc-title">${s.name}</h2></div>
+      <button class="icon-btn poc-hint-btn" type="button" data-poc="hints"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="13" rx="3" stroke-dasharray="2.6 2.2"/><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none"/></svg>${L.hints}</button>
+      <p class="poc-lead" style="flex-basis:100%;margin:0">${c.lead}</p></div>
+    <dl class="poc-facts"><dt>${L.who}</dt><dd>${c.who}</dd><dt>${L.moment}</dt><dd>${c.moment}</dd><dt>${L.end}</dt><dd>${c.end}</dd></dl>
+    <div><div class="poc-flow-head"><p class="poc-kicker">${L.flow}</p><span class="poc-count">${L.screens(s.steps.length)}</span></div><ol class="poc-steps">${s.steps.map((st,k)=>`<li><button type="button" data-k="${k}"><span class="n">${pocI+1}.${k+1}</span><b>${st[pocLang][0]}${st.key ? `<em class="poc-key">${L.key}</em>` : ''}</b><small>${st[pocLang][1]}</small></button></li>`).join('')}</ol></div>
+    <div class="poc-foot"><button class="icon-btn" type="button" data-poc="restart">${L.restart}</button><span class="poc-note">${L.note}</span></div>`;
+  pocFrame.title = L.frame(s.name);
+  paintPocSteps(); paintPlayer();
+}
+// 시나리오 소개: who uses each prototype, when and why (from mobile-ui-kit/docs/scenario-stories.md), around its photo
+const POC_STORY = {
+  ko:{ kicker:'Mobile UI PoC', title:'세 가지 순간을 위한 Mobile POC',
+       lead:'중고 PC를 사기 직전, 회의가 끝난 직후, 둘이서 결정을 내려야 할 때. 세 앱은 각각 그 순간에 필요한 화면만 이어 붙인 프로토타입이에요. 누가, 언제, 왜 쓰는지 살펴보고 바로 눌러 볼 수 있어요.',
+       who:'주인공', problem:'상황과 문제', promise:'앱이 약속하는 것', flow:'흐름', ok:'성공 기준', key:'대표', try:'눌러 보기', watch:'▶  자동 재생으로 보기',
+       foot:'세 앱 모두 데모 데이터로 동작해요. PC Health는 하드웨어를 읽지 않고, Meeting Notes는 마이크를 쓰지 않아요. Our Discussion의 합의율은 측정값이 아니라 두 사람이 합의로 표시한 항목 수예요. 화면의 데모 표시는 이 사실을 알려 주기 위한 것이라 시연할 때도 가리지 않아요.' },
+  en:{ kicker:'Mobile UI PoC', title:'Mobile POC for three moments',
+       lead:'Right before buying a used PC, right after a meeting, and when two people have to decide together. Each app strings together only the screens that moment needs. See who uses it, when and why, then try it yourself.',
+       who:'Who', problem:'The problem', promise:'The promise', flow:'Flow', ok:'Success looks like', key:'Key', try:'Try it', watch:'▶  Watch it play',
+       foot:'All three apps run on demo data. PC Health reads no hardware and Meeting Notes uses no microphone. The agreement rate in Our Discussion counts the points both people marked as agreed; it is not a measurement. The demo labels on the screens say so, and stay visible in a demo.' },
+  scenarios:[
+    { img:'pc-health',
+      ko:{ alt:'카페에서 USB-C로 연결된 폰에 PC Health 점검 결과 98%가 떠 있는 모습',
+           who:['민준, 29세 대학원생', '연구용 노트북이 필요해 중고 거래 앱에서 ThinkPad X1 Carbon을 찾았어요. 오늘 저녁 판매자와 카페에서 직거래하기로 했어요. 겉보기와 부팅만 확인하고 샀다가 몇 주 뒤 발열과 메모리 오류를 발견한 적이 있어요.'],
+           problem:'직거래 자리에서 쓸 수 있는 시간은 길어야 10분이에요. 벤치마크 프로그램은 설치가 번거롭고, 결과 숫자를 봐도 사도 되는지 판단하기 어려워요. 문제를 발견해도 판매자에게 어떻게 말을 꺼낼지 모르겠어요.',
+           promise:'폰을 케이블로 연결하고 2분이면, 사도 되는지를 한 문장으로 알려 주고 판매자에게 할 말까지 준비해 줘요.',
+           flow:['홈에서 새 점검을 눌러요', 'USB-C로 연결하고 페어링 코드를 입력해요', 'CPU, GPU, 메모리, 저장장치, 배터리를 차례로 점검해요', '98% 양호. 숫자 대신 판단 한 문장을 받아요', 'GPU 상세에서 판매자에게 보낼 질문을 복사해요', '전체 리포트를 7일 동안 열리는 링크로 공유해요'], key:3,
+           ok:['연결부터 판정까지 누르는 횟수는 3번 이하예요', '하드웨어를 몰라도 결과 화면 한 장으로 살지, 물어볼지, 포기할지 고를 수 있어요', '문제가 있으면 판매자에게 보낼 문장이 바로 준비돼요'] },
+      en:{ alt:'A phone connected over USB-C showing a PC Health result of 98%',
+           who:['Minjun, 29, grad student', 'Needs a laptop for research and found a ThinkPad X1 Carbon on a second-hand app, with a meetup at a café tonight. Once bought a laptop after a quick look and a boot, and found overheating and memory errors weeks later.'],
+           problem:'There are ten minutes at most with the seller. Benchmark tools are a hassle to install, and their numbers don’t say whether to buy. Even when something is wrong, it’s hard to know how to bring it up.',
+           promise:'Plug the phone in, and in two minutes it says in one sentence whether to buy, with the words for the seller ready.',
+           flow:['Tap New Check on the home screen', 'Connect over USB-C and enter the pairing code', 'CPU, GPU, memory, storage and battery are checked in turn', '98% Healthy: a verdict in one sentence, not just numbers', 'Copy a question for the seller from the GPU details', 'Share the full report as a link that works for 7 days'], key:3,
+           ok:['Three taps or fewer from connecting to the verdict', 'One result screen is enough to buy, ask or walk away, without knowing hardware', 'When something is wrong, the words for the seller are ready'] } },
+    { img:'meeting-notes',
+      ko:{ alt:'회의 테이블에서 Meeting Notes가 회의를 녹음하며 실시간 전사와 AI 요약을 보여 주는 폰',
+           who:['지호, 34세 제품 리드', '하루에 회의를 3~5개 해요. 제품 싱크, 디자인 리뷰, 팀원과의 1:1, 고객 미팅. 노트를 적느라 정작 대화에 집중하지 못하고, 회의가 끝나면 누가 무엇을 하기로 했는지 다시 묻곤 해요.'],
+           problem:'오늘 오후는 4분기 제품 싱크예요. 출시일과 법무 검토 일정을 정해야 해요. 손으로 적은 노트는 빠지는 내용이 많고, 녹음 파일은 다시 듣지 않아요. 회의 후 정리해서 보내는 데 매번 20~30분이 들어요.',
+           promise:'녹음 버튼 하나로 대화는 그대로 받아 적고, 멈추면 요약과 결정 사항, 할 일로 정리해 줘요. 원문이 필요하면 전사에서 바로 찾아요.',
+           flow:['새 녹음을 누르고 폰을 테이블에 둬요', '실시간 전사와 AI 요약이 회의 중에 채워져요', '정지하면 전사, 요약, 할 일 찾기가 차례로 끝나요', '노트에서 요약을 읽고 내 할 일을 체크해요', '전사에서 “법무”를 검색하고 하은의 발언만 걸러 봐요'], key:1,
+           ok:['회의 중 폰을 만지는 건 시작과 정지뿐이에요', '회의 직후 결정 사항과 담당자가 붙은 할 일이 바로 보여요', '원문 근거를 검색 한 번으로 찾아요'] },
+      en:{ alt:'A phone on a meeting table recording with Meeting Notes, showing a live transcript and an AI summary',
+           who:['Alex, 34, product lead', 'Three to five meetings a day: product syncs, design reviews, one-on-ones and customer calls. Taking notes pulls attention away from the conversation, and after a meeting the same question comes back: who agreed to do what?'],
+           problem:'This afternoon is the Q4 product sync, where the launch date and the legal review need settling. Handwritten notes miss things, recordings never get replayed, and writing up a meeting takes 20 to 30 minutes every time.',
+           promise:'One button takes down the conversation as it happens; stop, and it becomes a summary, decisions and action items. When the exact words matter, they are in the transcript.',
+           flow:['Tap New Recording and leave the phone on the table', 'The live transcript and AI summary fill in during the meeting', 'After Stop: the transcript, the summary, then the action items', 'Read the summary and check off your own actions', 'Search the transcript for “legal” and filter to Priya’s lines'], key:1,
+           ok:['During the meeting, the phone is touched only to start and stop', 'Right after it, decisions and action items with owners are there', 'The source of any decision is one search away'] } },
+    { img:'our-discussion',
+      ko:{ alt:'소파에 함께 앉은 부부가 Our Discussion으로 여행지 합의 현황을 보는 모습',
+           who:['미나(32)와 준(33), 결혼 2년 차 부부', '맞벌이라 평일에는 대화할 시간이 짧아요. 지금 정할 것은 여름휴가 7박이에요. 준은 이탈리아, 미나는 일본을 원해요. 예산과 날짜, 기간은 이미 맞췄는데 그 사실이 채팅 기록에 묻혀 매번 처음부터 다시 이야기하게 돼요.'],
+           problem:'채팅으로는 어디까지 합의했는지 보이지 않아요. 의견이 다른 부분만 남았는데도 대화가 감정 싸움처럼 느껴지고, 결정한 뒤 누가 무엇을 예약할지도 따로 정해야 해요.',
+           promise:'결정을 항목으로 나눠 이미 합의한 것과 남은 것을 보여 주고, 비교와 대화를 거쳐 둘 다 동의했을 때만 확정해요.',
+           flow:['홈에서 진행 중인 여행 계획을 열어요', '합의 60%, 5개 중 3개를 이미 합의했어요', '이탈리아와 일본을 나란히 비교하고 이탈리아를 골라요', '대화에서 빠른 답장을 보내면 준이 답해요', '마지막 항목에 동의해 5개 중 5개가 돼요', '확정하면 다음 할 일과 캘린더로 이어져요'], key:1,
+           ok:['앱을 열자마자 어디까지 합의했고 무엇이 남았는지 보여요', '의견 차이를 비교 표와 각자의 이유로 이야기해요', '한 사람이 혼자 확정할 수 없어요. 둘 다 모든 항목에 동의해야 해요'] },
+      en:{ alt:'A couple on a sofa looking at their trip agreement in Our Discussion',
+           who:['Mina (32) and Joon (33), married two years', 'Both work, so weekday conversations are short. The decision now is a seven-night summer trip: Joon wants Italy, Mina wants Japan. Budget, dates and length are already agreed, but that gets buried in the chat, so every talk starts over.'],
+           problem:'A chat never shows how far you have agreed. Only the differences are left, yet it feels like an argument, and once it is decided, who books what still has to be settled.',
+           promise:'It splits the decision into points, shows what is agreed and what is left, and makes it official only when both agree, after comparing and talking it through.',
+           flow:['Open Travel Plans from the topics in progress', '60% agreed: 3 of 5 points are already settled', 'Compare Italy and Japan side by side, then pick Italy', 'Send a quick reply in the discussion and Joon answers', 'Agree on the last point to reach 5 of 5', 'Make it official, with next steps and a calendar entry'], key:1,
+           ok:['Open the app and see at once what is agreed and what is left', 'Talk differences through with the comparison and each person’s reason', 'No one can decide alone: both must agree on every point'] } },
+  ],
+};
+function paintStory(){
+  const T = POC_STORY[pocLang], L = POC_TEXT[pocLang], host = $('#pocStory');
+  host.lang = pocLang;
+  host.innerHTML = `<div class="ps-in">
+    <header class="ps-hero"><p class="ps-kicker">${T.kicker}</p><h1>${T.title}</h1><p>${T.lead}</p></header>
+    ${POC_STORY.scenarios.map((sc, i)=>{ const c = sc[pocLang], s = POC[i]; return `
+    <section class="ps-scn" aria-labelledby="ps-h-${i}">
+      <figure class="ps-shot"><img src="mobile-ui-kit/scenarios/web/${sc.img}.jpg" alt="${c.alt}" width="2400" height="1350" loading="lazy" decoding="async"></figure>
+      <div class="ps-head">
+        <div><p class="ps-kicker">${L.scenario(i+1)}</p><h2 id="ps-h-${i}">${s.name}</h2><p class="ps-lead">${s[pocLang].lead}</p></div>
+        <div class="ps-acts"><button class="ps-btn" type="button" data-story-try="${i}">${T.try}</button><button class="ps-btn solid" type="button" data-story-play="${i}">${T.watch}</button></div>
+      </div>
+      <div class="ps-grid">
+        <div>
+          <div class="ps-block"><h3>${T.who}</h3><p><b>${c.who[0]}</b><br>${c.who[1]}</p></div>
+          <div class="ps-block"><h3>${T.problem}</h3><p>${c.problem}</p></div>
+          <div class="ps-block"><h3>${T.promise}</h3><p class="ps-promise">${c.promise}</p></div>
+        </div>
+        <div>
+          <div class="ps-block"><h3>${T.flow}</h3><ol class="ps-flow">${c.flow.map((f, k)=>`<li><span class="n">${i+1}.${k+1}</span><span>${f}${k === c.key ? `<em class="poc-key">${T.key}</em>` : ''}</span></li>`).join('')}</ol></div>
+          <div class="ps-block"><h3>${T.ok}</h3><ul class="ps-ok">${c.ok.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        </div>
+      </div>
+    </section>`; }).join('')}
+    <p class="ps-foot">${T.foot}</p>
+  </div>`;
+}
+$('#pocStory').addEventListener('click', e=>{
+  const t = e.target.closest('[data-story-try]'), p = e.target.closest('[data-story-play]');
+  if(t) pocOpen(+t.dataset.storyTry);
+  if(p){ pocOpen(+p.dataset.storyPlay); pocPlayToggle(); }
+});
+
+function paintPocSteps(){   // the screen the phone shows, marked in the flow
+  document.querySelectorAll('#pocInfo .poc-steps button').forEach(b=>{
+    if(POC[pocI].steps[+b.dataset.k].id === pocScreen) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+}
+function pocLayout(){   // the phone (390 × 844) as large as the room allows, never larger than 1:1
+  if($('#view-poc').hidden) return;
+  const body = $('#pocBody'), cs = getComputedStyle(body);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const s = matchMedia('(max-width:900px)').matches
+    ? Math.min(1, (body.clientWidth - padX)/390, (innerHeight - 150 - 48)/844)                        // stacked: the phone, then its story
+    : Math.min(1, (body.clientHeight - padY - 48)/844, (body.clientWidth - padX - 380 - 48)/390);     // side by side (48: the player under the phone)
+  $('#pocPhone').style.setProperty('--s', Math.max(0.35, s).toFixed(4));
+}
+function pocShow(){ if(pocStoryOn) pocOpenStory(); else if(!pocBooted) pocOpen(pocI); pocLayout(); }
+
+$('#pocScn').innerHTML = `<button type="button" role="tab" aria-selected="false" data-i="story"></button>`   // 시나리오 소개 first (its label: POC_TEXT.story), then the scenarios
+  + POC.map((s,i)=>`<button type="button" role="tab" aria-selected="false" data-i="${i}"><i>${i+1}</i>${s.name}</button>`).join('');
+const pocTabGo = k=>{ if(k === 'story'){ if(!pocStoryOn) pocOpenStory(); } else if(pocStoryOn || +k !== pocI) pocOpen(+k); };
+$('#pocScn').addEventListener('click', e=>{ const b = e.target.closest('[role="tab"]'); if(b) pocTabGo(b.dataset.i); });
+$('#pocScn').addEventListener('keydown', e=>{
+  if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
+  e.preventDefault(); const tabs = [...$('#pocScn').children], at = tabs.findIndex(b=>b.getAttribute('aria-selected') === 'true');
+  const next = tabs[(at + (e.key==='ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+  pocTabGo(next.dataset.i); next.focus();
+});
+document.querySelectorAll('#pocLang button').forEach(b=>b.onclick = ()=>{
+  if(pocLang === b.dataset.v) return;
+  pocLang = b.dataset.v; try{ localStorage.setItem('avc-poc-lang', pocLang); }catch(e){}
+  pocPost({ type:'au:lang', lang:pocLang }); paintPoc();
+});
+$('#pocInfo').addEventListener('click', e=>{
+  const b = e.target.closest('.poc-steps button'); if(b){ pocPlayStop(); pocGo(POC[pocI].steps[+b.dataset.k].file); return; }
+  if(e.target.closest('[data-poc="restart"]')){ pocOpen(pocI, { restart:true }); toast(POC_TEXT[pocLang].restarted(POC[pocI].name)); }
+  if(e.target.closest('[data-poc="hints"]')) pocHints();
+});
+/* 자동 재생: each scenario played like a screen recording. A finger glides to what it presses and presses it — the kit's own controls,
+   clicked for real — and the prototype runs: pages change, the scan and the processing finish, Joon answers. The steps follow the
+   kit's walkthrough (scripts/walkthrough.mjs) and demo script (docs/scenario-stories.md); each ends back on the scenario's first screen,
+   and the loop starts over from fresh demo data. ❚❚ pauses it; a touch of your own on the phone, a step of the flow, Restart or another
+   scenario stops it. Steps: { hold } ms · { tap, to?: screen, more?: selector, n? } · { tapIf } · { until: doc => bool } · { screen } ·
+   { type, text: { en, ko } } · { clear }. A step that cannot be done starts the loop over. */
+const POC_PLAY = {
+  'pc-health': [
+    { hold:1400 },
+    { tap:'.au-footer .au-button', to:'pc-health-connect' },                                  // New Check
+    { until:d=>{ const b = d.querySelector('#ph-c-start'); return b && !b.disabled; }, timeout:7000 }, { hold:900 },   // the PC connects
+    { tap:'#ph-c-start', to:'pc-health-scan' },                                              // Start Scan
+    { screen:'pc-health', timeout:16000 }, { hold:1700 },                                    // the scan finishes: 98% Healthy
+    { tap:'.ph-diag[data-key="gpu"] .ph-diag__head' }, { hold:1300 },                       // open the GPU card
+    { tap:'.ph-diag[data-key="gpu"] .ph-diag__more', to:'pc-health-part' }, { hold:1800 },  // its details: the load chart
+    { tap:'.au-footer .au-button' }, { hold:1500 },                                          // Ask the Seller
+    { tap:'[data-action="copy-msg"]' }, { hold:1500 },                                       // Copy the message
+    { tap:'[data-action="back"]', to:'pc-health' }, { hold:1000 },
+    { tap:'.au-footer .au-button', to:'pc-health-report' }, { hold:1700 },                   // View Full Report
+    { tap:'.au-footer [data-action="sheet"]' }, { hold:1200 },                               // Share
+    { tap:'[data-action="copy-link"]' }, { hold:1400 },
+    { tapIf:'.au-sheet:not([hidden]) [data-action="close-sheet"]' },
+    { tap:'[data-action="back"]', to:'pc-health' }, { hold:900 },
+    { tap:'[data-action="back"]', to:'pc-health-home' }, { hold:2600 },                     // home: the new check is listed
+  ],
+  'meeting-notes': [
+    { hold:1400 },
+    { tap:'.au-footer .au-button', to:'meeting-notes' }, { hold:4200 },                       // New Recording: the transcript and summary fill in
+    { tap:'[data-action="pause"]' }, { hold:1400 },
+    { tap:'[data-action="resume"]' }, { hold:2600 },
+    { tap:'[data-action="stop"]', to:'meeting-notes-processing' },
+    { screen:'meeting-notes-notes', timeout:12000 }, { hold:2000 },                          // the notes are ready
+    { tap:'#mn-n-tab-actions' }, { hold:1200 },
+    { tap:'.mn-action' }, { hold:1300 },                                                     // check an action item
+    { tap:'#mn-n-transcript', to:'meeting-notes-transcript' }, { hold:1200 },
+    { type:'#mn-t-search', text:{ en:'legal', ko:'법무' } }, { hold:1900 },                  // search the transcript
+    { clear:'#mn-t-search' }, { hold:600 },
+    { tap:'[data-who="Priya"]' }, { hold:1500 },                                             // one speaker's lines
+    { tap:'#mn-t-play' }, { hold:3600 },                                                     // play: the current line follows
+    { tap:'#mn-t-play' }, { hold:700 },
+    { tap:'[data-action="back"]', to:'meeting-notes-notes' }, { hold:1000 },
+    { tap:'[data-action="back"]', to:'meeting-notes-home' }, { hold:2600 },                 // home: the new meeting is listed
+  ],
+  'our-discussion': [
+    { hold:1400 },
+    { tap:'#od-h-list a', to:'our-discussion' }, { hold:2000 },                              // Travel Plans: 60% agreed
+    { tap:'[data-href="our-discussion-compare.html"]', to:'our-discussion-compare' }, { hold:2000 },
+    { tap:'[data-action="pick"][data-id="a"]' }, { hold:2000 },                              // pick Italy, as Joon did
+    { tap:'[data-action="back"]', to:'our-discussion' }, { hold:1800 },                      // 80%
+    { tap:'.au-footer [data-action="discuss"]', to:'our-discussion-thread' }, { hold:1200 },
+    { tap:'[data-action="quick"]', more:'.od-msg', n:2, timeout:7000 }, { hold:1500 },       // a quick reply, and Joon answers
+    { tap:'[data-href="our-discussion-agreement.html"]', to:'our-discussion-agreement' }, { hold:1500 },
+    { tap:'[data-action="toggle"][data-id="activities"]' }, { hold:1400 },                  // agree on Activities: 5 of 5
+    { tap:'#od-a-done', to:'our-discussion-decision' }, { hold:2800 },                       // Make It Official
+    { tap:'[data-action="back"]', to:'our-discussion' }, { hold:1000 },
+    { tap:'[data-action="back"]', to:'our-discussion-home' }, { hold:2600 },                // home: Travel Plans is decided
+  ],
+};
+const POC_SPEED = 1.5;            // the autoplay's speed: its waits, the finger, the typing and (pocTimewarp) the prototype's own clock
+const pocTouch = $('#pocTouch');
+let pocRun = null;                   // the autoplay in progress: { stop, paused, done, total }
+let pocFinger = { x:195, y:640 };    // where the finger was (phone px)
+const pocDoc = ()=>{ try{ return pocFrame.contentDocument; }catch(e){ return null; } };
+const pocLive = el=>!el.closest('[hidden], [inert]') && !el.disabled && el.getClientRects().length > 0;   // on screen and pressable now
+function pocSleep(ms, run){   // ms of playing time at 1 × (so ms / POC_SPEED of real time; a pause holds it); over at once when the run stops
+  return new Promise(res=>{ let left = ms / POC_SPEED, last = performance.now();
+    const tick = ()=>{ const now = performance.now(); if(!run.paused) left -= now - last; last = now;
+      if(run.stop || left <= 0) res(); else setTimeout(tick, Math.min(50, Math.max(4, left))); };
+    tick(); });
+}
+async function pocUntil(test, run, timeout){ for(let w = 0; !run.stop; w += 100){ let ok = false; try{ const d = pocDoc(); ok = !!(d && test(d)); }catch(e){} if(ok) return true; if(w > timeout) return false; await pocSleep(100, run); } return false; }
+const pocWaitScreen = (id, run, timeout)=>pocUntil(()=>pocScreen === id, run, timeout);
+async function pocFind(sel, run, timeout=5000){ let el = null; await pocUntil(d=>(el = [...d.querySelectorAll(sel)].find(pocLive)), run, timeout); return el; }
+async function pocInView(el, run){   // inside a scrolling list and out of view: scrolled to it first
+  const win = pocFrame.contentWindow;
+  for(let p = el.parentElement; p; p = p.parentElement){
+    if(!/(auto|scroll)/.test(win.getComputedStyle(p).overflowY) || p.scrollHeight <= p.clientHeight) continue;
+    const r = el.getBoundingClientRect(), q = p.getBoundingClientRect();
+    if(r.top < q.top + 8 || r.bottom > q.bottom - 8){ p.scrollBy({ top:(r.top + r.height/2) - (q.top + q.height/2), behavior:'smooth' }); await pocSleep(700, run); }
+    return;
+  }
+}
+async function pocPress(sel, run, { click=true }={}){   // the finger: appears, glides there, presses (and clicks), lifts
+  let el = await pocFind(sel, run); if(!el) return null;
+  await pocInView(el, run);
+  const r = el.getBoundingClientRect(), x = r.left + r.width/2, y = r.top + r.height/2, s = parseFloat(getComputedStyle($('#pocPhone')).getPropertyValue('--s')) || 1;
+  const ms = Math.round(Math.min(900, Math.max(450, 320 + Math.hypot(x - pocFinger.x, y - pocFinger.y) * 1.1)));
+  pocTouch.classList.add('on'); await pocSleep(180, run);
+  pocTouch.style.transitionDuration = `${Math.round(ms / POC_SPEED)}ms, 170ms`;
+  pocTouch.style.transform = `translate(${(x*s).toFixed(1)}px, ${(y*s).toFixed(1)}px)`; pocFinger = { x, y };
+  await pocSleep(ms + 100, run);
+  pocTouch.classList.add('down'); await pocSleep(150, run);
+  if(run.stop) return null;
+  if(!el.isConnected) el = await pocFind(sel, run, 600);   // (re-rendered meanwhile)
+  if(el && click) el.click();
+  pocTouch.classList.remove('down', 'ripple'); void pocTouch.offsetWidth; pocTouch.classList.add('ripple');
+  await pocSleep(420, run); pocTouch.classList.remove('on');
+  return el;
+}
+async function pocStep(a, run){
+  if(a.hold) return pocSleep(a.hold, run).then(()=>true);
+  if(a.screen) return pocWaitScreen(a.screen, run, a.timeout || 9000);
+  if(a.until) return pocUntil(a.until, run, a.timeout || 6000);
+  if(a.clear){ const el = pocDoc()?.querySelector(a.clear); if(el){ el.value = ''; el.dispatchEvent(new Event('input', { bubbles:true })); el.blur(); } return true; }
+  if(a.type){   // tap into the field, then type letter by letter
+    const el = await pocPress(a.type, run, { click:false }); if(!el) return false;
+    el.focus({ preventScroll:true });
+    for(const ch of (a.text[pocLang] || a.text.en)){ if(run.stop) return false; el.value += ch; el.dispatchEvent(new Event('input', { bubbles:true })); await pocSleep(190, run); }
+    return true;
+  }
+  if(a.tapIf){ const d = pocDoc(); if(d && [...d.querySelectorAll(a.tapIf)].some(pocLive)) await pocPress(a.tapIf, run); return true; }
+  if(a.tap){
+    const n0 = a.more ? (pocDoc()?.querySelectorAll(a.more).length || 0) : 0;
+    if(!await pocPress(a.tap, run)) return false;
+    if(a.to) return pocWaitScreen(a.to, run, a.timeout || 9000);
+    if(a.more) return pocUntil(d=>d.querySelectorAll(a.more).length >= n0 + (a.n || 1), run, a.timeout || 6000);
+    return true;
+  }
+  return true;
+}
+async function pocLoop(run){
+  const sc = POC[pocI], steps = POC_PLAY[sc.id];
+  run.total = steps.length;
+  while(!run.stop){
+    run.done = 0; paintPlayer();
+    pocFrame.style.opacity = '0'; await pocSleep(330, run); if(run.stop) break;   // fresh: demo data cleared, the first screen
+    pocClear(sc.id); pocScreen = ''; pocHintsOff(); pocGo(sc.steps[0].file);
+    await pocWaitScreen(sc.steps[0].id, run, 9000);
+    pocFrame.style.opacity = '';
+    for(const a of steps){
+      if(run.stop) break;
+      if(!await pocStep(a, run)){ if(!run.stop) console.warn('Mobile UI PoC autoplay: a step could not be done, starting over', a); break; }
+      run.done++; paintPlayer();
+    }
+  }
+  pocFrame.style.opacity = '';
+}
+function pocTimewarp(win){   // installed on each kit page as it opens; at 1 × unless the autoplay is playing
+  if(!win || win.__pocWarp) return;
+  win.__pocWarp = true;
+  const raf = win.requestAnimationFrame.bind(win), st = win.setTimeout.bind(win), si = win.setInterval.bind(win);
+  const speed = ()=>pocRun && !pocRun.paused ? POC_SPEED : 1;
+  let real0 = win.performance.now(), virt0 = real0, rate = 1;
+  const clock = real=>{ const r = speed(); if(r !== rate){ virt0 += (real - real0) * rate; real0 = real; rate = r; } return virt0 + (real - real0) * rate; };
+  win.requestAnimationFrame = cb=>raf(t=>cb(clock(t)));             // the frame time animations read
+  win.setTimeout = (fn, ms, ...a)=>st(fn, (+ms || 0) / speed(), ...a);
+  win.setInterval = (fn, ms, ...a)=>si(fn, (+ms || 0) / speed(), ...a);
+}
+function pocPlayToggle(){
+  if(pocRun){ pocRun.paused = !pocRun.paused; paintPlayer(); return; }
+  const run = pocRun = { stop:false, paused:false, done:0, total:1 };
+  pocFresh.add(POC[pocI].id); paintPlayer();
+  pocLoop(run).finally(()=>{ if(pocRun === run){ pocRun = null; paintPlayer(); } });
+}
+function pocPlayStop(){
+  if(!pocRun) return;
+  pocRun.stop = true; pocRun = null;
+  pocFrame.style.opacity = ''; pocTouch.classList.remove('on', 'down', 'ripple');
+  paintPlayer();
+}
+function pocPlayPause(){ if(pocRun && !pocRun.paused){ pocRun.paused = true; paintPlayer(); } }
+function paintPlayer(){
+  const L = POC_TEXT[pocLang], b = $('#pocPlay'), playing = !!pocRun && !pocRun.paused;
+  b.textContent = playing ? '❚❚' : '▶'; b.setAttribute('aria-label', playing ? L.pause : L.play);
+  const k = POC[pocI].steps.findIndex(st=>st.id === pocScreen);
+  $('#pocPlayLabel').textContent = !pocRun ? L.autoplay : pocRun.paused ? L.paused : k >= 0 ? `${pocI+1}.${k+1} ${POC[pocI].steps[k][pocLang][0]}` : L.playing;
+  $('#pocProg').style.width = pocRun ? `${(pocRun.done / pocRun.total * 100).toFixed(1)}%` : '0%';
+}
+$('#pocPlay').onclick = pocPlayToggle;
+
+// 클릭 영역 보기: what can be pressed on the phone's screen right now (buttons, links, tabs, checkboxes, fields …), read from the kit's
+// page at that moment, drawn over the phone for a second and gone. Hidden, inert (behind an open sheet) and disabled controls are left out.
+const POC_HIT_SEL = 'a[href], button, input:not([type="hidden"]), select, textarea, label, summary, [role="button"], [role="link"], [role="tab"], [role="radio"], [role="checkbox"], [role="switch"], [role="slider"], [data-action]';
+function pocHitRects(){   // in the phone's own px (390 × 844), clipped to what is on screen
+  let doc, win; try{ doc = pocFrame.contentDocument; win = pocFrame.contentWindow; }catch(e){ return []; }
+  if(!doc || !doc.body) return [];
+  const W = win.innerWidth, H = win.innerHeight, css = el=>win.getComputedStyle(el);
+  let els = [...doc.querySelectorAll(POC_HIT_SEL)].filter(el=>{
+    if(el.matches('label') && !el.control) return false;
+    if(el.closest('[hidden], [inert], .au-scrim, .au-visually-hidden, .au-status-bar, .au-home-indicator, .au-devbar')) return false;
+    if(el.disabled || el.getAttribute('aria-disabled') === 'true') return false;
+    const st = css(el); return st.visibility !== 'hidden' && st.pointerEvents !== 'none';
+  });
+  els = els.filter(el=>!els.some(o=>o !== el && o.contains(el)));   // a field inside its label: the label
+  const out = [];
+  for(const el of els){
+    const r = el.getBoundingClientRect(); let L = r.left, T = r.top, R = r.right, B = r.bottom;
+    for(let p = el.parentElement; p && p !== doc.documentElement; p = p.parentElement){   // inside a scrolling list: only the part in view
+      const st = css(p); if(st.overflowX === 'visible' && st.overflowY === 'visible') continue;
+      const q = p.getBoundingClientRect(); L = Math.max(L, q.left); T = Math.max(T, q.top); R = Math.min(R, q.right); B = Math.min(B, q.bottom);
+    }
+    L = Math.max(L, 0); T = Math.max(T, 0); R = Math.min(R, W); B = Math.min(B, H);
+    if(R - L >= 4 && B - T >= 4) out.push({ x:L, y:T, w:R-L, h:B-T, r:Math.max(6, parseFloat(css(el).borderTopLeftRadius) || 0) });
+  }
+  return out;
+}
+let pocHitTimer = 0;
+function pocHints(){
+  const host = $('#pocHits'), s = parseFloat(getComputedStyle($('#pocDevice')).getPropertyValue('--s')) || 1, rects = pocHitRects();
+  if(!rects.length){ toast(POC_TEXT[pocLang].hintsNone); return; }
+  host.innerHTML = rects.map(r=>`<i style="left:${(r.x*s).toFixed(1)}px;top:${(r.y*s).toFixed(1)}px;width:${(r.w*s).toFixed(1)}px;height:${(r.h*s).toFixed(1)}px;border-radius:${(r.r*s).toFixed(1)}px"></i>`).join('');
+  host.classList.add('on');
+  clearTimeout(pocHitTimer); pocHitTimer = setTimeout(pocHintsOff, 1000);   // a second, then it fades away
+}
+function pocHintsOff(){ clearTimeout(pocHitTimer); $('#pocHits').classList.remove('on'); }
+window.addEventListener('message', e=>{   // a kit screen has opened in the phone (also when Back restores one)
+  if(e.source !== pocFrame.contentWindow) return;
+  const d = e.data; if(!d || d.type !== 'au:ready') return;
+  const i = POC.findIndex(s=>s.steps.some(st=>st.id===d.screen));
+  if(i >= 0 && i !== pocI){ pocI = i; try{ localStorage.setItem('avc-poc-scn', POC[i].id); }catch(err){} paintPoc(); }
+  pocScreen = d.screen; pocHintsOff(); paintPlayer();
+  try{ pocTimewarp(pocFrame.contentWindow); }catch(err){}
+  try{ pocAt[POC[pocI].id] = pocFrame.contentWindow.location.href;
+       const doc = pocFrame.contentDocument, mine = e=>{ if(e.isTrusted) pocPlayStop(); };   // a touch of your own on the phone ends the autoplay
+       doc.addEventListener('pointerdown', mine, true); doc.addEventListener('keydown', mine, true);
+       const r = pocFrame.contentDocument.documentElement;   // (a toggle made while the page was loading)
+       if((r.getAttribute('data-au-lang') || 'en') !== pocLang) pocPost({ type:'au:lang', lang:pocLang });
+       if(r.getAttribute('data-au-theme') !== pocTheme()) pocPost({ type:'au:theme', theme:pocTheme() }); }catch(err){}
+  paintPocSteps();
+});
+const pocSyncTheme = ()=>{ if(pocBooted) pocPost({ type:'au:theme', theme:pocTheme() }); };   // ☾, or the system's own change
+new MutationObserver(pocSyncTheme).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', pocSyncTheme);
+new ResizeObserver(pocLayout).observe($('#pocBody'));
+window.addEventListener('resize', pocLayout);
+paintPoc();
+
+/* ======================================================================
+   12. Splitter between the control panel and the preview
        Drag it (or focus it and press ← / →) to resize the control area; double-click returns to the default width. The width is kept as a
        share of the window, so it survives reloads and window resizes. The panel's grids reflow by themselves as it gets narrower.
    ====================================================================== */

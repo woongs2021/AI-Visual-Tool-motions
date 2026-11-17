@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Scanning</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/pc-health.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="pc-health" data-au-screen="pc-health-scan" data-au-back="pc-health-connect.html" data-au-store="pc-health">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back" aria-hidden="true"></i></button>
+      <h1 class="au-app-bar__title" id="app-title">Scanning</h1>
+      <span class="fl-spacer" aria-hidden="true"></span>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <section class="ph-score" aria-label="Scan progress">
+        <div class="ph-ring" id="ph-s-ring" role="progressbar" aria-label="Scan progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="64">
+          <svg viewBox="0 0 176 176" aria-hidden="true" focusable="false">
+            <circle class="ph-ring__track" cx="88" cy="88" r="81"/>
+            <circle class="ph-ring__value" id="ph-s-value" cx="88" cy="88" r="81" stroke-dasharray="508.94" stroke-dashoffset="183.2"/>
+          </svg>
+          <div class="ph-ring__label" aria-hidden="true">
+            <span class="ph-ring__num"><span id="ph-s-pct">64</span><small>%</small></span>
+            <span class="ph-ring__state" id="ph-s-state">Checking GPU</span>
+          </div>
+        </div>
+        <p class="au-text-meta" style="margin-top:12px" id="ph-s-meta">ThinkPad X1 Carbon, about 1 min left</p>
+      </section>
+      <section class="au-card fl-gap" aria-label="Checks">
+        <div class="fl-status" id="ph-s-steps"></div>
+      </section>
+    </main>
+
+    <footer class="au-footer">
+      <button class="au-button au-button--secondary" type="button" data-action="cancel"><span>Cancel Scan</span></button>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Starter — new screen</title>
+
+  <!-- 1. The kit: tokens (light + dark) and the shared components. screens.css is only for the three demo screens. -->
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/components.css">
+
+  <!-- 2. Your app's accent, light and dark (both dark blocks: forced and from the OS). -->
+  <style>
+    [data-au-app="starter"] { --au-accent: #2563EB; --au-accent-fg: #1D4ED8; --au-accent-weak: #EFF4FF; --au-focus: #1D4ED8;
+                              --au-cta-bg: #2563EB; --au-cta-fg: #FFFFFF; }
+    [data-au-theme="dark"] [data-au-app="starter"] { --au-accent-fg: #93B4FF; --au-accent-weak: rgba(37, 99, 235, 0.2); --au-focus: #93B4FF; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-au-theme="light"]) [data-au-app="starter"] { --au-accent-fg: #93B4FF; --au-accent-weak: rgba(37, 99, 235, 0.2); --au-focus: #93B4FF; }
+    }
+  </style>
+
+  <!-- 3. Theme and modes before first paint (same snippet as the demo pages) -->
+  <script>(function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+
+  <!-- 4. The shell (sheets, toast, theme, scroll fog, 390 × 844 check), then your screen's logic -->
+  <script src="../scripts/i18n/ko.js" defer></script>
+  <script src="../scripts/app.js" defer></script>
+  <!-- your logic: in a file loaded after app.js with `defer`, or inline on DOMContentLoaded (inline scripts can't defer) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => AUKit.defineScreen('starter', ({ toast, sheets, $ }) => {
+      let done = 0;
+      const render = () => {
+        $('#st-progress').style.setProperty('--au-value', `${done * 25}%`);
+        $('#st-progress-wrap').setAttribute('aria-valuenow', done * 25);
+        $('#st-count').textContent = `${done} of 4 done`;
+      };
+      return {
+        actions: {
+          step: () => { done = Math.min(4, done + 1); render(); toast(done === 4 ? 'All set' : 'Step done'); },
+          info: (btn) => sheets.open('st-sheet', btn),
+          theme: () => { const t = AUKit.theme.cycle(); toast(`Theme: ${t}`); },
+        },
+        reset() { done = 0; render(); },
+        apply() { render(); },
+      };
+    }));
+  </script>
+</head>
+<body>
+<div class="au-stage">
+  <!-- data-au-screen: the id for AUKit.defineScreen · data-au-app: the accent rule above · data-au-back: where Back goes -->
+  <div class="au-screen" id="screen" data-au-app="starter" data-au-screen="starter" data-au-back="../index.html">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back"></i></button>
+      <h1 class="au-app-bar__title">New Screen</h1>
+      <button class="au-icon-button" type="button" aria-label="Change theme" data-action="theme"><i class="au-icon au-icon--more"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+      <section class="au-section">
+        <div class="au-card">
+          <div class="au-card__head">
+            <i class="au-icon au-icon--sparkle" aria-hidden="true"></i>
+            <h2 class="au-card__title">Get started</h2>
+            <span class="au-badge" data-tone="accent">New</span>
+          </div>
+          <div class="au-progress" id="st-progress-wrap" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="margin-top:16px">
+            <span class="au-progress__value" id="st-progress"></span>
+          </div>
+          <p class="au-text-meta" id="st-count" style="margin-top:8px">0 of 4 done</p>
+        </div>
+      </section>
+
+      <section class="au-section">
+        <div class="au-section-head">
+          <h2 class="au-section-head__title">Details</h2>
+          <span class="au-section-head__meta">Sample</span>
+        </div>
+        <div class="au-card">
+          <dl class="au-rows">
+            <div class="au-row"><dt class="au-row__label">Status</dt><dd class="au-row__value" data-tone="positive">Ready</dd></div>
+            <div class="au-row"><dt class="au-row__label">Owner</dt><dd class="au-row__value">You</dd></div>
+            <div class="au-row"><dt class="au-row__label">Updated</dt><dd class="au-row__value">Just now</dd></div>
+          </dl>
+        </div>
+        <div class="au-notice" data-tone="warning">
+          <i class="au-icon au-icon--alert"></i>
+          <p class="au-notice__text"><strong>Tones:</strong> positive, warning and critical work in both themes.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="au-footer">
+      <button class="au-button au-button--secondary au-button--hug" type="button" data-action="info" aria-haspopup="dialog" aria-controls="st-sheet"><i class="au-icon au-icon--info" style="width:20px;height:20px"></i><span>Info</span></button>
+      <button class="au-button" type="button" data-action="step"><span>Next step</span></button>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+    <section class="au-sheet" id="st-sheet" role="dialog" aria-modal="true" aria-labelledby="st-sheet-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="st-sheet-title">About this screen</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close"></i></button>
+      </div>
+      <div class="au-sheet__body"><p class="au-text-meta" style="font-size:14px;line-height:22px">Copy this file, rename data-au-screen and data-au-app, set your accent, and add actions in AUKit.defineScreen.</p></div>
+      <div class="au-sheet__foot"><button class="au-button" type="button" data-action="close-sheet"><span>Got it</span></button></div>
+    </section>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="../index.html"><i class="au-icon au-icon--back"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Decision</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/our-discussion.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="our-discussion" data-au-screen="our-discussion-decision" data-au-back="our-discussion.html our-discussion-home.html" data-au-store="our-discussion">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back" aria-hidden="true"></i></button>
+      <h1 class="au-app-bar__title" id="app-title">Decision</h1>
+      <button class="au-icon-button" type="button" aria-label="More options" aria-haspopup="dialog" aria-controls="our-discussion-decision-menu" data-action="sheet"><i class="au-icon au-icon--more" aria-hidden="true"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <section class="fl-center fl-decided" style="padding-top:8px" aria-labelledby="od-d-title" id="od-d-hero">
+        <span class="au-icon-box" aria-hidden="true" id="od-d-icon"><i class="au-icon au-icon--check" aria-hidden="true"></i></span>
+        <p class="au-text-meta" style="margin-top:12px" id="od-d-over">It’s decided</p>
+        <h2 class="fl-big" id="od-d-title">Italy</h2>
+        <div class="fl-meta-row" style="margin-top:4px"><span class="au-avatars au-avatars--sm" aria-hidden="true"><span class="au-avatar au-avatar--sm au-avatar--ring" data-person="you" data-name="Mina">M</span><span class="au-avatar au-avatar--sm au-avatar--ring" data-person="partner" data-name="Joon">J</span></span><span class="au-text-meta" id="od-d-meta">Mina &amp; Joon agreed on 5 of 5 points</span></div>
+      </section>
+      <section class="au-card fl-gap" aria-label="The plan"><dl class="au-rows" id="od-d-rows"></dl></section>
+      <section class="au-section fl-gap" aria-labelledby="od-d-next">
+        <div class="au-section-head"><h2 class="au-section-head__title" id="od-d-next">Next steps</h2><span class="au-section-head__meta">Demo</span></div>
+        <div><div class="mn-actions" id="od-d-steps" style="margin:0 -8px"></div></div>
+      </section>
+    </main>
+
+    <footer class="au-footer">
+      <!-- buttons rendered by scripts/flows/our-discussion.js -->
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+    <section class="au-sheet" id="our-discussion-decision-menu" role="dialog" aria-modal="true" aria-labelledby="our-discussion-decision-menu-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="our-discussion-decision-menu-title">Options</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close" aria-hidden="true"></i></button>
+      </div>
+      <div class="au-sheet__body">
+        <div class="au-menu">
+          <a class="au-menu__item" href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+          <button class="au-menu__item" type="button" data-action="reset" data-tone="critical"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

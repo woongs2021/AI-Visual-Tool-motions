@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Travel Plans</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/our-discussion.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="our-discussion" data-au-screen="our-discussion-thread" data-au-back="our-discussion.html" data-au-store="our-discussion" data-au-scroll="true">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back" aria-hidden="true"></i></button>
+      <h1 class="au-app-bar__title" id="app-title">Travel Plans</h1>
+      <button class="au-icon-button" type="button" aria-label="Agreement points" data-action="nav" data-href="our-discussion-agreement.html"><i class="au-icon au-icon--list" aria-hidden="true"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <p class="au-text-meta" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px">Joon’s replies are simulated <span class="au-demo-tag">Demo</span></p>
+      <div class="od-thread fl-thread" id="od-t-thread" aria-live="polite"></div>
+    </main>
+
+    <footer class="au-footer fl-compose-foot">
+      <div class="fl-chips" role="group" aria-label="Quick replies" id="od-t-quick"></div>
+      <form class="od-compose" id="od-t-form" autocomplete="off">
+        <label class="au-visually-hidden" for="od-t-input">Message</label>
+        <input class="od-compose__input" id="od-t-input" type="text" placeholder="Message Joon" maxlength="200" enterkeyhint="send">
+        <button class="au-icon-button" type="submit" aria-label="Send" id="od-t-send" disabled><i class="au-icon au-icon--send" aria-hidden="true"></i></button>
+      </form>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

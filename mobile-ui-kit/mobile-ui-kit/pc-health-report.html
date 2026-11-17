@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F1013" media="(prefers-color-scheme: dark)">
+  <title>Full Report</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/screens.css">
+  <link rel="stylesheet" href="styles/flows.css">
+  <script>/* before first paint: theme (?theme= → saved choice → OS) and modes (?ui=1 ?capture=1 ?statusbar=1 ?embed=1) */
+  (function(){var p=new URLSearchParams(location.search),r=document.documentElement,c=r.classList,t=p.get('theme');
+  if(!t&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{t=localStorage.getItem('au-theme')}catch(e){}}
+  if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);
+  var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}
+  if(p.get('ui')==='1')c.add('is-ui-only');if(p.get('capture')==='1')c.add('is-capture');if(p.get('statusbar')==='1')c.add('has-system-bars');if(p.get('embed')==='1')c.add('is-embed');})();</script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+  <script src="scripts/flows/pc-health.js" defer></script>
+</head>
+<body>
+<div class="au-stage">
+  <div class="au-screen" id="screen" data-au-app="pc-health" data-au-screen="pc-health-report" data-au-back="pc-health.html" data-au-store="pc-health">
+    <div class="au-status-bar" aria-hidden="true"><span class="au-num">9:41</span></div>
+
+    <header class="au-app-bar">
+      <button class="au-icon-button" type="button" aria-label="Back" data-action="back"><i class="au-icon au-icon--back" aria-hidden="true"></i></button>
+      <h1 class="au-app-bar__title" id="app-title">Full Report</h1>
+      <button class="au-icon-button" type="button" aria-label="More options" aria-haspopup="dialog" aria-controls="pc-health-report-menu" data-action="sheet"><i class="au-icon au-icon--more" aria-hidden="true"></i></button>
+    </header>
+
+    <main class="au-content" id="content">
+
+      <section class="au-card fl-report-sum" id="ph-r-sum" data-tone="positive" aria-label="Summary">
+        <div class="ph-ring" id="ph-r-ring" data-tone="positive">
+          <svg viewBox="0 0 72 72" aria-hidden="true" focusable="false"><circle class="ph-ring__track" cx="36" cy="36" r="31" style="stroke-width:7"/><circle class="ph-ring__value" id="ph-r-value" cx="36" cy="36" r="31" style="stroke-width:7" stroke-dasharray="194.78" stroke-dashoffset="3.9"/></svg>
+          <div class="ph-ring__label"><span class="ph-ring__num"><span id="ph-r-score">98</span><small>%</small></span></div>
+        </div>
+        <div class="fl-item__text">
+          <p class="fl-item__title" id="ph-r-device">ThinkPad X1 Carbon Gen 9</p>
+          <p class="fl-item__meta" id="ph-r-meta">Scanned 2 min ago, report PH-2611-0482</p>
+          <span class="au-badge" data-tone="positive" id="ph-r-badge" style="margin-top:6px;align-self:flex-start">Healthy</span>
+        </div>
+      </section>
+      <section class="au-section fl-gap" aria-labelledby="ph-r-parts">
+        <div class="au-section-head"><h2 class="au-section-head__title" id="ph-r-parts">Components</h2><span class="au-section-head__meta">Tap for details</span></div>
+        <div class="fl-list" id="ph-r-list"></div>
+      </section>
+      <section class="au-card fl-gap" aria-labelledby="ph-r-share">
+        <div class="au-card__head"><i class="au-icon au-icon--link" aria-hidden="true"></i><h2 class="au-card__title" id="ph-r-share">Share with the seller</h2><span class="au-demo-tag">Demo</span></div>
+        <p class="au-text-meta" style="margin-top:8px">Anyone with the link can view this report for 7 days.</p>
+        <div class="fl-link"><span class="fl-link__text" id="ph-r-link">pchealth.example/r/PH-2611-0482</span><button class="au-button au-button--text" type="button" data-action="copy-link"><i class="au-icon au-icon--copy" aria-hidden="true" style="width:18px;height:18px"></i><span>Copy</span></button></div>
+      </section>
+    </main>
+
+    <footer class="au-footer">
+      <button class="au-button" type="button" data-action="sheet" aria-haspopup="dialog" aria-controls="ph-r-sheet"><i class="au-icon au-icon--share" aria-hidden="true" style="width:20px;height:20px"></i><span>Share Report</span></button>
+    </footer>
+
+    <div class="au-home-indicator" aria-hidden="true"></div>
+
+    <div class="au-scrim" data-action="close-sheet" hidden></div>
+    <section class="au-sheet" id="pc-health-report-menu" role="dialog" aria-modal="true" aria-labelledby="pc-health-report-menu-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="pc-health-report-menu-title">Options</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close" aria-hidden="true"></i></button>
+      </div>
+      <div class="au-sheet__body">
+        <div class="au-menu">
+          <a class="au-menu__item" href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+          <button class="au-menu__item" type="button" data-action="reset" data-tone="critical"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset demo data</button>
+        </div>
+      </div>
+    </section>
+    <section class="au-sheet" id="ph-r-sheet" role="dialog" aria-modal="true" aria-labelledby="ph-r-sheet-title" tabindex="-1" hidden>
+      <div class="au-sheet__grabber" aria-hidden="true"></div>
+      <div class="au-sheet__head">
+        <h2 class="au-sheet__title" id="ph-r-sheet-title">Share report</h2>
+        <button class="au-icon-button" type="button" aria-label="Close" data-action="close-sheet"><i class="au-icon au-icon--close" aria-hidden="true"></i></button>
+      </div>
+      <div class="au-sheet__body"><div class="au-menu">
+          <button class="au-menu__item" type="button" data-action="copy-link"><i class="au-icon au-icon--copy" aria-hidden="true"></i>Copy link</button>
+          <button class="au-menu__item" type="button" data-action="demo" data-msg="Opened Messages (demo)"><i class="au-icon au-icon--chat" aria-hidden="true"></i>Send in Messages</button>
+          <button class="au-menu__item" type="button" data-action="demo" data-msg="PDF saved (demo)"><i class="au-icon au-icon--doc" aria-hidden="true"></i>Save as PDF</button>
+        </div></div>
+    </section>
+
+    <div class="au-toast" role="status" aria-live="polite"><div class="au-toast__inner" id="toast"></div></div>
+    <p class="au-visually-hidden" aria-live="polite"></p>
+  </div>
+
+  <nav class="au-devbar" aria-label="Preview controls">
+    <a href="flows.html"><i class="au-icon au-icon--list" aria-hidden="true"></i>All screens</a>
+    <button type="button" data-dev="theme">Theme: System</button>
+    <button type="button" data-dev="lang" translate="no">한국어</button>
+    <button type="button" data-dev="system-bars" aria-pressed="false">Status bar</button>
+    <button type="button" data-dev="ui-only" aria-pressed="false">UI-only</button>
+    <button type="button" data-dev="reset"><i class="au-icon au-icon--reset" aria-hidden="true"></i>Reset</button>
+  </nav>
+</div>
+</body>
+</html>

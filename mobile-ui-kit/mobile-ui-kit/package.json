@@ -1,0 +1,37 @@
+{
+  "name": "mobile-ui-kit",
+  "version": "1.4.0",
+  "description": "A vanilla HTML/CSS/JS mobile UI kit (light + dark): a design system, a screen generator, demo screens and IDE prompts for building more apps.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve -l 8080 .",
+    "new-app": "node scripts/new-app.mjs",
+    "capture": "node scripts/capture.mjs",
+    "capture:dark": "node scripts/capture.mjs --theme=dark",
+    "capture:main": "node scripts/capture.mjs --theme=both --main",
+    "capture:photo": "node scripts/capture.mjs --theme=dark --status-bar --main",
+    "new-screen": "node scripts/new-screen.mjs",
+    "walkthrough": "node scripts/walkthrough.mjs",
+    "capture:ko": "node scripts/capture.mjs --theme=both --lang=ko --main",
+    "capture:all-langs": "node scripts/capture.mjs --theme=both --lang=both --main",
+    "i18n-check": "node scripts/i18n-check.mjs"
+  },
+  "files": [
+    "styles",
+    "scripts/app.js",
+    "scripts/i18n",
+    "templates",
+    "apps/registry.js"
+  ],
+  "exports": {
+    "./tokens.css": "./styles/tokens.css",
+    "./components.css": "./styles/components.css",
+    "./screens.css": "./styles/screens.css",
+    "./app.js": "./scripts/app.js",
+    "./i18n/ko.js": "./scripts/i18n/ko.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Mobile UI Kit — All screens by scenario</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/preview.css">
+  <script>(function(){var p=new URLSearchParams(location.search),r=document.documentElement,t=p.get('theme');
+  if(!t){try{t=localStorage.getItem('au-theme')}catch(e){}}if(t==='light'||t==='dark')r.setAttribute('data-au-theme',t);var l=p.get('lang');if(!l&&p.get('capture')!=='1'&&p.get('embed')!=='1'){try{l=localStorage.getItem('au-lang')}catch(e){}}if(l==='ko'){r.setAttribute('data-au-lang','ko');r.lang='ko';r.classList.add('au-i18n-pending');setTimeout(function(){r.classList.remove('au-i18n-pending')},1500);}})();</script>
+  <script src="apps/registry.js" defer></script>
+  <script src="scripts/i18n/ko.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+</head>
+<body data-au-page="flows">
+<div class="fb">
+  <header class="fb-head">
+    <div>
+      <h1 class="ix-brand__title">All screens by scenario</h1>
+      <p class="ix-brand__meta">Each row is one scenario, in the order you move through it. Click a screen to open it in the preview, or Play to tap through the prototype.</p>
+    </div>
+    <div class="fb-head__tools">
+      <div class="au-segmented ix-theme" role="radiogroup" aria-label="Theme" style="width:240px">
+        <button class="au-segmented__tab" type="button" role="radio" data-theme="system" aria-checked="true">System</button>
+        <button class="au-segmented__tab" type="button" role="radio" data-theme="light" aria-checked="false" tabindex="-1">Light</button>
+        <button class="au-segmented__tab" type="button" role="radio" data-theme="dark" aria-checked="false" tabindex="-1">Dark</button>
+      </div>
+      <div class="au-segmented ix-theme" role="radiogroup" aria-label="Language" style="width:180px" translate="no">
+        <button class="au-segmented__tab" type="button" role="radio" data-lang="en" aria-checked="true" lang="en">English</button>
+        <button class="au-segmented__tab" type="button" role="radio" data-lang="ko" aria-checked="false" tabindex="-1" lang="ko">한국어</button>
+      </div>
+      <a class="fb-btn" href="index.html">Preview &amp; checks</a>
+    </div>
+  </header>
+  <main id="fb-board" class="fb-board"></main>
+</div>
+</body>
+</html>
